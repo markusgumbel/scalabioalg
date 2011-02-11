@@ -124,6 +124,9 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                  <argLine>-Xmx1024m -Xss10m</argLine>
+                </configuration>                
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
