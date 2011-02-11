@@ -7,4 +7,7 @@ import junit.framework.TestCase
  */
 
 class DynProTest extends TestCase {
+  def testDummy() {
+    
+  }
 }
