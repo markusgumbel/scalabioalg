@@ -1,20 +1,19 @@
 h2. Overview
 
-This project contains several algorithms used in the bioinformatics domain.
-More documentation will come soon - please be patient!
+This project contains several algorithms used in the bioinformatics domain. _More documentation will come soon - please be patient_!
 
 Highlights so far
-* generic (2D) dynamic programing algorithm
-* Global, semi-local and local aligment
-* Pattern recognization with the Viterbi-algorithm (hidden markov model)
-* RNA 2D struct viewer based on Nussinov algorithm
-* Greedy superstring algorithm for sequence assembly
+* generic (2D) dynamic programing algorithm (see net.gumbix.dynpro.DynPro)
+* Global, semi-local and local aligment (see net.gumbix.bioinf.string.alignment.Alignment)
+* Multiple alignment (star algorithm, see net.gumbix.bioinf.string.alignment.MultipleAlignment)
+* Pattern recognization with the Viterbi-algorithm (hidden markov model, see net.gumbix.bioinf.hmm.Viterbi)
+* RNA 2D struct viewer based on Nussinov algorithm (see net.gumbix.bioinf.struct.RNAStruct2DViewer)
+* Greedy superstring algorithm for sequence assembly (see net.gumbix.bioinf.string.seq.GreedySuperstring)
 * and many more...
 
 h2. Getting Started
 
-More documentation will come soon. A good start is to read the scaladoc
-API documentation. See installation below where to find it.
+More documentation will come soon. A good start is to read the scaladoc API documentation. See installation below where to find it.
 
 h3. Requirements
 
@@ -23,9 +22,7 @@ h3. Requirements
 
 h3. Installation
 
-The project uses Maven 2 as the build tool. Check out the project and
-run the Maven goal mvn site. This will generate all the relevant artifacts.
-The scaladoc can be found in ./target/site/index.html
+The project uses Maven 2 as the build tool. Check out the project and run the Maven goal mvn site. This will generate all the relevant artifacts. The scaladoc can be found in ./target/site/index.html
 
 h2. Mailing Lists
 
