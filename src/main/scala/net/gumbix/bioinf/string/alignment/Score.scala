@@ -3,6 +3,7 @@ package net.gumbix.bioinf.string.alignment
 import net.gumbix.bioinf.string.alignment.AlignmentStep._
 
 /**
+ * 
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 

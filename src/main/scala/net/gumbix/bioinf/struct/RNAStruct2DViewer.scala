@@ -18,7 +18,6 @@ import edu.uci.ics.jung.graph.{Graph, SparseMultigraph}
  * A viewer for the 2D structure of RNA.
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-
 object RNAStruct2DViewer {
   def main(args: Array[String]) {
     val s = "UCCCUGGUGGUCUAGUGGDUAGGAUUCGGCGCUCUCACCGCCGCGGCCCGGGUUCGAUUCCCGGUCAGGGAACCA"
@@ -40,7 +39,6 @@ object RNAStruct2DViewer {
     jf.pack
     jf.setVisible(true)
   }
-
 
   def graphPanel(graph: Graph[Node[Char], Edge]) = {
     val layout = new KKLayout(graph)

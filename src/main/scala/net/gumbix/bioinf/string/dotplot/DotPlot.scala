@@ -5,16 +5,21 @@ import net.gumbix.ui.{MatrixPanel, Data}
 import swing.{MainFrame}
 
 /**
+ * A tool for dot plots. 
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 object DotPlot {
   def main(args: Array[String]) {
-    new DotPlot2(args(0), args(1), args(2))
+    new DotPlot(args(0), args(1), args(2))
   }
 }
 
-// TODO Intellij Bug
-class DotPlot2(val s1: String, val s2: String, windowTitle: String) {
+/**
+ * @param s1 First string.
+ * @param s2 Second string.
+ * @param windowTitle The title of the frame.
+ */
+class DotPlot(val s1: String, val s2: String, windowTitle: String) {
 
   def data(s1: String, s2: String) = {
     var dataList = List[Data]()
