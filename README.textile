@@ -22,7 +22,7 @@ h3. Requirements
 
 h3. Installation
 
-The project uses Maven 2 as the build tool. Check out the project and run the Maven goal mvn site. This will generate all the relevant artifacts. The scaladoc can be found in ./target/site/index.html
+The project uses Maven 2 as the build tool. Check out the project and run the Maven goal mvn site. This will generate all the relevant artifacts. The scaladoc can be found in ./target/site/index.html.
 
 h2. Mailing Lists
 
@@ -30,4 +30,4 @@ None yet. :-)
 
 h2. History
 
-The software was originally developed for a lecture on "bioinformatics":http://www.mi.hs-mannheim.de/gumbel/aktuelle-vorlesungen/bioinformatik-bim/.
+The software was originally developed for a lecture on "bioinformatics":http://www.mi.hs-mannheim.de/gumbel/aktuelle-vorlesungen/bioinformatik-bim/. Thus, this software was mainly supposed to be for academic use. However, I believe that part of it might be of common interest. Let's see how this project relates to "Biojava":http://biojava.org/wiki/Main_Page and other projects like "bioscala":https://github.com/bioscala/bioscala.    
