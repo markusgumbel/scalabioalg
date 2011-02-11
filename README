@@ -1,1 +1,6 @@
-This is a readme!
+This project contains several algorithms used in the bioinformatics domain.
+More documentation will com soon - please be patient!
+
+Highlights so far
+* generic (2D) dynamic programing algorithm
+* RNA 2D struct viewer
