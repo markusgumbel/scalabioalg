@@ -1,6 +1,30 @@
+h2. Overview
 This project contains several algorithms used in the bioinformatics domain.
-More documentation will com soon - please be patient!
+More documentation will come soon - please be patient!
 
 Highlights so far
 * generic (2D) dynamic programing algorithm
-* RNA 2D struct viewer
+* Global, semi-local and local aligment
+* Pattern recognization with the Viterbi-algorithm (hidden markov model)
+* RNA 2D struct viewer based on Nussinov algorithm
+* Greedy superstring algorithm for sequence assembly
+* and many more...
+
+h2. Getting Started
+More documentation will come soon. A good start is to read the scaladoc
+API documentation. See installation below where to find it.
+
+h3. Requirements
+* "GIT":http://git-scm.com/
+* "Maven 2":http://maven.apache.org/
+
+h3. Installation
+The project uses Maven 2 as the build tool. Check out the project and
+run the Maven goal mvn site. This will generate all the relevant artifacts.
+The scaladoc can be found in ./target/site/index.html
+
+h2. Mailing Lists
+None yet. :-)     
+
+h2. History
+The software was originally developed for a lecture on "bioinformatics":http://www.mi.hs-mannheim.de/gumbel/aktuelle-vorlesungen/bioinformatik-bim/.
