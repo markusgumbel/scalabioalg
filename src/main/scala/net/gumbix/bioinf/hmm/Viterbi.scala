@@ -19,7 +19,7 @@ import net.gumbix.dynpro.Backpropagation
 import net.gumbix.dynpro.CellPosition._
 import net.gumbix.dynpro.{Idx, DynPro, MatrixPrinter}
 import collection.mutable.ArrayBuffer
-import Math.log
+import scala.math.log
 
 /**
  * The Viterbi algorithm to determine patterns in a string.

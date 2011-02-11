@@ -18,6 +18,7 @@ package net.gumbix.layout.test
 import junit.framework.TestCase
 import net.gumbix.layout.Element._
 import net.gumbix.layout.Element
+import scala.math._
 
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
@@ -43,7 +44,7 @@ class LayoutTest extends TestCase {
   }
 
   def test01c {
-    align = {s: String => Math.min(Math.max(s.indexOf('.') + 1, 0), s.length)}
+    align = {s: String => min(max(s.indexOf('.') + 1, 0), s.length)}
     val x1 = line("12.34") above line("1.0")
 
     println(expandableLine("|", '|') beside x1 beside expandableLine("|", '|'))
@@ -75,9 +76,9 @@ class LayoutTest extends TestCase {
 
   def test04 {
     align = NUMBER
-    val matrix: Array[Array[Double]] = new Array(20, 10)
+    val matrix: Array[Array[Double]] = Array.ofDim(20, 10)
     for (i <- 0 until matrix.size; j <- 0 until matrix(0).size) {
-      matrix(i)(j) = Math.random * Math.random * 100 - 20
+      matrix(i)(j) = random * random * 100 - 20
     }
     println(makeTable(matrix))
     1

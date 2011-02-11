@@ -19,6 +19,7 @@ import swing._
 import java.awt.Color._
 import java.awt.{Dimension, Graphics2D}
 import net.gumbix.dynpro.Idx
+import scala.math._
 
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
@@ -29,9 +30,9 @@ class MatrixPanel(rowLabels: Array[Char], columnLabels: Array[Char],
   preferredSize = new Dimension(500, 500)
   background = WHITE
 
-  def minSize = Math.min(size.width, size.height)
+  def minSize = min(size.width, size.height)
 
-  def deltaX = Math.min(minSize / (columnLabels.size + 2),
+  def deltaX = min(minSize / (columnLabels.size + 2),
     minSize / (rowLabels.size + 2))
 
   def deltaY = deltaX

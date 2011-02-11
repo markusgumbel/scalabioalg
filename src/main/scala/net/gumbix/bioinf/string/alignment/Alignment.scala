@@ -139,7 +139,7 @@ class Alignment(val s1: String, val s2: String,
 
     val solution = solution2.toArray
 
-    import Math._
+    import scala.math._
 
     if (solution.isEmpty) {
       val as1 = new AlignedString(s1)

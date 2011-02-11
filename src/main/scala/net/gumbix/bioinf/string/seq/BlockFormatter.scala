@@ -16,6 +16,7 @@ Copyright 2011 the original author or authors.
 package net.gumbix.bioinf.string.seq
 
 import io.Source.fromFile
+import scala.math._
 
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
@@ -43,7 +44,7 @@ object BlockFormatter {
     val p = buffer.length / lineLength
     for (s <- 0 until p) {
       val start = lineLength * s
-      val end = Math.min(lineLength * (s + 1), buffer.length)
+      val end = min(lineLength * (s + 1), buffer.length)
       val line = buffer.substring(start, end)
       println(line)
     }

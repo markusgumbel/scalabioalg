@@ -16,6 +16,7 @@ Copyright 2011 the original author or authors.
 package net.gumbix.layout
 
 import net.gumbix.layout.Element._
+import scala.math._
 
 /**
  * A library for creating tables and other things that can be layouted. Adapted
@@ -67,8 +68,8 @@ abstract class Element {
    * @param a The alignment of the other element.
    */
   def widen(w: Int, a: Int) = {
-    val sLeft = Math.max(a - alignment, 0)
-    val sRight = Math.max((w - a) - (width - alignment), 0)
+    val sLeft = max(a - alignment, 0)
+    val sRight = max((w - a) - (width - alignment), 0)
     if (sLeft == 0 && sRight == 0) this
     else {
 

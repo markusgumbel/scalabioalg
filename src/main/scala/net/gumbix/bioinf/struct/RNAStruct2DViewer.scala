@@ -103,7 +103,7 @@ object RNAStruct2DViewer {
     val solution = dp.solution(Idx(0, dp.n - 1))
     println(dp.mkMatrixString(solution))
 
-    val list = new HashMap[Integer, Node[Char]]()
+    val list = new HashMap[Int, Node[Char]]()
     var g = new SparseMultigraph[Node[Char], Edge]
     for (id <- 0 until s.length) {
       list(id) = new Node[Char](s.charAt(id), id)
@@ -129,7 +129,7 @@ object RNAStruct2DViewer {
   }
 }
 
-class Node[A](val node: A, id: Integer) {
+class Node[A](val node: A, id: Int) {
   override def toString = node.toString
 }
 
