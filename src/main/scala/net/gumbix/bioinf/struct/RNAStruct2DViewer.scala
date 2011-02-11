@@ -15,19 +15,19 @@ import javax.swing.{JTextField, JFrame}
 import edu.uci.ics.jung.graph.{Graph, SparseMultigraph}
 
 /**
+ * A viewer for the 2D structure of RNA.
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 
-object StructViewer {
+object RNAStruct2DViewer {
   def main(args: Array[String]) {
     val s = "UCCCUGGUGGUCUAGUGGDUAGGAUUCGGCGCUCUCACCGCCGCGGCCCGGGUUCGAUUCCCGGUCAGGGAACCA"
     val vv = graphPanel(graph(s))
-    val jf = new JFrame
+    val jf = new JFrame("RNA 2D Viewer")
     jf.getContentPane.setLayout(new BorderLayout())
     val textfield = new JTextField(s)
     textfield.addActionListener(new ActionListener() {
       def actionPerformed(e: ActionEvent) {
-        println("New graph")
         jf.getContentPane.remove(1)
         val vv = graphPanel(graph(textfield.getText))
         jf.getContentPane.add(vv, BorderLayout.CENTER)
