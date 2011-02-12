@@ -13,7 +13,7 @@ Highlights so far
 
 h2. Getting Started
 
-More documentation will come soon. A good start is to read the scaladoc API documentation. See installation below where to find it.
+More documentation will come soon. Please refer to the "wiki pages":https://github.com/markusgumbel/scalabioalg/wiki for more information. A good start is to read the scaladoc API documentation. See installation below where to find it.
 
 h3. Requirements
 
