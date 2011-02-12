@@ -5,7 +5,7 @@
     <groupId>net.gumbix</groupId>
     <artifactId>bioalg</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>bioinformatics algorithms</name>
     <url>http://www.gumbix.net</url>
@@ -25,6 +25,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <modules>
+        <module>core</module>
+        <module>demo</module>
+    </modules>
 
     <dependencies>
         <dependency>
@@ -90,32 +95,9 @@
             <id>central</id>
             <name>central</name>
             <url>http://repo1.maven.org/maven2</url>
-        </pluginRepository>        
+        </pluginRepository>
     </pluginRepositories>
-    <build>
-        <sourceDirectory>src/main/scala</sourceDirectory>
-        <testSourceDirectory>src/test/scala</testSourceDirectory>
-        <plugins>
-            <plugin>
-                <groupId>org.scala-tools</groupId>
-                <artifactId>maven-scala-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <jvmArgs>
-                        <jvmArg>-Xms128m</jvmArg>
-                        <jvmArg>-Xmx1024m</jvmArg>
-                    </jvmArgs>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+
     <reporting>
         <plugins>
             <plugin>
@@ -125,8 +107,8 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                  <argLine>-Xmx1024m -Xss10m</argLine>
-                </configuration>                
+                    <argLine>-Xmx1024m -Xss10m</argLine>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
