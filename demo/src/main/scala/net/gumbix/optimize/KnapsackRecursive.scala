@@ -16,10 +16,11 @@ Copyright 2011 the original author or authors.
 package net.gumbix.optimize
 
 /**
- * The knapsack algorithm. Several branches are computed redundantly.  
+ * The knapsack algorithm. Several branches are computed redundantly.
+ * So this class is just to demonstrate how the knapsack problem
+ * should NOT be solved. 
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-
 class KnapsackRecursive(val items: Array[String],
                         val weights: Array[Int], val values: Array[Int],
                         val capacity: Int)

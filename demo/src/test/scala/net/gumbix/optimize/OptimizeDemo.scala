@@ -13,22 +13,21 @@ Copyright 2011 the original author or authors.
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package net.gumbix.optimize.test
+package net.gumbix.optimize
 
 import junit.framework.TestCase
 import net.gumbix.optimize.{KnapsackRecMatrix, KnapsackRecursive}
 
 /**
- * Here are only non DP solution. DP examples are
- * in net.gumbix.dynpro.test.
+ * Here are some examples for optimization problems, mainly those
+ * who could be (better) solved with dynamic programming.
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-
-class OptimizeTest extends TestCase {
+class OptimizeDemo extends TestCase {
   /**
-   * Like in PPT (ID = NEW2).
+   * The knapsack problem using a specific recursive algorithm.
    */
-  def testPPTExample() {
+  def testKnapsack() {
     val ks = new KnapsackRecursive(Array("A", "B", "C", "D"),
       Array(2, 2, 6, 5), Array(6, 3, 5, 4), 10)
     val (items, value) = ks.calculateSolution
@@ -38,37 +37,12 @@ class OptimizeTest extends TestCase {
   }
 
   /**
-   * Like in PPT (ID = NEW2).
+   * The knapsack problem solved by a recursive algorithm
+   * that uses a matrix to store results (like in dynamic programming).
    */
-  def testPPTExampleMatrix() {
+  def testKnapsackMatrix() {
     val ks = new KnapsackRecMatrix(Array("A", "B", "C", "D"),
       Array(2, 2, 6, 5), Array(6, 3, 5, 4), 10)
-    val (items, value) = ks.calculateSolution
-    println(items)
-    println("value = " + value)
-    println(ks.mkOverviewString)
-    println()
-    println(ks.mkMatrixString)
-  }
-
-  /**
-   * Like in older version of PPT.
-   */
-  def testOldPPTExample() {
-    val ks = new KnapsackRecursive(Array("A", "B", "C", "D"),
-      Array(5, 6, 2, 2), Array(4, 5, 3, 6), 10)
-    val (items, value) = ks.calculateSolution
-    println(items)
-    println("value = " + value)
-    println(ks.mkOverviewString)
-  }
-
-  /**
-   * Like in older version of PPT.
-   */
-  def testOldPPTExampleMatrix() {
-    val ks = new KnapsackRecMatrix(Array("A", "B", "C", "D"),
-      Array(5, 6, 2, 2), Array(4, 5, 3, 6), 10)
     val (items, value) = ks.calculateSolution
     println(items)
     println("value = " + value)

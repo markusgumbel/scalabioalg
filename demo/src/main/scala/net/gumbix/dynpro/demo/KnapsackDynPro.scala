@@ -77,6 +77,11 @@ class KnapsackDynPro(val items: Array[String],
     else Array()
   }
 
+  /**
+   * @param idx The state (idx.i = index to i-th item, idx.j = capacity)
+   * @param d Decision which is either 0 (skip the i-th item) or
+   * 1 (take it). 
+   */
   def value(idx: Idx, d: Int) = d * values(idx.i)
 
   /**

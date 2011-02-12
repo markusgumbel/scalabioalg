@@ -19,17 +19,29 @@ import net.gumbix.layout.Element._
 import net.gumbix.layout.Element
 
 /**
- *
+ * Some features of the knapsack problem.
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-
 trait Knapsack {
+
+  /**
+   * A list of names for items to carry.
+   */
   val items: Array[String]
 
+  /**
+   * The weights of each item.
+   */
   val weights: Array[Int]
 
+  /**
+   * The value of each item.
+   */
   val values: Array[Int]
 
+  /**
+   * How many can I carry?
+   */
   val capacity: Int
 
   /**

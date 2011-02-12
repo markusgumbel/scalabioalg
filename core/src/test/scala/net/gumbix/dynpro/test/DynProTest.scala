@@ -18,11 +18,13 @@ package net.gumbix.dynpro.test
 import junit.framework.TestCase
 
 /**
+ * Test cases to verify the dynamic programming algorithm.
+ * Note: examples can be found in the demo module at
+ * net.gumbix.dynpro.demo.test.*.
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-
 class DynProTest extends TestCase {
   def testDummy() {
-    
+    // TODO
   }
 }

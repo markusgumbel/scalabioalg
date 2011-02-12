@@ -110,7 +110,6 @@ class KnapsackRecMatrix(val items: Array[String],
               res
             }
             case Some(tuple) => {
-              println("reused " + i + ", " + remainingCapacity)
               tuple // Just return the result
             }
           }
