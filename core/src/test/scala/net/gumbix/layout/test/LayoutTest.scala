@@ -16,6 +16,7 @@ Copyright 2011 the original author or authors.
 package net.gumbix.layout.test
 
 import junit.framework.TestCase
+import junit.framework.Assert._
 import net.gumbix.layout.Element._
 import net.gumbix.layout.Element
 import scala.math._
@@ -23,14 +24,12 @@ import scala.math._
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-
 class LayoutTest extends TestCase {
   def test01 {
-    val x1 = line("Hallo") above line("Welt")
-    println(x1)
-    val x2 = line("Und?") beside x1
-    println(x2)
-    1
+    val x1 = line("Hello") above line("World!")
+    assertEquals(" Hello\nWorld!", x1.toString)
+    val x2 = line("What?") beside x1
+    assertEquals("What? Hello\n     World!", x2.toString)
   }
 
   def test01b {
