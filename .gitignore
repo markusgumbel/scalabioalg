@@ -1,0 +1,10 @@
+*.iml
+*.iws
+*.ipr
+MANIFEST.MF
+target
+id_file
+.idea
+.classpath
+.project
+.settings
