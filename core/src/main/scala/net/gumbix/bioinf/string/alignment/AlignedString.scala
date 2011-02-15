@@ -80,6 +80,9 @@ class AlignedString(val primaryString: String) {
   /**
    * Note: pos = string size is possible. This inserts gaps
    * at the end of the string.
+   * @param pos Index position where to insert the gap
+   * @param length Size of the gap.
+   * @param gapType
    */
   def insertGapBefore(pos: Int, length: Int, gapType: GapType) {
     if (pos < 0 || pos > this.size) {
