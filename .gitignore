@@ -1,6 +1,7 @@
 *.iml
 *.iws
 *.ipr
+.idea
 MANIFEST.MF
 target
 id_file
