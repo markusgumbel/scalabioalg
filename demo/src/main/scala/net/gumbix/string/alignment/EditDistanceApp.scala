@@ -23,6 +23,7 @@ import javax.swing.UIManager
 import java.awt.{Dimension, Color, Font}
 
 /**
+ * Demo for the edit distance. Was used for a open campus demo.
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 object EditDistanceApp {
