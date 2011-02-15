@@ -20,52 +20,14 @@ import net.gumbix.bioinf.string.alignment.{AlignmentMode, MultipleAlignment}
 import net.gumbix.bioinf.string.alignment.AlignmentMode._
 
 /**
+ * Unit test cases for multiple aligments.
+ * Note: examples can be found in the demo module at
+ * net.gumbix.bioinf.string.alignment.demo.*. 
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-
 class MultipleAlignmentTest extends TestCase {
-  val strings: Array[Tuple2[Array[String], String]] = Array(
-    (Array("ATGCATT", "AGTCAAT", "TCTCA"), "Böckenhauer, p. 107"),
-    (Array("KYFHKAGNQHSPT", "KYFHKAGNGHT", "KEFHNGHT"), "Hütt, p. 187"),
-    (Array("123", "234", "345"), "Test1"),
-    (Array("123", "234", "345", "456"), "Test2"),
-    (Array("123", "345", "567"), "Test3"),
-    (Array("AATGCT", "ATTC", "TCC"), "Folienbsp. Consensus"),
-    (Array("NYLS", "NFLS", "NKYLS", "NFS"), "Folienbsp. MSA"),
-    (Array("GCTTATA", "GCTATA", "GTTATA", "GCTTAGA"), "Übung MSA")
-    )
 
-  def testMultipleAlignment() {
-    for (s <- strings; if (s._2.startsWith("Übung MSA")); mode <- AlignmentMode.values) {
-      doMultipleAligment(s._1, mode, s._2)
-    }
-  }
-
-  def testKW10MSA() {
-    val seqs = Array("YEFRKHGHT", "KEFHNGHT", "KEHGCT")
-    doMultipleAligment(seqs, GLOBAL, "KW10")
-  }
-
-  def testKW10MSA2() {
-    //val seqs = Array("YEFRKHGHT", "KEFHNGHT", "KEHGCT", "KEHACT")
-    val seqs = Array("AYEFRKHGHT", "AKEFHNGHT", "AKEHGCT", "AKGEFHACT")
-    doMultipleAligment(seqs, GLOBAL, "KW10")
-  }
-
-  def doMultipleAligment(s: Array[String], mode: AlignmentMode, comment: String) {
-    println("---------------------------------")
-    println("Multiple Ali gnment, mode = " + mode + ", " + comment)
-    println()
-    (0 until s.size).foreach {i => print("s" + i + " = '" + s(i) + "', ")}
-    println()
-    println()
-    val ma = new MultipleAlignment(s, mode)
-    println(ma.mkString)
-    // ma.printAlignment
-    println()
-    println("dist = " + ma.distance)
-    println("SP = " + ma.sumOfPairs)
-    // println("root index = " + ma.rootIdx)
-    println()
+  def testDummy() {
+    // TODO
   }
 }

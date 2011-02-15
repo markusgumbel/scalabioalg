@@ -33,14 +33,14 @@ class AlignedStringTest extends TestCase {
 
     als.insertGapBefore(0, 5, GAP)
     assertTrue(als.size == 10)
-    assertTrue(als.toString() == "-----hello")
+    assertEquals(als.toString(), "-----hello")
 
     als.insertGapBefore(6, 1, GAP)
-    assertTrue(als.toString() == "-----h-ello")
+    assertEquals(als.toString, "-----h-ello")
 
     als.insertGapBefore(als.size, 4, GAP)
     assertEquals(als.toString(), "-----h-ello----")
     assertEquals(als(5).toString, "h")
-    assertTrue(als.primaryString == "hello")
+    assertEquals(als.primaryString, "hello")
   }
 }

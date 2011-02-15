@@ -22,7 +22,6 @@ import net.gumbix.util.Logger
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-
 class SeqTest extends TestCase with Logger {
 
   logLevel = false

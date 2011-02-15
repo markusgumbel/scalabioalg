@@ -15,20 +15,16 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.alignment.test
 
-import net.gumbix.bioinf.string.alignment.AlignmentMode._
-import net.gumbix.bioinf.string.alignment.{AlignmentMode, Alignment}
 import junit.framework.TestCase
 
 /**
- * Unit test cases.
+ * Unit test cases for aligments.
+ * Note: examples can be found in the demo module at
+ * net.gumbix.bioinf.string.alignment.demo.*.
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class AlignmentTest extends TestCase with AlignmentOutput with ExampleData {
-  def testAllAlignments() {
-    println("All alignments")
-    for ((s1, s2, comment) <- strings.values
-         if comment.startsWith("nach Hütt p. 148."); mode <- AlignmentMode.values) {
-      doAligmentDP(mode, s1, s2, comment)
-    }
+class AlignmentTest extends TestCase {
+  def testDummy() {
+    // TODO
   }
 }

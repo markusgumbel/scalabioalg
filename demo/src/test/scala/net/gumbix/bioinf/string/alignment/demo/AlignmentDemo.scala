@@ -13,44 +13,54 @@ Copyright 2011 the original author or authors.
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package net.gumbix.bioinf.string.alignment.test
+package net.gumbix.bioinf.string.alignment.demo
 
-import collection.mutable.{HashMap}
+import junit.framework.TestCase
+import net.gumbix.bioinf.string.alignment.AlignmentMode._
+import collection.immutable.HashMap
+import net.gumbix.bioinf.string.alignment.{Alignment, AlignmentMode}
 
-/**
- * Example data used in the lectures.
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
- */
-
-trait ExampleData {
-  val strings: HashMap[String, Tuple3[String, String, String]] = HashMap(
-    "DNA-Bsp-01" ->
-            ("GCCATTATCCACATAGCAATGGACA",
-                    "GCCATATCGCACAGCAATAGGACA",
-                    "Beispiel 1"),
-    "DNA-Bsp-02" ->
-            ("CATTATCCACATAGCAATGGA",
-                    "CATTATCCTAAACATAGCGCCAATGGA",
-                    "Beispiel 2"),
-    "Boeck-p91" -> ("AAAT", "AGTA", "Böckenhauer, p. 91"),
-    "Boeck-p89" -> ("ACTTTATGCCTGCT", "ACAGGCT", "Böckenhauer, p. 89"),
-    "Boeck-p89-inv" -> ("ACAGGCT", "ACTTTATGCCTGCT", "Böckenhauer, p. 89"),
-    "Gumbel-Boeck-p89-inv" -> ("ACAGGC", "ACTTTATGCCTGCTAGCT", "Gumbel-Böckenhauer, p. 89"),
-    "Gumbel-semi-1" -> ("ACTAGGC", "ACTTTACGCTGCTAGCT", "Gumbel: Bsp. für lokales Alignment"),    
+class AlignmentDemo extends TestCase {
+  val seqs = HashMap[String, Tuple3[String, String, String]](
     "Boeck-p88" -> ("AAAAACTCTCTCT", "GCGCGCGCAAAAA", "Böckenhauer, p. 88"),
     "Huett-p151" -> ("CGATCCTGT", "CATCGCCTT", "Hütt, p. 151"),
-    "SuMa-01" -> ("susanne wassmuth-gumbel", "markus gumbel", "SuMa 1"),
-    "Text-01" -> ("das ist ein text", "das ist ein langer text", "Text"),
     "Huett-p148" -> ("KIAQYKRECPSIFAWEIRDRL",
             "KIAQYKRECPNIPSVSSINSIFAWEIRDRL",
             "Hütt p. 148. Einschub"),
     "Huett-p151b" -> ("MQNSHSGVNQLGGVFVNGRPLPDSTRQKIVELAHSGARPCDISRILQTHADAKVQVLDNENVSNGCVSKILGRYYETGSIRPRAIGGSKPRVATPEVVSKIAQYKRECPSIFAWEIRDRLLSEGVCTNDNIPSVSSINRVLRNLASEKQQMGADGMYDKLRMLNGQTGSWGTRPGWYPGTSVPGQPTQDGCQQQEGGGENTNSISSNGEDSDEAQMRLQLKRKLQRNRTSFTQEQIEALEKEFERTHYPDVFARERLAAKIDLPEARIQVWFSNRRAKWRREEKLRNQRRQASNTPSHIPISSSFSTSVYQPIPQPTTPVSSFTSGSMLGRTDTALTNTYSALPPMPSFTMANNLPMQPPVPSQTSSYSCMLPTSPSVNGRSYDTYTPPHMQTHMNSQPMGTSGTTSTGLISPGVSVPVQVPGSEPDMSQYWPRLQ",
             "MFTLQPTPAAIGSVPWSAGSLIERLPTLDDMNHKDNVLAMRNLPCLGVAGGSGLGGIGGKAAATAAMEAAADATTAPQPPHSTSSYFTTTYYHLTDDECHSGVNQLGGVFVGGRPLPDSTRQKIVELAHSGARPCDISRILQVSNGCVSKILGRYYETGSIRPRAIGGSKPRVATAEVVSKISQYKRECPSIFAWEIRDRLLQESVCTNDNIPSVSSINRVLRNLAAQKEQQNTGTSSSNPNPNPNPNPSHAAASGNGSSNNGNSSSNGNSVSGANGVGPSSTNDLIQTATPLNSSESGGASNSGEGSEQESIYEKIRMLNTQQASTLDSAISTTGAPPVTHGQLMTSVPSNFSPHSHSSHPIHTHGHGHQQQQSWPTRHYPTGSWYAAPLNGSELVSSPGVISVTGYGNGGLTAASGLVPGHPLTPPSDLINIGGPSARLGNCTNSADDVMLKKELDGHQSDETGSGEGDNSNGGASNIGTSEDDQARLILKRKLQRNRTSFTNDQIDSLEKEFERTHYPDVFARERLAGKIGLPEARIQVWFSNRRAKWRREEKLRNQRRTPNSTGTNGTSSSTSATTSLTDSPNSLGGCSSLLAGSAGSGLNGLASPNPIATPTGGSETTDAHHTASGGAHIRSGTHDIGNACSPGLGIADQRHQHHHHVPPHTLVPSISPRLNFNSGFSSSMSAMYSNMHHNAISMSEGYGSVSSIPNFGHPTVGSLAPPSPVMQQRDLTPPSMYPCHMPLRPPPIPPHQLVGVGSATNDSAGVSSSPLQSNPHAASGTVASNNATGYESLSAYSLPPPPPASTAANHIPSGHHHSMEARQATCSPSLMNSGGSVHGVGHGSGFGSESISPAMPSYAHMSYNYAAAASGVASSGGANPAAAINSHGSGKQQFFASCFYSPWA",
             "Vergleich PAX-6 (Genbank: NP_038655) mit eyeless (Genbank: XP_002059744)"),
-    "Gumbel-DNA-Bsp-01" -> ("ACTTTATGCCTGCT", "AGAGGCT", "Folienbeispiel"),
-    "Gumbel-DNA-Bsp-02" -> ("ATAG", "AGTA", "Folienbeispiel"),
-    "Hütt p. 148b" -> ("KIQYKREPNIPSVSLINSLFAWEIRDRI", "KAQYRRECMIFVWEINRL", "nach Hütt p. 148.") 
+    "Hütt p. 148b" -> ("KIQYKREPNIPSVSLINSLFAWEIRDRI", "KAQYRRECMIFVWEINRL", "nach Hütt p. 148.")
     )
+
+  /**
+   * Perform all kind of alignments.
+   */
+  def testAllAlignments() {
+    for ((s1, s2, comment) <- seqs.values;
+         mode <- AlignmentMode.values) {
+      doAligmentDP(mode, s1, s2, comment)
+    }
+  }
+
+  def doAligmentDP(mode: AlignmentMode, s1: String, s2: String, comment: String) {
+    println()
+    println("---------------------------------")
+    println("Alignment: method = " + mode + "; " + comment)
+    println()
+    println("s1 = " + s1 + ", s2 = " + s2)
+    val dp = new Alignment(s1, s2, mode)
+    val solution = dp.solution
+    println("sim = " + dp.similarity)
+    println()
+    println(dp.makeAlignmentString(solution))
+    println()
+    if (s1.size < 100 && s2.size < 100) {
+      println(dp.mkMatrixString(solution))
+      println()
+      solution.foreach(e => print(e.decision))
+      // solution.foreach(e => println(e))
+      println()
+    }
+  }
 }
-
-
