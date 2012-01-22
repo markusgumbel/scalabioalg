@@ -176,8 +176,8 @@ class Alignment(val s1: String, val s2: String,
     as1.insertGapBefore(0, gapB1, EMPTY)
     as2.insertGapBefore(0, gapB2, EMPTY)
 
-    var i1 = gapB1
-    var i2 = gapB2
+    var i1 = ib // gapB1 was wrong
+    var i2 = jb // gapB2 was wrong
     for (i <- 1 until solution.size) {
       solution(i).decision match {
         case INSERT => as1.insertGapBefore(i1, 1, GAP)
