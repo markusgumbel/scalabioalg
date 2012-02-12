@@ -1,0 +1,826 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{comment}
+\usepackage{color}
+\usepackage{framed}
+
+\definecolor{shadecolor}{gray}{0.875}
+
+\specialcomment{musterloesung}{\begin{shaded}Lösung/Hinweise: }{\end{shaded}}
+
+% Nur exluden nötig. Include automatisch.
+\excludecomment{musterloesung}
+\end_preamble
+\use_default_options true
+\begin_modules
+logicalmkup
+customHeadersFooters
+\end_modules
+\maintain_unincluded_children false
+\language american
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 12
+\spacing single
+\use_hyperref true
+\pdf_title "ADS Übungsblatt"
+\pdf_author "Markus Gumbel"
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\branch taschenrechner
+\selected 1
+\filename_suffix 0
+\color #ffffff
+\end_branch
+\branch klassenkopieren
+\selected 0
+\filename_suffix 0
+\color #ffffff
+\end_branch
+\branch baumdarstellung
+\selected 1
+\filename_suffix 0
+\color #ffffff
+\end_branch
+\branch stringliststack
+\selected 0
+\filename_suffix 0
+\color #ffffff
+\end_branch
+\branch inhalt
+\selected 0
+\filename_suffix 0
+\color #ffffff
+\end_branch
+\branch aufwandsabschätzung
+\selected 0
+\filename_suffix 0
+\color #ffffff
+\end_branch
+\branch dyn-datenstruktur
+\selected 1
+\filename_suffix 0
+\color #ffffff
+\end_branch
+\branch listen
+\selected 0
+\filename_suffix 0
+\color #ffffff
+\end_branch
+\branch bäume
+\selected 1
+\filename_suffix 0
+\color #ffffff
+\end_branch
+\branch gleichheit-unterbäume
+\selected 1
+\filename_suffix 0
+\color #ffffff
+\end_branch
+\branch Höhe-von-Bäumen
+\selected 1
+\filename_suffix 0
+\color #ffffff
+\end_branch
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 3cm
+\topmargin 3cm
+\rightmargin 2.5cm
+\bottommargin 3cm
+\headheight 2cm
+\headsep 0.8cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+bioscala manual
+\end_layout
+
+\begin_layout Author
+Markus Gumbel
+\end_layout
+
+\begin_layout Date
+February 2012
+\end_layout
+
+\begin_layout Abstract
+This is the abstract.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+fancyhead{}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+fancyhead[CO,CE]{scalabioalg manual}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+fancyhead[LE,LO]{Version ??}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+fancyhead[RE,RO]{M.
+\backslash
+ Gumbel
+\backslash
+
+\backslash
+
+\backslash
+code{m.gumbel@hs-mannheim}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Overview
+\end_layout
+
+\begin_layout Standard
+This library contains algorithms for bioinformatics written in Scala.
+ Highlights so far
+\end_layout
+
+\begin_layout Itemize
+generic (2D) dynamic programing algorithm (see 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Dynamic-programming"
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+Global, semi-local and local pairwise alignment (see 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Pairwise-alignment"
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+Multiple alignment (star algorithm, see )
+\end_layout
+
+\begin_layout Itemize
+Pattern recognition with the Viterbi-algorithm (see 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Pattern-recognition"
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+RNA 2D struct viewer based on Nussinov algorithm (see 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:RNA-secondary-structures"
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+Greedy superstring algorithm for sequence assembly (see 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:DNA-assembly"
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+and much more...
+\end_layout
+
+\begin_layout Standard
+Why another library for bioinformatics? Well, because it's fun?! No, seriously:
+ This project was incubated for ready-to-go examples for a lecture in bioinforma
+tics at the Mannheim University of Appliced Sciences (see 
+\begin_inset CommandInset href
+LatexCommand href
+target "http://www.mi.hs-mannheim.de/gumbel/en/vorlesungen/bioinformatik-bim"
+
+\end_inset
+
+).
+ Many of the algorithms are adapted from the text book 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+Algorithmic Aspects of Bioinformatics
+\end_layout
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ by H.
+\backslash
+ J.
+\backslash
+ Böckenhauer and D.
+\backslash
+ Bongartz 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "boeckenhauer2007"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Clearly, Biojava 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "biojava"
+
+\end_inset
+
+ is the closest project.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Scala: Scala is a state of the art programming language for the Java virtual
+ machine that combines object-oriented and functional programming paradigms
+ and which 100% compatible to Java.
+ Especially the functional programming concepts are interesting for concurrent
+ algorithms and we will see how bioinformatics tool can benefit.
+ Also, Scala's implicit defs might be used to wrap and seamless integrate
+ other classes, e.
+\begin_inset space ~
+\end_inset
+
+g.
+ Biojava packages.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+DP or Dynamic Programming.
+ Many bioinformatics algorithms rely on the dynamic programming method.
+ However, often the description of such an bioinformatics algorithm does
+ not explicitly describe/elaborate where DP is applied and reused.
+ This is a pity as DP is a common design pattern which could and should
+ have a clear programming interface that could be used.
+ There are even methods where the DP pattern (the recurrent equations, to
+ be more precise) can be derived from a algebra (see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "giegerich2004"
+
+\end_inset
+
+).
+ However, scalabioalg simply comes with a dynamic programming framework
+ which can be (re-)used for many purposes, especially for bioinformatics
+ algorithms.
+\end_layout
+
+\begin_layout Section
+Installation
+\end_layout
+
+\begin_layout Subsection
+Prerequisites
+\end_layout
+
+\begin_layout Standard
+You need
+\end_layout
+
+\begin_layout Itemize
+a Java virtual machine (Java 5 or above)
+\begin_inset CommandInset citation
+LatexCommand cite
+key "jvm"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+for development: Maven 2 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "maven2"
+
+\end_inset
+
+ and GIT 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "git"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+for developers who want to use the library
+\end_layout
+
+\begin_layout Standard
+This sections explain how to use the library.
+ Unfortunately, ready-to-go jar files are not yet available.
+ Please read section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:for-developers-extend"
+
+\end_inset
+
+and compile your project.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:for-developers-extend"
+
+\end_inset
+
+for developers who want to extend the library
+\end_layout
+
+\begin_layout Standard
+Check out the project from github 
+\begin_inset CommandInset href
+LatexCommand href
+target "https://github.com/markusgumbel/scalabioalg"
+
+\end_inset
+
+.
+ The project uses Maven 2 as the build tool 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "maven2"
+
+\end_inset
+
+.
+ Run the Maven goal 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+mvn site
+\end_layout
+
+\end_inset
+
+.
+ This will generate all the relevant artifacts.
+ The scaladoc can be found in 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+./target/site/index.html
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+There are the following Maven subprojects
+\end_layout
+
+\begin_layout Itemize
+bioalg-core: fundamental algorithms
+\end_layout
+
+\begin_layout Itemize
+demo: Examples that use the algorithms of bioalg-core.
+\end_layout
+
+\begin_layout Section
+Packages
+\end_layout
+
+\begin_layout Standard
+This section describes the packages and their algorithms.
+\end_layout
+
+\begin_layout Subsection
+Overview
+\end_layout
+
+\begin_layout Standard
+scalabioalg consists of the following core Scala packages which are part
+ of the bioalg-core Maven project.
+ The term package just refers to a logical unit of source code and does
+ not express any other concepts like components etc.
+ The root namespace is 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+net.gumbix
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+net.gumbix.bioinf
+\end_layout
+
+\end_inset
+
+: Algorithms for bioinformatics
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+.hmm
+\end_layout
+
+\end_inset
+
+: Hidden markov models
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+.string
+\end_layout
+
+\end_inset
+
+: Everything which operates on strings, i.
+\backslash
+ e.
+\backslash
+ sequences.
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+.alignment
+\end_layout
+
+\end_inset
+
+: Sequence alignments (pairwise and multiple)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+.dotplot
+\end_layout
+
+\end_inset
+
+: Dotplots
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+.seq
+\end_layout
+
+\end_inset
+
+: Methods to assembly sequences
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+.struct
+\end_layout
+
+\end_inset
+
+: Algorithms for structure formation (currently only RNA secondary structures)
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+net.gumbix.dynpro
+\end_layout
+
+\end_inset
+
+: Dynamic programming basics
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+net.gumbix.layout
+\end_layout
+
+\end_inset
+
+: Methods to layout characters on a console
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+net.gumbix.ui
+\end_layout
+
+\end_inset
+
+: Some panels for a user interface
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+net.gumbix.util
+\end_layout
+
+\end_inset
+
+: No comment ;-)
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Dynamic-programming"
+
+\end_inset
+
+Dynamic programming (
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+*.dynpro
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+Tbd.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Pairwise-alignment"
+
+\end_inset
+
+Pairwise alignment (
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+*.bioinf.string.alignment
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+Tbd.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:DNA-assembly"
+
+\end_inset
+
+DNA assembly (
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+*.bioinf.string.seq
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+Tbd.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:RNA-secondary-structures"
+
+\end_inset
+
+RNA secondary structures (
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+*.bioinf.struct
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+Tbd.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Pattern-recognition"
+
+\end_inset
+
+Pattern recognition (
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+*.bioinf.hmm
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+Tbd.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "references"
+options "amsplain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
