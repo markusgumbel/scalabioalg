@@ -47,7 +47,7 @@ abstract class AbstractNussinov(val s: String)
         h.toList
       } else Nil
       // val splitList = Nil
-      val otherList = for (state <- NussinovState;
+      val otherList = for (state <- NussinovState.values;
                            if (state != SPLIT)) yield {
         new NussinovDecision(state, idx, 0, s(idx.i), s(idx.j))
       }
