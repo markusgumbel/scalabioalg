@@ -892,7 +892,17 @@ demo
 
 \end_inset
 
-: Examples that use the algorithms found in 
+ (project name 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+scabio-demo
+\end_layout
+
+\end_inset
+
+): Examples that use the algorithms found in 
 \begin_inset Flex Code
 status collapsed
 
@@ -922,7 +932,55 @@ Dependencies to other libs
 \end_layout
 
 \begin_layout Standard
+The 
+\begin_inset Flex Code
+status collapsed
 
+\begin_layout Plain Layout
+scabio-core
+\end_layout
+
+\end_inset
+
+-module requires the Apache commons-math library
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+as of now only the class 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+org.apache.commons.math.stat.Frequency
+\end_layout
+
+\end_inset
+
+ is needed
+\end_layout
+
+\end_inset
+
+.
+ The 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+scabio-demo
+\end_layout
+
+\end_inset
+
+ uses Java Universal Network/Graph Framework library 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "JUNG"
+
+\end_inset
+
+ for visualization.
 \end_layout
 
 \begin_layout Section
@@ -1273,8 +1331,552 @@ SCABIO
 .
 \end_layout
 
+\begin_layout Subsection
+Source-Code-Snippets
+\end_layout
+
 \begin_layout Standard
-Todo.
+This section shows several 
+\begin_inset Flex Noun
+status collapsed
+
+\begin_layout Plain Layout
+SCABIO
+\end_layout
+
+\end_inset
+
+'s classes in action.
+\end_layout
+
+\begin_layout Subsubsection
+Alignments
+\end_layout
+
+\begin_layout Standard
+Let us create a global alignment of two DNA sequences.
+ The scores are our default: match = 1, mismatch = -1 and an insertion or
+ deletion = -2.
+ Listing 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "lis:Alignment"
+
+\end_inset
+
+ shows an example.
+ The class 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+Alignment
+\end_layout
+
+\end_inset
+
+ expects the sequences to align and the mode which is here set to global
+ (Needleman/Wunsch).
+ 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+Alignment
+\end_layout
+
+\end_inset
+
+ provides the method 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+makeAlignmentString()
+\end_layout
+
+\end_inset
+
+ that pretty-prints the alignment (line 8).
+ The solution is the sequence of decisions.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\ttfamily},breaklines=true,captionpos=t,float,frame=tb,language=Java,numbers=left,numbersep=5pt,numberstyle={\tiny},showlines=true,stepnumber=2,tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+...
+\end_layout
+
+\begin_layout Plain Layout
+
+    val s1 = "ACGT"
+\end_layout
+
+\begin_layout Plain Layout
+
+    val s2 = "ACGATC"
+\end_layout
+
+\begin_layout Plain Layout
+
+    val dp = new Alignment(s1, s2, AlignmentMode.GLOBAL)
+\end_layout
+
+\begin_layout Plain Layout
+
+    val solution = dp.solution
+\end_layout
+
+\begin_layout Plain Layout
+
+    println("sim = " + dp.similarity)
+\end_layout
+
+\begin_layout Plain Layout
+
+    println()
+\end_layout
+
+\begin_layout Plain Layout
+
+    println(dp.makeAlignmentString(solution))
+\end_layout
+
+\begin_layout Plain Layout
+
+    println()
+\end_layout
+
+\begin_layout Plain Layout
+
+    println(dp.mkMatrixString(solution))
+\end_layout
+
+\begin_layout Plain Layout
+
+    println()
+\end_layout
+
+\begin_layout Plain Layout
+
+    solution.foreach(e => print(e.decision))
+\end_layout
+
+\begin_layout Plain Layout
+
+...
+\begin_inset Caption
+
+\begin_layout Plain Layout
+
+\begin_inset CommandInset label
+LatexCommand label
+name "lis:Alignment"
+
+\end_inset
+
+Alignment
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Running these lines gives the following console output:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Plain Layout
+
+sim = 0.0
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+ACG-T.
+\end_layout
+
+\begin_layout Plain Layout
+
+||| | 
+\end_layout
+
+\begin_layout Plain Layout
+
+ACGATC
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+   |  0    1    2    3    4     5     6  
+\end_layout
+
+\begin_layout Plain Layout
+
+   |  -    A    C    G    A     T     C  
+\end_layout
+
+\begin_layout Plain Layout
+
+- -|---- ---- ---- ---- ---- ----- ----- 
+\end_layout
+
+\begin_layout Plain Layout
+
+0 -| 0.* -2.
+  -4.
+  -6.
+  -8.
+  -10.
+  -12.
+  
+\end_layout
+
+\begin_layout Plain Layout
+
+1 A|-2.
+   1.* -1.
+  -3.
+  -5.
+   -7.
+   -9.
+  
+\end_layout
+
+\begin_layout Plain Layout
+
+2 C|-4.
+  -1.
+   2.*  0.
+  -2.
+   -4.
+   -6.
+  
+\end_layout
+
+\begin_layout Plain Layout
+
+3 G|-6.
+  -3.
+   0.
+   3.*  1.*  -1.
+   -3.
+  
+\end_layout
+
+\begin_layout Plain Layout
+
+4 T|-8.
+  -5.
+  -2.
+   1.
+   2.
+    2.*   0.* 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+NBBBIBI
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Knapsack
+\end_layout
+
+\begin_layout Standard
+The knapsack problem is a well known problem in computer science which can
+ be solved using dynamic programming.
+ Listing 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "list:Knapsack"
+
+\end_inset
+
+ shows the class.
+\begin_inset CommandInset include
+LatexCommand lstinputlisting
+filename "D:/users/markus/src/eclipse/hs-ma-workspace/bioalg/demo/src/main/scala/net/gumbix/dynpro/demo/KnapsackDynPro.scala"
+lstparams "basicstyle={\\ttfamily},breaklines=true,caption={Knapsack},captionpos=t,frame=tb,label={list:Knapsack},language=Java,linerange={16-20, 49-1000},numbers=left,numbersep=5pt,numberstyle={\\tiny},showlines=true,stepnumber=2,tabsize=2"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Applications with GUI
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+demo
+\end_layout
+
+\end_inset
+
+-subproject contains some applications with an interactive user interface.
+\end_layout
+
+\begin_layout Subsubsection
+RNA-Folding
+\end_layout
+
+\begin_layout Standard
+Run the demo 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+net.gumbix.bioinf.struct.RNAStruct2DViewer
+\end_layout
+
+\end_inset
+
+ within the module 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+demo
+\end_layout
+
+\end_inset
+
+.
+ It opens a simple GUI showing a RNA sequence in the text field and a visualized
+ folding of this sequence (cf.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Showcase-RNA"
+
+\end_inset
+
+).
+ Modify the sequence and press ENTER (or just press ENTER) to (re-)draw
+ the RNA structure.
+ The Nussinov algorithm is used and the graph is visualized with the JUNG
+ library.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename fig/RNA2DViewer.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Showcase-RNA"
+
+\end_inset
+
+Showcase for two-dimensional RNA folding.
+ See 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+net.gumbix.bioinf.struct.RNAStruct2DViewer
+\end_layout
+
+\end_inset
+
+ within the module 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+demo
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Edit-Distance
+\end_layout
+
+\begin_layout Standard
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+net.gumbix.string.alignment.EditDistanceApp
+\end_layout
+
+\end_inset
+
+ within the module 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+demo
+\end_layout
+
+\end_inset
+
+ is a tool which calculates the edit distance of two strings, which is very
+ similar to alignment methods.
+ This application is used at the Mannheim University of Applied Sciences
+ at the faculty for computer science for a some sort of 
+\begin_inset Quotes eld
+\end_inset
+
+marketing
+\begin_inset Quotes erd
+\end_inset
+
+ presentations (open campus etc.).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename fig/EditDistance.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+A tool that calculates the edit distance of two strings.
+ Here you need 12 steps to convert 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+bioinformatics
+\end_layout
+
+\end_inset
+
+ into 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+moleculargenetics
+\end_layout
+
+\end_inset
+
+.
+ The alignment and the dynamic programming table are also shown.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section*
