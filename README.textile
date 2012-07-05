@@ -1,6 +1,6 @@
 h2. Overview
 
-This project contains several algorithms used in the bioinformatics domain. _More documentation will come soon - please be patient_!
+This project provides algorithms written in Scala which are used in the bioinformatics domain.
 
 Highlights so far
 * generic (2D) dynamic programing algorithm (see net.gumbix.dynpro.DynPro)
@@ -13,7 +13,7 @@ Highlights so far
 
 h2. Getting Started
 
-More documentation will come soon. Please refer to the "wiki pages":https://github.com/markusgumbel/scalabioalg/wiki for more information. A good start is to read the scaladoc API documentation. See installation below where to find it.
+_More documentation will come soon._ Please refer to "project home page":http://www.mi.hs-mannheim.de/gumbel/en/forschung/scabio or the to the "wiki pages":https://github.com/markusgumbel/scalabioalg/wiki for more information. A good start is to read the preliminary "manual":http://www.mi.hs-mannheim.de/gumbel/files/scabio-manual.pdf or the generated scaladoc API documentation. See installation below where to find it.
 
 h3. Requirements
 
@@ -22,7 +22,7 @@ h3. Requirements
 
 h3. Installation
 
-The project uses Maven 2 as the build tool. Check out the project and run the Maven goal mvn site. This will generate all the relevant artifacts. The scaladoc can be found in ./target/site/index.html.
+The project uses Maven 2 as the build tool. Check out the project and run the Maven goal _mvn site_. This will generate all the relevant artifacts. The scaladoc can be found in ./target/site/index.html. More details are described int the "manual":http://www.mi.hs-mannheim.de/gumbel/files/scabio-manual.pdf.
 
 h2. Mailing Lists
 
