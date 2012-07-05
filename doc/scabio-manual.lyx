@@ -506,7 +506,7 @@ concurrent algorithms
 \end_inset
 
  and we will see how bioinformatics tools can benefit.
- Although not yet shown in SCABIO, modern concurrency-frameworks like Aka
+ Although not yet shown in SCABIO, modern concurrency-frameworks like Akka
  
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -587,9 +587,18 @@ key "giegerich2004"
 \end_inset
 
 ).
- However, scalabioalg simply comes with a dynamic programming framework
- which can be (re-)used for many purposes, especially for bioinformatics
- algorithms.
+ However, 
+\begin_inset Flex Noun
+status collapsed
+
+\begin_layout Plain Layout
+SCABIO
+\end_layout
+
+\end_inset
+
+ simply comes with a dynamic programming framework which can be (re-)used
+ for many purposes, especially for bioinformatics algorithms.
 \end_layout
 
 \begin_layout Enumerate
@@ -1474,7 +1483,6 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-
 \begin_inset CommandInset label
 LatexCommand label
 name "lis:Alignment"
