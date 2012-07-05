@@ -13,7 +13,7 @@ Highlights so far
 
 h2. Getting Started
 
-_More documentation will come soon._ Please refer to "project home page":http://www.mi.hs-mannheim.de/gumbel/en/forschung/scabio or the to the "wiki pages":https://github.com/markusgumbel/scalabioalg/wiki for more information. A good start is to read the preliminary "manual":http://www.mi.hs-mannheim.de/gumbel/files/scabio-manual.pdf or the generated scaladoc API documentation. See installation below where to find it.
+_More documentation will come soon._ Please refer to "project home page":http://www.mi.hs-mannheim.de/gumbel/en/forschung/scabio/ or the to the "wiki pages":https://github.com/markusgumbel/scalabioalg/wiki for more information. A good start is to read the preliminary "manual":http://www.mi.hs-mannheim.de/gumbel/files/scabio-manual.pdf or the generated scaladoc API documentation. See installation below where to find it.
 
 h3. Requirements
 
