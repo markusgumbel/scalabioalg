@@ -148,25 +148,9 @@ customHeadersFooters
 
 \begin_body
 
-\begin_layout Title
-bioscala manual
-\end_layout
-
-\begin_layout Author
-Markus Gumbel
-\end_layout
-
-\begin_layout Date
-February 2012
-\end_layout
-
-\begin_layout Abstract
-This is the abstract.
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Plain Layout
 
@@ -179,14 +163,14 @@ fancyhead{}
 
 
 \backslash
-fancyhead[CO,CE]{scalabioalg manual}
+fancyhead[CO,CE]{SCABIO Manual}
 \end_layout
 
 \begin_layout Plain Layout
 
 
 \backslash
-fancyhead[LE,LO]{Version ??}
+fancyhead[LE,LO]{Version 0.1-SNAPSHOT}
 \end_layout
 
 \begin_layout Plain Layout
@@ -209,6 +193,92 @@ code{m.gumbel@hs-mannheim}}
 
 \end_layout
 
+\begin_layout Title
+SCABIO Manual
+\end_layout
+
+\begin_layout Author
+Markus Gumbel
+\end_layout
+
+\begin_layout Date
+July 2012
+\end_layout
+
+\begin_layout Abstract
+\begin_inset Flex Noun
+status collapsed
+
+\begin_layout Plain Layout
+scabio
+\end_layout
+
+\end_inset
+
+ is a framework written in Scala that contains a collection of algorithms
+ and methods for bioinformatics.
+ It was originally developed to demonstrate algorithms for a lecture in
+ bioinformatics but has grown in the meantime and become a comprehensive
+ collection.
+ The framework contains so far a generic (2D) extensible dynamic programing
+ algorithm, global, semi-local and local pairwise alignment, multiple alignment,
+ pattern recognition with the Viterbi-algorithm, RNA 2D structure viewer
+ based on Nussinov algorithm, greedy superstring algorithm for sequence
+ assembly and much more.
+\end_layout
+
+\begin_layout Abstract
+A key feature is a generic and extensible dynamic programming (DP) algorithm.
+ Many bioinformatics algorithms rely on this method.
+ 
+\begin_inset Flex Noun
+status collapsed
+
+\begin_layout Plain Layout
+scabio
+\end_layout
+
+\end_inset
+
+ simply comes with a dynamic programming framework/interface which can be
+ (re-)used or extended for many purposes, especially for all kind of bioinformat
+ics algorithms.
+ Within 
+\begin_inset Flex Noun
+status collapsed
+
+\begin_layout Plain Layout
+scabio
+\end_layout
+
+\end_inset
+
+, all pairwise alignment algorithms, the Viterbi-algorithm and the Nussinov-algo
+rithm are based on these DP classes.
+\end_layout
+
+\begin_layout Abstract
+\begin_inset Flex Noun
+status collapsed
+
+\begin_layout Plain Layout
+scabio
+\end_layout
+
+\end_inset
+
+ requires a Java virtual machine (Java 5 or above) and works with Scala
+ 2.8 or above.
+ It uses Maven 2 and GIT for development.
+\end_layout
+
+\begin_layout Abstract
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
 \begin_layout Standard
 \begin_inset CommandInset toc
 LatexCommand tableofcontents
@@ -223,12 +293,65 @@ LatexCommand tableofcontents
 \end_layout
 
 \begin_layout Section
+Scope
+\end_layout
+
+\begin_layout Standard
+This manual refers to version 0.1-SNAPSHOT which is a very early alpha version.
+ Many things are still under construction and may change in the future.
+\end_layout
+
+\begin_layout Standard
+The manual is for developers in the bioinformatics domain who want to learn
+ more about 
+\begin_inset Flex Noun
+status collapsed
+
+\begin_layout Plain Layout
+SCABIO
+\end_layout
+
+\end_inset
+
+ or who want to implement their own algorithms.
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Subsection
 Overview
 \end_layout
 
 \begin_layout Standard
-This library contains algorithms for bioinformatics written in Scala.
- Highlights so far
+The 
+\begin_inset Flex Noun
+status collapsed
+
+\begin_layout Plain Layout
+SCABIO
+\end_layout
+
+\end_inset
+
+ library/framework contains algorithms for bioinformatics written in Scala
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "scala"
+
+\end_inset
+
+ hosted at 
+\begin_inset CommandInset href
+LatexCommand href
+target "https://github.com/markusgumbel/scalabioalg"
+
+\end_inset
+
+ and licensed under the Apache License Version 2.0.
+ Highlights so far are
 \end_layout
 
 \begin_layout Itemize
@@ -294,10 +417,14 @@ reference "sub:DNA-assembly"
 and much more...
 \end_layout
 
+\begin_layout Subsection
+Motivation
+\end_layout
+
 \begin_layout Standard
 Why another library for bioinformatics? Well, because it's fun?! No, seriously:
  This project was incubated for ready-to-go examples for a lecture in bioinforma
-tics at the Mannheim University of Appliced Sciences (see 
+tics at the Mannheim University of Applied Sciences (see 
 \begin_inset CommandInset href
 LatexCommand href
 target "http://www.mi.hs-mannheim.de/gumbel/en/vorlesungen/bioinformatik-bim"
@@ -324,12 +451,18 @@ Algorithmic Aspects of Bioinformatics
 \end_inset
 
  by H.
-\backslash
- J.
-\backslash
- Böckenhauer and D.
-\backslash
- Bongartz 
+\begin_inset space ~
+\end_inset
+
+J.
+\begin_inset space ~
+\end_inset
+
+Böckenhauer and D.
+\begin_inset space ~
+\end_inset
+
+Bongartz 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "boeckenhauer2007"
@@ -340,35 +473,106 @@ key "boeckenhauer2007"
 \end_layout
 
 \begin_layout Standard
-Clearly, Biojava 
+SCABIO might be useful/helpful because
+\end_layout
+
+\begin_layout Enumerate
+it is written in 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+Scala
+\end_layout
+
+\end_inset
+
+.
+ Scala is a state of the art programming language for the Java virtual machine
+ that combines object-oriented and functional programming paradigms and
+ which 100% compatible to Java.
+ 
+\end_layout
+
+\begin_layout Enumerate
+especially the functional programming concepts are interesting for 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+concurrent algorithms
+\end_layout
+
+\end_inset
+
+ and we will see how bioinformatics tools can benefit.
+ Although not yet shown in SCABIO, modern concurrency-frameworks like Aka
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "akka"
+
+\end_inset
+
+ are easy to apply as they naturally integrate with Scala.
+\end_layout
+
+\begin_layout Enumerate
+Scala's 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+implicit def
+\end_layout
+
+\end_inset
+
+s might be used to wrap and seamless integrate with other Java-based libraries.
+ Clearly, Biojava 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "biojava"
 
 \end_inset
 
- is the closest project.
+ and bioscala 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "bioscala"
+
+\end_inset
+
+ are the most related projects and their integration should be straight
+ forward.
 \end_layout
 
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-Scala: Scala is a state of the art programming language for the Java virtual
- machine that combines object-oriented and functional programming paradigms
- and which 100% compatible to Java.
- Especially the functional programming concepts are interesting for concurrent
- algorithms and we will see how bioinformatics tool can benefit.
- Also, Scala's implicit defs might be used to wrap and seamless integrate
- other classes, e.
+\begin_layout Enumerate
+Scala has many features that support the development of domain specific
+ languages (DSL).
+ Such a DSL could be created e.
 \begin_inset space ~
 \end_inset
 
 g.
- Biojava packages.
+\begin_inset space ~
+\end_inset
+
+for tools that wrap SCABIO's algorithms.
 \end_layout
 
-\begin_layout Labeling
-\labelwidthstring 00.00.0000
-DP or Dynamic Programming.
+\begin_layout Enumerate
+is offers a full-blown generic 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+dynamic programming
+\end_layout
+
+\end_inset
+
+ (DP) algorithm.
  Many bioinformatics algorithms rely on the dynamic programming method.
  However, often the description of such an bioinformatics algorithm does
  not explicitly describe/elaborate where DP is applied and reused.
@@ -388,8 +592,23 @@ key "giegerich2004"
  algorithms.
 \end_layout
 
+\begin_layout Enumerate
+it is free!
+\end_layout
+
+\begin_layout Standard
+We should not forget to mention the open questions: As SCABIO is a new kid
+ on the block, it cannot compete with mature frameworks like Biojava.
+ However, as the integration is simple, perhaps both frameworks can supplement
+ each other.
+\end_layout
+
 \begin_layout Section
 Installation
+\end_layout
+
+\begin_layout Standard
+This sections describes the installation process.
 \end_layout
 
 \begin_layout Subsection
@@ -434,8 +653,8 @@ for developers who want to use the library
 \end_layout
 
 \begin_layout Standard
-This sections explain how to use the library.
- Unfortunately, ready-to-go jar files are not yet available.
+This section explains how to use the library.
+ Unfortunately, downloadable jar files are not yet available.
  Please read section 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -496,6 +715,142 @@ status collapsed
 \end_inset
 
 .
+ Refer to chapter 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Design"
+
+\end_inset
+
+ for more details on the architecture and design.
+\end_layout
+
+\begin_layout Section
+Design
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Design"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Design-Principles
+\end_layout
+
+\begin_layout Standard
+This section elaborates the design principles behind 
+\begin_inset Flex Noun
+status collapsed
+
+\begin_layout Plain Layout
+SCABIO
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Functional
+\end_layout
+
+\begin_layout Standard
+Although SCABIO is not 100% functional it incorporates many features of
+ the functional programming paradigms.
+ The best practices recommended for Scala (e.
+\begin_inset space ~
+\end_inset
+
+g.
+\begin_inset space ~
+\end_inset
+
+ in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "odersky-scalabook-2010"
+
+\end_inset
+
+) are applied here.
+ For instance, is is discouraged to use variables (literally!) as declared
+ by the 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+var
+\end_layout
+
+\end_inset
+
+ keyword -- instead only immutable 
+\begin_inset Quotes eld
+\end_inset
+
+variables
+\begin_inset Quotes erd
+\end_inset
+
+ declared by the 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+val
+\end_layout
+
+\end_inset
+
+ keyword are used.
+ This will help to make the algorithms ready for concurrence.
+\end_layout
+
+\begin_layout Subsubsection
+Reusability
+\end_layout
+
+\begin_layout Standard
+SCABIO aims to shift core functionality to base classes (or traits) in order
+ to maximize reusability.
+ A good example is the consequent and consistent reuse of the dynamic programmin
+g method in many algorithms.
+\end_layout
+
+\begin_layout Subsubsection
+Compact
+\end_layout
+
+\begin_layout Standard
+Supported by Scala language design, the 
+\begin_inset Flex Noun
+status collapsed
+
+\begin_layout Plain Layout
+SCABIO
+\end_layout
+
+\end_inset
+
+'s source code is quite compact and non redundant.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+More to come
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Modules
 \end_layout
 
 \begin_layout Standard
@@ -503,11 +858,71 @@ There are the following Maven subprojects
 \end_layout
 
 \begin_layout Itemize
-bioalg-core: fundamental algorithms
+directory name 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+core
+\end_layout
+
+\end_inset
+
+: fundamental algorithms (project name 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+scabio-core
+\end_layout
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Itemize
-demo: Examples that use the algorithms of bioalg-core.
+directory name 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+demo
+\end_layout
+
+\end_inset
+
+: Examples that use the algorithms found in 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+scabio-core
+\end_layout
+
+\end_inset
+
+.
+ See chapter 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Examples"
+
+\end_inset
+
+ for examples.
+\end_layout
+
+\begin_layout Standard
+Further subprojects could be added in the future.
+\end_layout
+
+\begin_layout Subsection
+Dependencies to other libs
+\end_layout
+
+\begin_layout Standard
+
 \end_layout
 
 \begin_layout Section
@@ -515,7 +930,7 @@ Packages
 \end_layout
 
 \begin_layout Standard
-This section describes the packages and their algorithms.
+This section describes the packages and their algorithms in more detail.
 \end_layout
 
 \begin_layout Subsection
@@ -523,11 +938,29 @@ Overview
 \end_layout
 
 \begin_layout Standard
-scalabioalg consists of the following core Scala packages which are part
- of the bioalg-core Maven project.
+\begin_inset Flex Noun
+status collapsed
+
+\begin_layout Plain Layout
+SCABIO
+\end_layout
+
+\end_inset
+
+ consists of the following core Scala packages which are part of the 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+scabio-core
+\end_layout
+
+\end_inset
+
+ Maven project.
  The term package just refers to a logical unit of source code and does
  not express any other concepts like components etc.
- The root namespace is 
+ The root namespace is right now is 
 \begin_inset Flex Code
 status collapsed
 
@@ -537,7 +970,7 @@ net.gumbix
 
 \end_inset
 
-.
+ but may change in the future.
 \end_layout
 
 \begin_layout Itemize
@@ -578,10 +1011,14 @@ status collapsed
 \end_inset
 
 : Everything which operates on strings, i.
-\backslash
- e.
-\backslash
- sequences.
+\begin_inset space ~
+\end_inset
+
+e.
+\begin_inset space ~
+\end_inset
+
+sequences.
 \end_layout
 
 \begin_deeper
@@ -811,7 +1248,102 @@ status collapsed
 Tbd.
 \end_layout
 
+\begin_layout Section
+Examples
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Examples"
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Standard
+This sections demonstrates some examples how to use 
+\begin_inset Flex Noun
+status collapsed
+
+\begin_layout Plain Layout
+SCABIO
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Todo.
+\end_layout
+
+\begin_layout Section*
+Contact
+\end_layout
+
+\begin_layout Standard
+For further questions, please contact Markus Gumbel (
+\size normal
+
+\begin_inset CommandInset href
+LatexCommand href
+name "m.gumbel@hs-mannheim.de"
+target "m.gumbel@hs-mannheim.de"
+type "mailto:"
+
+\end_inset
+
+
+\size default
+) or post an issue to the 
+\begin_inset CommandInset href
+LatexCommand href
+name "project's issue tracking system"
+target "https://github.com/markusgumbel/scalabioalg/issues"
+
+\end_inset
+
+.
+ The official project's home page is 
+\begin_inset CommandInset href
+LatexCommand href
+target "http://www.mi.hs-mannheim.de/gumbel/en/forschung/scalabioalg"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Paragraph*
+Address
+\end_layout
+
+\begin_layout Standard
+Markus Gumbel
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Address
+Mannheim University of Applied Sciences
+\begin_inset Newline newline
+\end_inset
+
+Department of Computer Science, Institute for Medical Informatics, 
+\begin_inset Newline newline
+\end_inset
+
+Paul-Wittsack-Straße 10
+\begin_inset Newline newline
+\end_inset
+
+D-68163 Mannheim
+\begin_inset Newline newline
+\end_inset
+
+Germany
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "references"
