@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="52cm" height="38cm" viewBox="249 185 1040 748" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="281" y="239" width="792" height="420"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="281" y="239" width="792" height="420"/>
+    <rect style="fill: #ffffff" x="281" y="219" width="88.7" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="281" y="219" width="88.7" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="283" y="234">SCABIO core</text>
+  </g>
+  <g>
+    <rect style="fill: #e6e6fa" x="322" y="284" width="190" height="107"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="322" y="284" width="190" height="107"/>
+    <rect style="fill: #e6e6fa" x="322" y="264" width="65.6" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="322" y="264" width="65.6" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="279">*.dynpro</text>
+  </g>
+  <g>
+    <rect style="fill: #add8e6" x="545.5" y="283.5" width="489.5" height="358.5"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="545.5" y="283.5" width="489.5" height="358.5"/>
+    <rect style="fill: #add8e6" x="545.5" y="263.5" width="65.6" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="545.5" y="263.5" width="65.6" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="547.5" y="278.5">*.bioinf</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="785" y="538" width="129" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="785" y="538" width="129" height="80"/>
+    <rect style="fill: #ffffff" x="785" y="518" width="40" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="785" y="518" width="40" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="787" y="533">hmm</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="569" y="335.5" width="206" height="149.5"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="569" y="335.5" width="206" height="149.5"/>
+    <rect style="fill: #ffffff" x="569" y="315.5" width="127.2" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="569" y="315.5" width="127.2" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="571" y="330.5">string.alignment</text>
+  </g>
+  <g>
+    <rect style="fill: #e5e5e5" x="319.5" y="583.5" width="78.5" height="55.5"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="319.5" y="583.5" width="78.5" height="55.5"/>
+    <rect style="fill: #e5e5e5" x="319.5" y="563.5" width="65.6" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="319.5" y="563.5" width="65.6" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="321.5" y="578.5">*.layout</text>
+  </g>
+  <g>
+    <rect style="fill: #e5e5e5" x="425" y="587" width="82" height="52"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="425" y="587" width="82" height="52"/>
+    <rect style="fill: #e5e5e5" x="425" y="567" width="40" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="425" y="567" width="40" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="427" y="582">*.ui</text>
+  </g>
+  <g>
+    <rect style="fill: #e5e5e5" x="321.5" y="480.5" width="78.5" height="55.5"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="321.5" y="480.5" width="78.5" height="55.5"/>
+    <rect style="fill: #e5e5e5" x="321.5" y="460.5" width="50.2" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="321.5" y="460.5" width="50.2" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="323.5" y="475.5">*.util</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="782.5" y="336.5" width="225.5" height="78.5"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="782.5" y="336.5" width="225.5" height="78.5"/>
+    <rect style="fill: #ffffff" x="782.5" y="316.5" width="81" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="782.5" y="316.5" width="81" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="784.5" y="331.5">string.seq</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="569" y="541" width="172" height="75"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="569" y="541" width="172" height="75"/>
+    <rect style="fill: #ffffff" x="569" y="521" width="50.2" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="569" y="521" width="50.2" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="571" y="536">struct</text>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="685,187 1060.6,187 1072.6,199 1072.6,221 685,221 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="685,187 1060.6,187 1072.6,199 1072.6,221 685,221 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="1060.6,187 1060.6,199 1072.6,199 "/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="692" y="211.9">
+      <tspan x="692" y="211.9">root namespace is net.gumbix (subject to change)</tspan>
+    </text>
+  </g>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="878.8" y1="221" x2="863.591" y2="262.521"/>
+  <g>
+    <rect style="fill: #ffffff" x="809" y="553" width="71.25" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="809" y="553" width="71.25" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="844.625" y="572">Viterbi</text>
+    <rect style="fill: #ffffff" x="809" y="581" width="71.25" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="809" y="581" width="71.25" height="8"/>
+    <rect style="fill: #ffffff" x="809" y="589" width="71.25" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="809" y="589" width="71.25" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="596.5" y="357.5" width="102.8" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="596.5" y="357.5" width="102.8" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="647.9" y="376.5">Alignment</text>
+    <rect style="fill: #ffffff" x="596.5" y="385.5" width="102.8" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="596.5" y="385.5" width="102.8" height="8"/>
+    <rect style="fill: #ffffff" x="596.5" y="393.5" width="102.8" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="596.5" y="393.5" width="102.8" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="802.5" y="353.5" width="181.15" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="802.5" y="353.5" width="181.15" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="893.075" y="372.5">GreedySuperstring</text>
+    <rect style="fill: #ffffff" x="802.5" y="381.5" width="181.15" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="802.5" y="381.5" width="181.15" height="8"/>
+    <rect style="fill: #ffffff" x="802.5" y="389.5" width="181.15" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="802.5" y="389.5" width="181.15" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="579" y="555" width="155.15" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="579" y="555" width="155.15" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="656.575" y="574">NussinovEnergy</text>
+    <rect style="fill: #ffffff" x="579" y="583" width="155.15" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="579" y="583" width="155.15" height="8"/>
+    <rect style="fill: #ffffff" x="579" y="591" width="155.15" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="579" y="591" width="155.15" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="374.5" y="303.5" width="75.8" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="374.5" y="303.5" width="75.8" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="412.4" y="322.5">DynPro</text>
+    <rect style="fill: #ffffff" x="374.5" y="331.5" width="75.8" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="374.5" y="331.5" width="75.8" height="8"/>
+    <rect style="fill: #ffffff" x="374.5" y="339.5" width="75.8" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="374.5" y="339.5" width="75.8" height="8"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="469.544,325.5 489,325.5 489,379.5 595.509,379.5 "/>
+    <polygon style="fill: #ffffff" points="469.544,317.5 453.544,325.5 469.544,333.5 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="469.544,317.5 453.544,325.5 469.544,333.5 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="412.4,366.725 412.4,503 844.626,503 844.626,553 "/>
+    <polygon style="fill: #ffffff" points="420.4,366.725 412.4,350.725 404.4,366.725 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="420.4,366.725 412.4,350.725 404.4,366.725 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="412.4,365.736 412.4,503 656.575,503 656.575,554.001 "/>
+    <polygon style="fill: #ffffff" points="420.4,365.736 412.4,349.736 404.4,365.736 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="420.4,365.736 412.4,349.736 404.4,365.736 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="583.5" y="421.5" width="176.55" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="583.5" y="421.5" width="176.55" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="671.775" y="440.5">MultipleAlignment</text>
+    <rect style="fill: #ffffff" x="583.5" y="449.5" width="176.55" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="583.5" y="449.5" width="176.55" height="8"/>
+    <rect style="fill: #ffffff" x="583.5" y="457.5" width="176.55" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="583.5" y="457.5" width="176.55" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="281" y="708" width="791" height="225"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="281" y="708" width="791" height="225"/>
+    <rect style="fill: #ffffff" x="281" y="688" width="88.7" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="281" y="688" width="88.7" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="283" y="703">SCABIO demo</text>
+  </g>
+  <g>
+    <rect style="fill: #add8e6" x="552.5" y="753" width="487.5" height="163"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="552.5" y="753" width="487.5" height="163"/>
+    <rect style="fill: #add8e6" x="552.5" y="733" width="65.6" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="552.5" y="733" width="65.6" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="554.5" y="748">*.bioinf</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="807" y="789.5" width="205" height="102.5"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="807" y="789.5" width="205" height="102.5"/>
+    <rect style="fill: #ffffff" x="807" y="769.5" width="50.2" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="807" y="769.5" width="50.2" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="809" y="784.5">struct</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="573.5" y="787.5" width="206" height="104.5"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="573.5" y="787.5" width="206" height="104.5"/>
+    <rect style="fill: #ffffff" x="573.5" y="767.5" width="127.2" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="573.5" y="767.5" width="127.2" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="575.5" y="782.5">string.alignment</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="837" y="818" width="151.9" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="837" y="818" width="151.9" height="36"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="912.95" y="839.9">
+      <tspan x="912.95" y="839.9">:RNAStruct2DViewer</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="847" y1="842.9" x2="978.9" y2="842.9"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="602.5" y="818.5" width="130.1" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="602.5" y="818.5" width="130.1" height="36"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="667.55" y="840.4">
+      <tspan x="667.55" y="840.4">:EditDistanceApp</tspan>
+    </text>
+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="612.5" y1="843.4" x2="722.6" y2="843.4"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" points="279.994,820.5 250.994,820.5 250.994,449 273.289,449 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="260.641,454 276.641,449 260.641,444 "/>
+  </g>
+  <g>
+    <rect style="fill: #e6e6fa" x="316.5" y="750.5" width="190" height="107"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="316.5" y="750.5" width="190" height="107"/>
+    <rect style="fill: #e6e6fa" x="316.5" y="730.5" width="104.1" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="316.5" y="730.5" width="104.1" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="318.5" y="745.5">*.dynpro.demo</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="330.5" y="779.5" width="162.3" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="330.5" y="779.5" width="162.3" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="411.65" y="798.5">KnapsackDynPro</text>
+    <rect style="fill: #ffffff" x="330.5" y="807.5" width="162.3" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="330.5" y="807.5" width="162.3" height="8"/>
+    <rect style="fill: #ffffff" x="330.5" y="815.5" width="162.3" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="330.5" y="815.5" width="162.3" height="8"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="412.4,366.742 412.4,571.5 411.65,571.5 411.65,778.494 "/>
+    <polygon style="fill: #ffffff" points="420.4,366.742 412.4,350.742 404.4,366.742 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="420.4,366.742 412.4,350.742 404.4,366.742 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1124.85" y="240.314" width="163.576" height="415.483"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1124.85" y="240.314" width="163.576" height="415.483"/>
+    <rect style="fill: #ffffff" x="1124.85" y="220.314" width="111.8" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1124.85" y="220.314" width="111.8" height="20"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1126.85" y="235.314">SCABIO biojava</text>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="1141.21,265.396 1255.01,265.396 1267.01,277.396 1267.01,299.396 1141.21,299.396 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1141.21,265.396 1255.01,265.396 1267.01,277.396 1267.01,299.396 1141.21,299.396 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="1255.01,265.396 1255.01,277.396 1267.01,277.396 "/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1148.21" y="290.296">
+      <tspan x="1148.21" y="290.296">only showcases</tspan>
+    </text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" points="1123.85,448.056 1102.93,448.056 1102.93,449 1080.71,449 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1093.36,444 1077.36,449 1093.36,454 "/>
+  </g>
+</svg>

@@ -612,6 +612,31 @@ We should not forget to mention the open questions: As SCABIO is a new kid
  each other.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Discussion
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+SCABIO consists of the modules core and demo.
+ core contains 22 classes and 8 traits and 6 enumerations (test classes
+ are not considered).
+ We found that Scala enables one to write very compact and non redundant
+ code.
+ For instance, the entire pairwise alignment is accomplished with 192 lines
+ of code (LOC, including comments!) for the Alignment class and 265 LOC
+ for the generic DynPro class from which Alignment is derived.
+ The overall size is about 2,300 LOC.
+\end_layout
+
 \begin_layout Section
 Installation
 \end_layout
@@ -845,7 +870,7 @@ SCABIO
 
 \end_inset
 
-'s source code is quite compact and non redundant.
+'s source code is quite compact concise and non redundant.
 \begin_inset Note Note
 status open
 
@@ -953,7 +978,7 @@ scabio-core
 
 -module requires the Apache commons-math library
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 as of now only the class 
@@ -1038,6 +1063,59 @@ net.gumbix
 \end_inset
 
  but may change in the future.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Module-overview"
+
+\end_inset
+
+ shows an overview.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename fig/overview.svg
+	lyxscale 30
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Module-overview"
+
+\end_inset
+
+Module overview
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
