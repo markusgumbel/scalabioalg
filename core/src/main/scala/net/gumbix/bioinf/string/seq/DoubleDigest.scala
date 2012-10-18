@@ -25,14 +25,31 @@ import net.gumbix.util.{Logger, Permutation}
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 class DoubleDigest(a: List[Int], b: List[Int], ab: List[Int])
-        extends Permutation[Int] with Logger {
+  extends Permutation[Int] with Logger {
+
+  /*
+   * The sum of the fragment sizes must be the same!
+   */
+  require(a.reduce(_ + _) == b.reduce(_ + _) &&
+    a.reduce(_ + _) == ab.reduce(_ + _))
+
   private val MAX_TICKS = 100000
   private var c = 0
 
   def printSolutions() {
+    def fac(n: Int): Int = n match {
+      case 0 => 1
+      case _ => fac(n - 1) * n
+    }
     println()
-    if (calc.size > 1) println(calc.size + " solutions:")
-    println(calc.toList.sorted.mkString("\n"))
+    println("A: " + calc._1.size + " out of " + fac(a.size) + " fragment-orders")
+    println("A: " + calc._1.mkString(", "))
+    println()
+    println("B: " + calc._2.size + " out of " + fac(b.size) + " fragment-orders")
+    println("B: " + calc._2.mkString(", "))
+    println()
+    if (calc._3.size > 1) println(calc._3.size + " combinations:")
+    println(calc._3.toList.sorted.mkString("\n"))
   }
 
   val calc = {
@@ -40,7 +57,9 @@ class DoubleDigest(a: List[Int], b: List[Int], ab: List[Int])
     val ticks = iter / MAX_TICKS
     logln("iterations:  " + iter + " (" + ticks + " ticks)")
 
-    val set = new HashSet[String]
+    val solutionA = new HashSet[List[Int]]
+    val solutionB = new HashSet[List[Int]]
+    val printLines = new HashSet[String]
     for (testA <- perm(a); testB <- perm(b); testAB <- perm(ab)) {
 
       printTicks()
@@ -56,13 +75,17 @@ class DoubleDigest(a: List[Int], b: List[Int], ab: List[Int])
       // logln("--> " + posABshould)
 
       if (posABshould == posAB) {
-        val line = posA.mkString("{", ", ", "}") + " + " +
-                posB.mkString("{", ", ", "}") +
-                " = " + posABshould.mkString("{", ", ", "}")
-        set += line
+        solutionA += testA
+        solutionB += testB
+        val line = "Order A/B: " + testA.mkString(",") + " / " + testB.mkString(",") +
+          "; Pos = " +
+          posA.mkString("(", ", ", ")") + " + " +
+          posB.mkString("(", ", ", ")") +
+          " = " + posABshould.mkString("(", ", ", ")")
+        printLines += line
       }
     }
-    set
+    (solutionA, solutionB, printLines)
   }
 
   /**

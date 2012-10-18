@@ -17,6 +17,7 @@ package net.gumbix.dynpro.demo
 
 import net.gumbix.optimize.Knapsack
 import net.gumbix.dynpro.{Idx, MatrixPrinter, DynPro, PathEntry}
+
 /*
 i|a_i|w_i|v_i|d_i
 -|---|---|---|---
