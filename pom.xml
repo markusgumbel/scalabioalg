@@ -39,6 +39,7 @@
         <module>core</module>
         <module>demo</module>
         <module>biojava</module>
+        <module>paracore</module>
     </modules>
 
     <dependencies>
