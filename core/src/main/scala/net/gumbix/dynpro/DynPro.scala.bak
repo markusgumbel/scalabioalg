@@ -41,15 +41,12 @@ abstract class DynPro[Decision] extends DynProMatrix {
    * starting from (0, 0) going to (n-1, m-1). Then the decision path
    * is calculated by going backwards to cell (0, 0).
    */
-  val matrixForwardPathBackward = true
-
-  private val eps = 0.001
+  def matrixForwardPathBackward = true
 
   /**
    * How many cells need to be computed?
    */
   def cellsSize = n * m
-
 
   /**
    * Get the cell index for the k-th step where k is in range
@@ -102,7 +99,7 @@ abstract class DynPro[Decision] extends DynProMatrix {
   /**
    * Boundary value: The value in the matrix for not existing states.
    */
-  val initValues = Array(0.0)
+  def initValues: Array[Double] = Array(0)
 
   val MIN = (x1: Double, x2: Double) => if (x1 < x2) x1 else x2
   val MAX = (x1: Double, x2: Double) => if (x1 > x2) x1 else x2
@@ -122,17 +119,15 @@ abstract class DynPro[Decision] extends DynProMatrix {
    * Note that the decision is not needed as we only define the function here.  
    * Default is: accValue = currentValue + g(prevsAccValues)
    * @param currentValue The value for the current state (given a decision)
-   * @param prevValues Array of previous values (given a decision).
+   * @param prevsAccValues Array of previous values (given a decision).
    * Most of the dynamic optimization problems have exactly one previous value.
-   * @param gDef Function that calculates the previous values.
+   * @param g Function that calculates the previous values.
    */
-  def calcF(currentValue: Double, prevValues: Array[Double], gDef: (Array[Double]) => Double) =
-    currentValue + gDef(prevValues)
+  def calcF(currentValue: Double, prevsAccValues: Array[Double], g: (Array[Double]) => Double) =
+    currentValue + g(prevsAccValues)
 
-
-  def calcFBack(currentValue: Double, prevValues: Array[Double], gDef: (Array[Double]) => Double) =
-    currentValue - gDef(prevValues)
-
+  def calcFBack(current: Double, prevs: Array[Double], g: (Array[Double]) => Double) =
+    current - g(prevs)
 
   /**
    * The function g specifies how the accumulated values are calculated
@@ -140,7 +135,7 @@ abstract class DynPro[Decision] extends DynProMatrix {
    * one previous accumulated values.
    * Default: g(x) = x1 + x2 + ... x_n
    */
-  def calcG(x: Array[Double]) = if (x.isEmpty) 0.0 else x.reduceLeft(_ + _)
+  def calcG(x: Array[Double]) = if (x.isEmpty) 0 else x.reduceLeft(_ + _)
 
   /**
    * Local alignment needs to reset an accumulated value to 0.
@@ -148,12 +143,11 @@ abstract class DynPro[Decision] extends DynProMatrix {
    */
   def reviseMax(max: Double): Double = max
 
-
   /**
    * matrix containing the accumulated values (costs).
    */
   lazy val matrix: Array[Array[Option[Double]]] = {
-    var mx: Array[Array[Option[Double]]] = Array.ofDim(n, m)
+    val mx: Array[Array[Option[Double]]] = Array.ofDim(n, m)
     for (i <- 0 until n; j <- 0 until m) {
       mx(i)(j) = None
     }
@@ -162,70 +156,37 @@ abstract class DynPro[Decision] extends DynProMatrix {
     // However, any other order may also work.
     for (k <- 0 until cellsSize) {
       val idx = getCellIndex(k)
-      mx = calcMatrixIndexValue(mx, idx, parsePrevValues, handleNewValue)
-    }
-
-    mx
-  }
-
-
-  private def parsePrevValues(prevIndexes: Array[Idx], prevValues: Array[Double]) = prevValues
-
-  private def handleNewValue(idx: Idx, newValue: Double){} //do nothing
-
-
-  /**
-   *
-   * @param currentMX
-   * @param idx
-   * @param parsePrevValues
-   * @param handleNewValue
-   * @return
-   */
-  protected[gumbix] def calcMatrixIndexValue(currentMX: Array[Array[Option[Double]]],
-                       idx: Idx,
-                       parsePrevValues:(Array[Idx], Array[Double]) => Array[Double],
-                       handleNewValue:(Idx, Double) => Unit): Array[Array[Option[Double]]] = {
-
-    // Get a list of values (or empty list):
-    val values = for (u <- decisions(idx)) yield {
-      prevStates(idx, u) match {
+      // Get a list of values (or empty list):
+      val values = for (u <- decisions(idx)) yield {
+        prevStates(idx, u) match {
         // Empty array, i.e. there are no prev. states:
-        case Array() => calcF(value(idx, u), initValues, calcG)//sum of current and previous values
-        // Non-empty array:
-        case prevIndexes: Array[Idx] => {
-          val prevValues: Array[Double] = for (pidx <- prevIndexes) yield {
-            currentMX(pidx.i)(pidx.j) match {
+          case Array() => calcF(value(idx, u), initValues, calcG)
+          // Non-empty array:
+          case indices: Array[Idx] => {
+            val args: Array[Double] = for (pidx <- indices) yield {
+              mx(pidx.i)(pidx.j) match {
               /*
              case None => throw new RuntimeException("Internal error: " +
                      "Illegal previous state " + pidx + " at " + idx.toString)
               */
-              case None => initValues(0)
-              case Some(value) => value
+                case None => initValues(0)
+                case Some(value) => value
+              }
             }
+            calcF(value(idx, u), args, calcG)
           }
-          calcF(value(idx, u), parsePrevValues(prevIndexes, prevValues), calcG)
-          //calcF(value(idx, u), prevValues, calcG)
         }
       }
+      // Calculate the extreme value (min. or max.):
+      val extrValue: Double = values match {
+      // TODO why index position 0?
+        case Array() => initValues(0)
+        case _ => values.toList.reduceLeft(extremeFunction(_, _))
+      }
+      mx(idx.i)(idx.j) = Some(reviseMax(extrValue))
     }
-
-
-    // Calculate the new value (min. or max.):
-    val newValue: Double = values match {
-      case Array() => initValues(0)
-      /*a double value, while overriding the initValues method, the dev should keep in mind that
-      * the extreme value comes first*/
-
-      case _ => values.toList.reduceLeft(extremeFunction(_, _)) //the maximum or min
-    }
-
-    handleNewValue(idx, newValue)
-
-    currentMX(idx.i)(idx.j) = Some(reviseMax(newValue))
-    currentMX //return
+    mx
   }
-
 
   /**
    * TODO Q&D hack for matlab
@@ -299,6 +260,7 @@ abstract class DynPro[Decision] extends DynProMatrix {
     else listBuffer.toList
   }
 
+  private def eps = 0.001
 }
 
 // because of Scala bug?!
@@ -308,7 +270,7 @@ class IntDynPro extends DynPro[java.lang.Integer] with MatrixPrinter[java.lang.I
 
   def m = 1
 
-  def decisions(idx: Idx) = Array(new Integer(1))
+  def decisions(idx: Idx) = Array(1)
 
   def prevStates(idx: Idx, d: java.lang.Integer) = Array()
 
