@@ -45,7 +45,7 @@
   </argo>
 <profile>
 </profile>
-<XMI xmi.version = '1.2' xmlns:UML = 'org.omg.xmi.namespace.UML' timestamp = 'Tue Apr 23 07:15:59 CEST 2013'>
+<XMI xmi.version = '1.2' xmlns:UML = 'org.omg.xmi.namespace.UML' timestamp = 'Tue Apr 23 07:56:29 CEST 2013'>
   <XMI.header>    <XMI.documentation>
       <XMI.exporter>ArgoUML (using Netbeans XMI Writer version 1.0)</XMI.exporter>
       <XMI.exporterVersion>0.34(6) revised on $Date: 2010-01-11 22:20:14 +0100 (Mon, 11 Jan 2010) $ </XMI.exporterVersion>
@@ -1484,7 +1484,7 @@
     ></text>
   </group>
   <group name="Fig1"
-       description="org.argouml.uml.diagram.static_structure.ui.FigPackage[16, 40, 224, 112]pathVisible=false;stereotypeView=0;stereotypeVisible=true;visibilityVisible=false"
+       description="org.argouml.uml.diagram.static_structure.ui.FigPackage[8, 40, 224, 112]pathVisible=false;stereotypeView=0;stereotypeVisible=true;visibilityVisible=false"
        href="-64--88-49-1-13205bfb:13e314cf9b7:-8000:0000000000000A60"
        fill="1"
        fillcolor="white"
@@ -1495,7 +1495,7 @@
     </private>
     
     <rectangle name="Fig1.0"
-      x="16"
+      x="8"
       y="40"
       width="224"
       height="112"
@@ -1511,23 +1511,23 @@
       stroke="0"
       strokecolor="black"
     >
-      <moveto x="16"
+      <moveto x="8"
               y="40" />
-      <lineto x="190"
+      <lineto x="182"
               y="40" />
-      <lineto x="190"
+      <lineto x="182"
               y="64" />
-      <lineto x="239"
+      <lineto x="231"
               y="64" />
-      <lineto x="239"
+      <lineto x="231"
               y="151" />
-      <lineto x="16"
+      <lineto x="8"
               y="151" />
-      <lineto x="16"
+      <lineto x="8"
               y="40" />
     </path>
     <text name="Fig1.2"
-      x="16"
+      x="8"
       y="40"
       width="175"
       height="25"
@@ -1543,7 +1543,7 @@
       justification="Left"
     >dynpro</text>
     <group name="Fig1.3"
-         description="org.argouml.uml.diagram.ui.FigStereotypesGroup[16, 40, 174, 1]"
+         description="org.argouml.uml.diagram.ui.FigStereotypesGroup[8, 40, 174, 1]"
          href="-64--88-49-1-13205bfb:13e314cf9b7:-8000:0000000000000A60"
          fill="1"
          fillcolor="white"
@@ -1555,7 +1555,7 @@
       </private>
       
       <rectangle name="Fig1.3.0"
-        x="16"
+        x="8"
         y="40"
         width="174"
         height="1"
@@ -1566,7 +1566,7 @@
       />
     </group>
     <text name="Fig1.4"
-      x="16"
+      x="8"
       y="64"
       width="224"
       height="88"
@@ -1583,7 +1583,7 @@
     ></text>
   </group>
   <group name="Fig2"
-       description="org.argouml.uml.diagram.static_structure.ui.FigClass[24, 72, 208, 72]pathVisible=false;stereotypeView=0;operationsVisible=true;attributesVisible=true;"
+       description="org.argouml.uml.diagram.static_structure.ui.FigClass[16, 72, 208, 72]pathVisible=false;stereotypeView=0;operationsVisible=true;attributesVisible=true;"
        href="-64--88-49-1-13205bfb:13e314cf9b7:-8000:0000000000000A62"
        fill="1"
        fillcolor="white"
@@ -1595,7 +1595,7 @@
     </private>
     
     <rectangle name="Fig2.0"
-      x="24"
+      x="16"
       y="72"
       width="208"
       height="72"
@@ -1605,7 +1605,7 @@
       strokecolor="black"
     />
     <text name="Fig2.1"
-      x="25"
+      x="17"
       y="73"
       width="206"
       height="23"
@@ -1621,7 +1621,7 @@
       justification="Center"
     >+ DynPro.scala</text>
     <group name="Fig2.2"
-         description="org.argouml.uml.diagram.ui.FigStereotypesGroup[25, 73, 203, 0]"
+         description="org.argouml.uml.diagram.ui.FigStereotypesGroup[17, 73, 203, 0]"
          href="-64--88-49-1-13205bfb:13e314cf9b7:-8000:0000000000000A62"
          fill="0"
          fillcolor="white"
@@ -1633,7 +1633,7 @@
       </private>
       
       <rectangle name="Fig2.2.0"
-        x="25"
+        x="17"
         y="73"
         width="203"
         height="0"
@@ -1644,7 +1644,7 @@
       />
     </group>
     <rectangle name="Fig2.3"
-      x="24"
+      x="16"
       y="96"
       width="208"
       height="1"
@@ -1654,7 +1654,7 @@
       strokecolor="black"
     />
     <group name="Fig2.4"
-         description="org.argouml.uml.diagram.ui.FigAttributesCompartment[25, 97, 206, 25]"
+         description="org.argouml.uml.diagram.ui.FigAttributesCompartment[17, 97, 206, 25]"
          href="-64--88-49-1-13205bfb:13e314cf9b7:-8000:0000000000000A62"
          fill="0"
          fillcolor="white"
@@ -1665,7 +1665,7 @@
       </private>
       
       <rectangle name="Fig2.4.0"
-        x="25"
+        x="17"
         y="97"
         width="206"
         height="25"
@@ -1675,7 +1675,7 @@
         strokecolor="black"
       />
       <text name="Fig2.4.1"
-        x="25"
+        x="17"
         y="97"
         width="206"
         height="23"
@@ -1692,7 +1692,7 @@
       >+ matrix: Array[Array[Option[Double]]]</text>
     </group>
     <rectangle name="Fig2.5"
-      x="24"
+      x="16"
       y="121"
       width="208"
       height="1"
@@ -1702,7 +1702,7 @@
       strokecolor="black"
     />
     <group name="Fig2.6"
-         description="org.argouml.uml.diagram.ui.FigOperationsCompartment[25, 122, 206, 21]"
+         description="org.argouml.uml.diagram.ui.FigOperationsCompartment[17, 122, 206, 21]"
          href="-64--88-49-1-13205bfb:13e314cf9b7:-8000:0000000000000A62"
          fill="0"
          fillcolor="white"
@@ -1713,7 +1713,7 @@
       </private>
       
       <rectangle name="Fig2.6.0"
-        x="25"
+        x="17"
         y="122"
         width="206"
         height="21"
@@ -1892,7 +1892,7 @@
     >
       <moveto x="272"
               y="104" />
-      <lineto x="231"
+      <lineto x="223"
               y="104" />
     </path>
   </group>
