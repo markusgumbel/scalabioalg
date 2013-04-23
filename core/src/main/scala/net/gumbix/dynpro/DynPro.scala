@@ -169,9 +169,9 @@ abstract class DynPro[Decision] extends DynProMatrix {
   }
 
 
-  private def parsePrevValues(prevIndexes: Array[Idx], prevValues: Array[Double]) = prevValues
+  protected[gumbix] def parsePrevValues(prevIndexes: Array[Idx], prevValues: Array[Double]) = prevValues
 
-  private def handleNewValue(idx: Idx, newValue: Double){} //do nothing
+  protected[gumbix] def handleNewValue(idx: Idx, newValue: Double){} //do nothing
 
 
   /**

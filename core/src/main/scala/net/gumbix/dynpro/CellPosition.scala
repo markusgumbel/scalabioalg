@@ -26,3 +26,5 @@ object CellPosition extends Enumeration {
   val MAXIMUM_VALUE_LAST_COLUMN = Value("Max. last column")
   val MAXIMUM_INDICES = Value("Max. indices, i.e. (n, m)")
 }
+
+

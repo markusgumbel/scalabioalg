@@ -9,12 +9,14 @@ package net.gumbix.paradynpro
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 
-import net.gumbix.dynpro._
+import actors.MatrixActor
 import DependencyCase._
+import ParaType._
 
+abstract class DynPro[Decision](paraType: ParaType, dependencyCase: DependencyCase) extends net.gumbix.dynpro.DynPro {
 
-abstract class DynPro[Decision](dependencyCase: DependencyCase) extends net.gumbix.dynpro.DynPro {
-  //TODO override the following methods: matrix and possibly matlabmatrix, solution
+  val cellActorAmount = 0
+
 
   /**
    *
@@ -26,25 +28,15 @@ abstract class DynPro[Decision](dependencyCase: DependencyCase) extends net.gumb
     }
 
     dependencyCase match {
-      case LEFT_UPLEFT_UP | UPLEFT_UP_UPRIGHT => buildMatrix(mx, dependencyCase)
+      case LEFT_UPLEFT_UP | UPLEFT_UP_UPRIGHT =>
+        ParaWrapper.computeMatrix(paraType, mx, initValues(0), dependencyCase, cellActorAmount, calcMatrixIndexValue)
       case LEFT_UPLEFT_UP_UPRIGHT | none => super.matrix
 
     }
   }
 
 
-  /**
-   *
-   */
-  private def buildMatrix(mx: Array[Array[Option[Double]]], dep: DependencyCase)
-  = {
 
-    //n: number of rows
-      // and then m: number of columns
-
-    mx
-  }
-
-
+  //TODO override the following methods: matrix and possibly matlabmatrix, solution
 
 }
