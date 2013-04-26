@@ -3,7 +3,9 @@ package net.gumbix.paradynpro.actors
 import scala.actors.Actor
 import net.gumbix.dynpro.Idx
 import net.gumbix.paradynpro.DependencyCase._
-import net.gumbix.paradynpro.{Messages, msgUpdateMatrix, msgGetValues, msgAckGetValues}
+import net.gumbix.paradynpro._
+import net.gumbix.dynpro.Idx
+import net.gumbix.paradynpro.DependencyCase.DependencyCase
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -34,21 +36,31 @@ protected[actors] final class CellActor(mxActor: MatrixActor,
                 ) extends Actor{
 
   /*
+  The purpose of the link is that all CellActor objects will crash if their MatrixActor
+  crashes. That way we save resources.
+  */
+  link(mxActor)
+
+  /*
   * The default value of the indexes constant coordinate. Only one of the both coordinates
   * can be constant at the time.
   */
   private var constantCoordinate = -1
+  /**
+   *
+   */
+  private var loopPositionStart = 0
+  private var loopPositionCurrent = 0
   /*
   * The sub matrix. It actually has the same size as the main matrix stored in
   * the master object (MatrixActor.scala). The difference is that it's computation
   * uniquely uni directional.
   */
   private var matrix = Array(Array(Option(new Double())))
-  /*
-  * This attribute defines whether or not the slave is free.
-  */
-  private var _isFree = true
-
+  /**
+   * Used in the "exceptionhandler" method.
+   */
+  private var firstException = true
 
   /**
    * This method returns a suitable Index (Idx) depending on the object's dependency case.
@@ -115,22 +127,6 @@ protected[actors] final class CellActor(mxActor: MatrixActor,
 
 
   /**
-   * Default sleep period = 10 millisecond
-    */
-  private def sleep = sleep(10)
-
-
-  /**
-   * This method forces the actor to sleep for a while.
-   * @param period The period to sleep in millisecond
-   */
-  private def sleep(period: Int){
-    val target = System.currentTimeMillis + period
-    while(System.currentTimeMillis < target){}//simply stall
-  }
-
-
-  /**
    * This method sends (and forgets) a message to the master (MatrixActor.scala)
    * requesting it to store the newly computed value in the main matrix.
    *
@@ -143,23 +139,37 @@ protected[actors] final class CellActor(mxActor: MatrixActor,
 
 
   /**
-   * @see The "_free" attribute.
-   * @return a Boolean value.
+   * Default sleep period = 10 millisecond
+    */
+  private def sleep = sleep(10)
+  /**
+   * This method forces the actor to sleep for a while.
+   * @param period The period to sleep in millisecond
    */
-  def isFree: Boolean = _isFree
+  private def sleep(period: Int){
+    val target = System.currentTimeMillis + period
+    while(System.currentTimeMillis < target){}//simply stall
+  }
+
+
+  /**
+   * This methods handles all the exceptions that might cause a CellActor object to crash.
+   * So far it simple informs its MatrixActor object about the crash and sends it the current
+   * pointers.
+   * @return
+   */
+  override def exceptionHandler ={//TODO think about e.getMessage
+    case e: Exception => mxActor ! msgException(constantCoordinate, loopPositionCurrent)
+  }
 
 
   override def act{
-    for (i <- 0 until matrixLength)
+    for (i <- loopPositionStart until matrixLength){
+      loopPositionCurrent = i
       matrix = calcMatrixIndexValue(matrix, getIdx(i), parsePrevValues, sendMsgSaveNewValue)
-
-    //the computation of the values is done
-    _isFree = true
-    mxActor ! Messages.symbol(1) // notify the master (matrix actor)
-
-    react{
-      case 'Die =>
     }
+    //the computation of the values is done, notify the master (matrix actor) and forget (die)
+    mxActor !? Messages.symbol(1)
   }
 
 
@@ -167,12 +177,13 @@ protected[actors] final class CellActor(mxActor: MatrixActor,
    * This method takes care of the preliminary settings and starts the slave (this actor).
    *
    * @param mx The current version of the matrix.
-   * @param pos The constant coordinate.
+   * @param pointer1 The constant coordinate.
+   * @param pointer2 The start position of the loop.
    */
-  def start(mx: Array[Array[Option[Double]]], pos: Int){
+  def start(mx: Array[Array[Option[Double]]], pointer1: Int, pointer2: Int){
     matrix = mx
-    constantCoordinate = pos
-    _isFree = false
+    constantCoordinate = pointer1
+    loopPositionStart = pointer2
     super.start()
   }
 

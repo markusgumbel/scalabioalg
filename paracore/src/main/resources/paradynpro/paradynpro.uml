@@ -45,7 +45,7 @@
   </argo>
 <profile>
 </profile>
-<XMI xmi.version = '1.2' xmlns:UML = 'org.omg.xmi.namespace.UML' timestamp = 'Tue Apr 23 07:56:29 CEST 2013'>
+<XMI xmi.version = '1.2' xmlns:UML = 'org.omg.xmi.namespace.UML' timestamp = 'Tue Apr 23 08:23:33 CEST 2013'>
   <XMI.header>    <XMI.documentation>
       <XMI.exporter>ArgoUML (using Netbeans XMI Writer version 1.0)</XMI.exporter>
       <XMI.exporterVersion>0.34(6) revised on $Date: 2010-01-11 22:20:14 +0100 (Mon, 11 Jan 2010) $ </XMI.exporterVersion>
@@ -1355,7 +1355,7 @@
           </UML:TagDefinition.multiplicity>
         </UML:TagDefinition>
         <UML:Comment xmi.id = '-64--88-49-1-13205bfb:13e314cf9b7:-8000:0000000000000B20'
-          name = 'How to read' isSpecification = 'false' body = 'How to read:&#10;- Classes / Object classes&#10;Classes/object classes written in italics&#10;are abstract.&#10;&#10;- Symbols&#10;-- &quot;+&quot; =: public&#10;-- &quot;#&quot; =: protected&#10;-- &quot;-&quot; =: private&#10;-- &quot;&quot; =: default&#10;&#10;- Attributes&#10;-- Attributes with a return date type are&#10;constructor attributes.&#10;Exception: matrix&#10;-- Attributes without a return date type are &#10;attributes initalized within the class/object.&#10;-- Attributes starting with a &quot;METH_&quot; prefix &#10;are mehtod&apos;s attributes. This is commun &#10;in SCALA and MATLAB.&#10;&#10;- Methods //no notes so far&#10;&#10;- Others&#10;-- Attributes / methods starting with an&#10;&quot;OVER_&quot; prefix are overwritten &#10;attributes/methods.'>
+          name = 'How to read' isSpecification = 'false' body = 'How to read:&#10;-----------------&#10;&#10;- Classes / Object classes&#10;Classes/object classes written in italics&#10;are abstract.&#10;&#10;- Symbols&#10;-- &quot;+&quot; =: public&#10;-- &quot;#&quot; =: protected&#10;-- &quot;-&quot; =: private&#10;-- &quot;&quot; =: default&#10;&#10;- Attributes&#10;-- Attributes with a return date type are&#10;constructor attributes.&#10;Exception: matrix&#10;-- Attributes without a return date type are &#10;attributes initalized within the class/object.&#10;-- Attributes starting with a &quot;METH_&quot; prefix &#10;are mehtod&apos;s attributes. This is commun &#10;in SCALA and MATLAB.&#10;&#10;- Methods //no notes so far&#10;&#10;- Others&#10;-- Attributes / methods starting with an&#10;&quot;OVER_&quot; prefix are overwritten &#10;attributes/methods.'>
           <UML:Comment.annotatedElement>
             <UML:Package xmi.idref = '-64--88-49-1-13205bfb:13e314cf9b7:-8000:0000000000000A5F'/>
           </UML:Comment.annotatedElement>
@@ -1372,7 +1372,7 @@
           </UML:TagDefinition.multiplicity>
         </UML:TagDefinition>
         <UML:Comment xmi.id = '-64--88-49-1--211be572:13e33745609:-8000:0000000000000FF5'
-          isSpecification = 'false' body = 'Prospect:&#10;Parallelization while using &#10;threads.'>
+          isSpecification = 'false' body = 'Prospect:&#10;-------------&#10;Parallelization while using &#10;threads.'>
           <UML:Comment.annotatedElement>
             <UML:Package xmi.idref = '-64--88-49-1--211be572:13e33745609:-8000:0000000000000D10'/>
           </UML:Comment.annotatedElement>
@@ -3002,6 +3002,8 @@
       textsize="12"
       justification="Left"
     >How to read:
+-----------------
+
 - Classes / Object classes
 Classes/object classes written in italics
 are abstract.
@@ -4043,7 +4045,7 @@ attributes/methods.</text>
     </path>
   </group>
   <group name="Fig21"
-       description="org.argouml.uml.diagram.static_structure.ui.FigComment[1192, 72, 162, 72]pathVisible=false;stereotypeView=0;"
+       description="org.argouml.uml.diagram.static_structure.ui.FigComment[1192, 72, 168, 80]pathVisible=false;stereotypeView=0;"
        href="-64--88-49-1--211be572:13e33745609:-8000:0000000000000FF5"
        fill="1"
        fillcolor="white"
@@ -4057,8 +4059,8 @@ attributes/methods.</text>
     <rectangle name="Fig21.0"
       x="1192"
       y="72"
-      width="162"
-      height="72"
+      width="168"
+      height="80"
       fill="0"
       fillcolor="white"
       stroke="0"
@@ -4073,14 +4075,14 @@ attributes/methods.</text>
     >
       <moveto x="1192"
               y="72" />
-      <lineto x="1343"
+      <lineto x="1349"
               y="72" />
-      <lineto x="1353"
+      <lineto x="1359"
               y="82" />
-      <lineto x="1353"
-              y="143" />
+      <lineto x="1359"
+              y="151" />
       <lineto x="1192"
-              y="143" />
+              y="151" />
       <lineto x="1192"
               y="72" />
     </path>
@@ -4091,17 +4093,17 @@ attributes/methods.</text>
       stroke="1"
       strokecolor="black"
     >
-      <moveto x="1343"
+      <moveto x="1349"
               y="72" />
-      <lineto x="1353"
+      <lineto x="1359"
               y="82" />
-      <lineto x="1343"
+      <lineto x="1349"
               y="82" />
-      <lineto x="1343"
+      <lineto x="1349"
               y="72" />
     </path>
     <group name="Fig21.3"
-         description="org.argouml.uml.diagram.ui.FigStereotypesGroup[1194, 74, 148, 0]"
+         description="org.argouml.uml.diagram.ui.FigStereotypesGroup[1194, 74, 154, 0]"
          href="-64--88-49-1--211be572:13e33745609:-8000:0000000000000FF5"
          fill="0"
          fillcolor="white"
@@ -4115,7 +4117,7 @@ attributes/methods.</text>
       <rectangle name="Fig21.3.0"
         x="1194"
         y="74"
-        width="148"
+        width="154"
         height="0"
         fill="0"
         fillcolor="white"
@@ -4126,8 +4128,8 @@ attributes/methods.</text>
     <text name="Fig21.4"
       x="1194"
       y="74"
-      width="148"
-      height="68"
+      width="154"
+      height="76"
       fill="0"
       fillcolor="white"
       stroke="0"
@@ -4139,6 +4141,7 @@ attributes/methods.</text>
       textsize="12"
       justification="Left"
     >Prospect:
+-------------
 Parallelization while using 
 threads.</text>
   </group>
@@ -4323,8 +4326,8 @@ threads.</text>
                         classname="org.argouml.uml.diagram.ui.PathItemPlacement"
                         figclassname="org.argouml.uml.diagram.ui.FigAssociationEndAnnotation"
                         ownerhref="-64--88-49-1--211be572:13e33745609:-8000:0000000000000FFE"
-                        angle="132.0"
-                        offset="413" />
+                        angle="114.99999999999999"
+                        offset="21" />
     </private>
     <path name="Fig25.0"
       description="org.argouml.gefext.ArgoFigPoly"

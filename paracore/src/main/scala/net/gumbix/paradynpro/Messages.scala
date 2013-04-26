@@ -1,6 +1,7 @@
 package net.gumbix.paradynpro
 
 import net.gumbix.dynpro.Idx
+import scala.actors.Actor
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -15,7 +16,8 @@ protected[paradynpro] object Messages {
   val symbol = Array(
     'NotTotallyComputedYet,
     'CellActorComputationDone,
-    'MatrixTotallyComputed)
+    'MatrixTotallyComputed,
+    'Die)
 }
 
 
@@ -23,3 +25,5 @@ protected[paradynpro] object Messages {
 protected[paradynpro] case class msgGetValues(missingValIndexes: Array[Idx])
 protected[paradynpro] case class msgAckGetValues(values: Array[Double])
 protected[paradynpro] case class msgUpdateMatrix(idx: Idx, newValue: Double)
+protected[paradynpro] case class msgCompute(mx: Array[Array[Option[Double]]], pointer: Int)
+protected[paradynpro] case class msgException(pointer1: Int, pointer2: Int)

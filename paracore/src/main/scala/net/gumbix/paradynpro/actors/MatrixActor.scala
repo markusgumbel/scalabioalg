@@ -33,13 +33,45 @@ protected[paradynpro] final class MatrixActor(
                           => Array[Array[Option[Double]]]
                  ) extends Actor with IMatrixComputer{
 
+  trapExit = true; //receive all the exceptions from the cellActors in from of messages
+  /*
+  The matrix iterator distinguishes the submatrices by using a pointer "pointer".
+  Each CellActor will receive a unique part of the original matrix based on the pointer's location.
+  */
+  private var pointer = -1
+
+  /*
+  Use the following attributes with extreme caution.
+  They are set in the "startCellActors" Methods and shouldn't be set again.
+   */
+  private var roundsAmount= 0 // Amount of submatrices
+  private var realCellActorAmount = 0 // The real amount of CellActors.
+  // It depends on the size of the submatrices and the "cellActorAmount" attribute
+  private var cellActorMatrixLength = 0
+  private var computingCellActorAmount = 0 //amount of CellActors still alive
+
+
+  /**
+   * This method creates and starts one CellActor.
+   * @param pointer1 The row/column from the original matrix considered as the submatrix that
+   *                 the new CellActor will compute.
+   * @param pointer2 The start position in the submatrix.
+   */
+  private def startNewCellActor(pointer1: Int, pointer2: Int){
+    val cellActor = new CellActor(this, initValue, cellActorMatrixLength, dependencyCase, calcMatrixIndexValue)
+    link(cellActor)
+    //start a row or column computation with the current version of the matrix.
+    cellActor.start(mx, pointer1, pointer2)
+  }
+  private def startNewCellActor(pointer: Int) = startNewCellActor(pointer, 0)
+
 
   /**
    * This method takes care of starting and keeping all the slaves alive (CellActor.scala).
    */
   private def startCellActors{
     //get the suitable dimensions for the cell actors
-    val (roundsAmount, cellActorMatrixLength) = dependencyCase match {
+    (roundsAmount, cellActorMatrixLength) = dependencyCase match {
       case LEFT_UPLEFT_UP => (mx.length, mx(0).length)
       case UPLEFT_UP_UPRIGHT => (mx(0).length, mx.length)
       case _ => (0,0)
@@ -49,61 +81,78 @@ protected[paradynpro] final class MatrixActor(
       */
     }
 
-    //start all the cell actors
-    var cellActor: CellActor = null //default slave (CellActor.scala)
-    var cellActorMap: Map[Int, CellActor] = Map() //empty map
-
     //TODO check if my optimization is flawless
-    /*
-    * Once the amount of rounds found, the loop creates, if necessary
-    * (depending on the allowed amount) keeps the slaves alive (CellActor.scala)
-    * and start them.
-    */
-    for(i <- 0 until roundsAmount){
-      if (cellActorAmount < 1 || i < cellActorAmount){
-        cellActor = new CellActor(this, initValue, cellActorMatrixLength, dependencyCase, calcMatrixIndexValue)
-        cellActorMap += (i -> cellActor)
-      }else{
-        var cellActorIsFound = false
-        var j = 0
-        // the loop will run until a free cell actor is found.
-        while(!cellActorIsFound) if(j == cellActorMap.size){
-          j = -1
-        }else if(cellActorMap.get(j).get.isFree){
-          cellActor = cellActorMap.get(j).get
-          cellActorIsFound = true
-        }else j = j+1
-      }
+    realCellActorAmount = {
+      if(cellActorAmount < 1 || cellActorAmount > roundsAmount) roundsAmount
+      else cellActorAmount
+    }
 
-      //start a row or column computation with the current version of the matrix.
-      cellActor.start(mx, i)
+    var i=0
+    while(i < realCellActorAmount){//the for loop doesn't work because of the last statement
+      if(i > pointer){
+        pointer = i //update the pointer
+        computingCellActorAmount = computingCellActorAmount + 1 //update
+        startNewCellActor(i)
+        /*
+        WARNING: do not replace "i" by "pointer", because the pointer attribute is updated concurrently
+        by this and the "act" method.
+         */
+        //TODO wait
+      }else i = pointer
+
+      i = i+1
     }
 
   }
 
 
   override def act{
-    react{
-      case msgGetValues(missingValIndexes) =>
-        val _values = for(idx <- missingValIndexes) yield mx(idx.i)(idx.j)
-        /*
-        initValue can't be safely used because the initial value could occur in another cell,
-        in addition either way the loop has to be used @ least twice
-        => the current structure.
+    var exitSymbol = 'empty
+
+    loopWhile(exitSymbol != Messages.symbol(2)){
+      react{
+        case msgGetValues(missingValIndexes) =>
+          val _values = for(idx <- missingValIndexes) yield mx(idx.i)(idx.j)
+          /*
+          initValue can't be safely used because the initial value could occur in another cell,
+          in addition either way the loop has to be used @ least twice
+          => the current structure.
+           */
+          val msg = if(_values.contains(None)) Messages.symbol(0) //'NotTotallyComputedYet
+            else{
+              val values = for(_v <- _values) yield _v match{ case Some(_val) => _val }
+              msgAckGetValues(values)
+            }
+          sender ! msg
+
+        case msgUpdateMatrix(idx, newValue) => mx(idx.i)(idx.j) = Some(newValue)
+
+        case msgException(pointer1, pointer2) => startNewCellActor(pointer1, pointer2)
+
+        case 'CellActorComputationDone =>
+          pointer = pointer + 1
+          val tempPointer = pointer
+          /*
+          WARNING: do not replace "tempPointer" by "pointer", because the pointer attribute
+          is updated concurrently by this and the "startCellActors" method.
          */
-        val msg = if(_values.contains(None)) Messages.symbol(0)
-          else{
-            val values = for(_v <- _values) yield _v match{ case Some(_val) => _val }
-            msgAckGetValues(values)
+          val msg = if (tempPointer < roundsAmount)
+            startNewCellActor(tempPointer)
+          else
+            computingCellActorAmount = computingCellActorAmount - 1
+            //One CellActor just died and no new one will be started at his place
+
+          /*
+          If the !mx.contains(None)-condition becomes a problem (i'm thinking about algorithms
+          such as the local alignment), it can easily be removed.
+          It is in fact simple security measurement. The first should work faultlessly.
+           */
+          if(computingCellActorAmount == 0 && !mx.contains(None)){
+            exitSymbol = Messages.symbol(2)
+            this ! exitSymbol //'MatrixTotallyComputed
           }
-        sender ! msg
 
-      case msgUpdateMatrix(idx, newValue) =>
-        mx(idx.i)(idx.j) = Some(newValue)
-
-      case 'CellActorComputationDone =>
-
-      case 'Die =>
+      }
     }
   }
 
@@ -112,9 +161,9 @@ protected[paradynpro] final class MatrixActor(
    * @see IMatrixComputer
    */
   override def computeMatrix: Array[Array[Option[Double]]] = {
-    startCellActors // create and start all the necessary cell actors (slaves)
     start // start the matrix actor itself (master)
-    wait // wait while all the values of the matrix (mx) are being computed
+    startCellActors // create and start all the necessary cell actors (slaves)
+    //wait // wait while all the values of the matrix (mx) are being computed
     react{
       //once all the values are computed, return the matrix
       case 'MatrixTotallyComputed => mx
