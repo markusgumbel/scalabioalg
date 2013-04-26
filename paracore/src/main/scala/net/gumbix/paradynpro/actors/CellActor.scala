@@ -1,11 +1,10 @@
 package net.gumbix.paradynpro.actors
 
 import scala.actors.Actor
-import net.gumbix.dynpro.Idx
 import net.gumbix.paradynpro.DependencyCase._
 import net.gumbix.paradynpro._
 import net.gumbix.dynpro.Idx
-import net.gumbix.paradynpro.DependencyCase.DependencyCase
+import Thread.sleep
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -30,6 +29,7 @@ import net.gumbix.paradynpro.DependencyCase.DependencyCase
 protected[actors] final class CellActor(mxActor: MatrixActor,
                 initValue: Double,
                 matrixLength: Int, dependencyCase: DependencyCase,
+                sleepPeriod: Int,
                 calcMatrixIndexValue:(Array[Array[Option[Double]]], Idx,
                                       (Array[Idx], Array[Double]) => Array[Double], (Idx, Double) => Unit)
                     => Array[Array[Option[Double]]]
@@ -46,11 +46,14 @@ protected[actors] final class CellActor(mxActor: MatrixActor,
   * can be constant at the time.
   */
   private var constantCoordinate = -1
-  /**
-   *
-   */
+
+  //The loop pointer
   private var loopPositionStart = 0
   private var loopPositionCurrent = 0
+
+  //Default sleep period = 10 iterations
+  private val sleep = sleep(sleepPeriod)
+
   /*
   * The sub matrix. It actually has the same size as the main matrix stored in
   * the master object (MatrixActor.scala). The difference is that it's computation
@@ -72,7 +75,7 @@ protected[actors] final class CellActor(mxActor: MatrixActor,
    */
   private def getIdx(variableCoordinate: Int): Idx = {
     dependencyCase match{
-      case LEFT_UPLEFT_UP => new Idx(variableCoordinate, constantCoordinate)
+      case LEFT_UPLEFT_UP_UPRIGHT => new Idx(variableCoordinate, constantCoordinate)
       case UPLEFT_UP_UPRIGHT => new Idx(constantCoordinate, variableCoordinate)
     }
   }
@@ -111,7 +114,7 @@ protected[actors] final class CellActor(mxActor: MatrixActor,
 
     if(!missingValIndexes.isEmpty){
       var isComputed = false
-      while(!isComputed){
+      loopWhile(!isComputed){
         mxActor !? msgGetValues(missingValIndexes.toArray)
         prevValues = react{
           case 'NotTotallyComputedYet =>
@@ -135,20 +138,6 @@ protected[actors] final class CellActor(mxActor: MatrixActor,
    */
   private def sendMsgSaveNewValue(idx: Idx, newValue: Double){
     mxActor ! msgUpdateMatrix(idx, newValue)
-  }
-
-
-  /**
-   * Default sleep period = 10 millisecond
-    */
-  private def sleep = sleep(10)
-  /**
-   * This method forces the actor to sleep for a while.
-   * @param period The period to sleep in millisecond
-   */
-  private def sleep(period: Int){
-    val target = System.currentTimeMillis + period
-    while(System.currentTimeMillis < target){}//simply stall
   }
 
 

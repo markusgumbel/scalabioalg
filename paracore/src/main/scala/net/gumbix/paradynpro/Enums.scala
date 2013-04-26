@@ -12,9 +12,9 @@ package net.gumbix.paradynpro
 protected[paradynpro] object DependencyCase extends Enumeration{
   type DependencyCase = Value
 
-  val LEFT_UPLEFT_UP = Value(1)
+  val LEFT_UPLEFT_UP_UPRIGHT = Value(1)
   val UPLEFT_UP_UPRIGHT = Value(2)
-  val LEFT_UPLEFT_UP_UPRIGHT = Value(3)
+  val NOPARA = Value(3)
 
   //the first 2 dependency cases allow the algorithm to be parallelized
 }

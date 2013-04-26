@@ -13,13 +13,22 @@ import actors.MatrixActor
 import DependencyCase._
 import ParaType._
 
-abstract class DynPro[Decision](paraType: ParaType, dependencyCase: DependencyCase) extends net.gumbix.dynpro.DynPro {
+abstract class DynPro[Decision] extends net.gumbix.dynpro.DynPro {
 
+  //TO OVERRIDE IF NECESSARY
+  val paraType = ACTOR
+  val dependencyCase = LEFT_UPLEFT_UP_UPRIGHT
+  // cellActorAmount < 1 => realCellActorAmount = amount of submatrices
   val cellActorAmount = 0
+  /*
+  period (in milliseconds) that a CellActor has to wait if all values it is dependant from
+  haven't been computed yet.
+  */
+  val waitPeriod = 10
 
 
   /**
-   *
+   * @see net.gumbix.dynpro.DynPro.matrix
    */
   override lazy val matrix: Array[Array[Option[Double]]] = {
     val mx: Array[Array[Option[Double]]] = Array.ofDim(n, m)
@@ -28,9 +37,9 @@ abstract class DynPro[Decision](paraType: ParaType, dependencyCase: DependencyCa
     }
 
     dependencyCase match {
-      case LEFT_UPLEFT_UP | UPLEFT_UP_UPRIGHT =>
-        ParaWrapper.computeMatrix(paraType, mx, initValues(0), dependencyCase, cellActorAmount, calcMatrixIndexValue)
-      case LEFT_UPLEFT_UP_UPRIGHT | none => super.matrix
+      case LEFT_UPLEFT_UP_UPRIGHT | UPLEFT_UP_UPRIGHT =>
+        ParaWrapper.computeMatrix(paraType, mx, initValues(0), dependencyCase, waitPeriod, cellActorAmount, calcMatrixIndexValue)
+      case _ => super.matrix
 
     }
   }

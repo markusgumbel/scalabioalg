@@ -27,7 +27,7 @@ import net.gumbix.paradynpro.DependencyCase._
  */
 protected[paradynpro] final class MatrixActor(
                         mx: Array[Array[Option[Double]]], initValue: Double,
-                        dependencyCase: DependencyCase, cellActorAmount: Int,
+                        dependencyCase: DependencyCase, waitPeriod: Int, cellActorAmount: Int,
                         calcMatrixIndexValue:(Array[Array[Option[Double]]], Idx,
                           (Array[Idx], Array[Double]) => Array[Double], (Idx, Double) => Unit)
                           => Array[Array[Option[Double]]]
@@ -58,7 +58,7 @@ protected[paradynpro] final class MatrixActor(
    * @param pointer2 The start position in the submatrix.
    */
   private def startNewCellActor(pointer1: Int, pointer2: Int){
-    val cellActor = new CellActor(this, initValue, cellActorMatrixLength, dependencyCase, calcMatrixIndexValue)
+    val cellActor = new CellActor(this, initValue, cellActorMatrixLength, dependencyCase, waitPeriod, calcMatrixIndexValue)
     link(cellActor)
     //start a row or column computation with the current version of the matrix.
     cellActor.start(mx, pointer1, pointer2)
@@ -70,11 +70,10 @@ protected[paradynpro] final class MatrixActor(
    * This method takes care of starting and keeping all the slaves alive (CellActor.scala).
    */
   private def startCellActors{
-    //get the suitable dimensions for the cell actors
+    //get the suitable dimensions for the cell actors. It can only be one of the following 2 options.
     (roundsAmount, cellActorMatrixLength) = dependencyCase match {
-      case LEFT_UPLEFT_UP => (mx.length, mx(0).length)
+      case LEFT_UPLEFT_UP_UPRIGHT => (mx.length, mx(0).length)
       case UPLEFT_UP_UPRIGHT => (mx(0).length, mx.length)
-      case _ => (0,0)
       /*
       * mx.length =: maximal number of cells in a column
       * mx(0).length =: maximal number of cells in a row
@@ -82,10 +81,9 @@ protected[paradynpro] final class MatrixActor(
     }
 
     //TODO check if my optimization is flawless
-    realCellActorAmount = {
+    realCellActorAmount =
       if(cellActorAmount < 1 || cellActorAmount > roundsAmount) roundsAmount
       else cellActorAmount
-    }
 
     var i=0
     while(i < realCellActorAmount){//the for loop doesn't work because of the last statement
@@ -97,7 +95,7 @@ protected[paradynpro] final class MatrixActor(
         WARNING: do not replace "i" by "pointer", because the pointer attribute is updated concurrently
         by this and the "act" method.
          */
-        //TODO wait
+        //TODO think about wait
       }else i = pointer
 
       i = i+1

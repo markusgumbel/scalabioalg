@@ -34,6 +34,7 @@ protected[paradynpro] object ParaWrapper {
                     mx: Array[Array[Option[Double]]],
                     initValue: Double,
                     dependencyCase: DependencyCase,
+                    waitPeriod: Int,
                     cellActorAmount: Int,
                     calcMatrixIndexValue:(Array[Array[Option[Double]]], Idx,
                       (Array[Idx], Array[Double]) => Array[Double], (Idx, Double) => Unit)
@@ -41,9 +42,9 @@ protected[paradynpro] object ParaWrapper {
 
     val para: IMatrixComputer = paraType match {
       case ACTOR =>
-        new MatrixActor(mx, initValue, dependencyCase, cellActorAmount, calcMatrixIndexValue)
+        new MatrixActor(mx, initValue, dependencyCase, waitPeriod, cellActorAmount, calcMatrixIndexValue)
       case THREAD =>
-        new MatrixThread(mx, initValue, dependencyCase, cellActorAmount, calcMatrixIndexValue)
+        new MatrixThread(mx, initValue, dependencyCase, waitPeriod, cellActorAmount, calcMatrixIndexValue)
     }
     para.computeMatrix
   }

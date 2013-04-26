@@ -15,7 +15,7 @@ import net.gumbix.paradynpro.DependencyCase._
  */
 
 final class MatrixThread(mx: Array[Array[Option[Double]]], initValue: Double,
-                         dep: DependencyCase, cellActorAmount: Int,
+                         dep: DependencyCase, sleepPeriod: Int, cellActorAmount: Int,
                          calcMatrixIndexValue:(Array[Array[Option[Double]]], Idx,
                           (Array[Idx], Array[Double]) => Array[Double], (Idx, Double) => Unit)
                           => Array[Array[Option[Double]]]
