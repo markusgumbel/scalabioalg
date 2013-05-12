@@ -1,9 +1,9 @@
-package net.gumbix.paradynpro.threads
+package net.gumbix.dynpro.concurrency.threads
 
 import scala.actors.Actor
 import net.gumbix.dynpro.Idx
-import net.gumbix.paradynpro.IMatrixComputer
-import net.gumbix.paradynpro.DependencyCase._
+import net.gumbix.dynpro.concurrency._
+import DependencyCase._
 
 /**
  * An algorithm for parallel dynamic programming. It uses internally a two-dimensional
@@ -14,7 +14,8 @@ import net.gumbix.paradynpro.DependencyCase._
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 
-final class MatrixThread(mx: Array[Array[Option[Double]]], initValue: Double,
+protected[concurrency] final class MatrixThread(mx: Array[Array[Option[Double]]], initValue: Double,
+                         subMatrixAmount: Int, cellActorMatrixLength: Int,
                          dep: DependencyCase, sleepPeriod: Int, cellActorAmount: Int,
                          calcMatrixIndexValue:(Array[Array[Option[Double]]], Idx,
                           (Array[Idx], Array[Double]) => Array[Double], (Idx, Double) => Unit)
@@ -27,6 +28,9 @@ final class MatrixThread(mx: Array[Array[Option[Double]]], initValue: Double,
   }
 
 
+  /**
+   * @see concurrency.IMatrixComputer
+   */
   override def computeMatrix: Array[Array[Option[Double]]] = Array()
 
 }

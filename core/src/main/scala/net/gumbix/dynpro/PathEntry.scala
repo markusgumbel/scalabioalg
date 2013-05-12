@@ -23,6 +23,8 @@ class PathEntry[Decision](
         val value: Double,
         val currCell: Idx,
         val prevCell: Array[Idx]) {
+
+
   override def toString = {
     val prev = prevCell match {
       case Array() => "none"

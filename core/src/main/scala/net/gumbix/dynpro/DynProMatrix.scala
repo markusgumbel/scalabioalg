@@ -19,6 +19,7 @@ package net.gumbix.dynpro
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 trait DynProMatrix {
+
   /**
    * The number of rows of the matrix.
    */
@@ -34,4 +35,9 @@ trait DynProMatrix {
    * A cell may be empty (=None).
    */
   val matrix: Array[Array[Option[Double]]]
+
+
+
+
+
 }

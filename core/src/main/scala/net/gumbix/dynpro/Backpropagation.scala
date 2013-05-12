@@ -48,6 +48,8 @@ trait Backpropagation[Decision] extends DynProMatrix {
     case _ => throw new RuntimeException("Illegal position.")
   }
 
+
+  //TODO concurrently look for the max index
   lazy val maxIdx = {
     var max = java.lang.Double.NEGATIVE_INFINITY
     var maxIdx = Idx(0, 0)

@@ -132,7 +132,7 @@ class Alignment(val s1: String, val s2: String,
   = alignedStrings(solution)
 
   /**
-   * @param solution A possible solution for the alignment.
+   * @param solution2 A possible solution for the alignment.
    * @return The aligned string based on on the given solution.
    */
   def alignedStrings(solution2: List[PathEntry[AlignmentStep]]) = {
