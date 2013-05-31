@@ -16,12 +16,12 @@ Copyright 2011 the original author or authors.
 package net.gumbix.dynpro
 
 import collection.mutable.ListBuffer
-import math.abs
-import net.gumbix.dynpro.concurrency
-import concurrency.{Concurrency}
-import net.gumbix.dynpro.concurrency.DependencyCase._
-import net.gumbix.dynpro.concurrency.ConcurrencyMode._
+import math.{abs, min, max}
+import net.gumbix.dynpro.concurrency.{Stage, Debugger, Concurrency}
+import net.gumbix.dynpro.concurrency.ConClass._
+import net.gumbix.dynpro.concurrency.ConMode._
 import scala.Some
+import Stage.Stage
 
 /**
  * Convenient class for a two-dimensional index pair (i, j).
@@ -29,31 +29,80 @@ import scala.Some
  */
 case class Idx(i: Int, j: Int) {
   def +(o: Idx) = Idx(i + o.i, j + o.j)
-  override def toString = "(" + i + ", " + j + ")"
+  def -(o: Idx) = Idx(i - o.i, j - o.j)
 
-  //required to simplify the concurrency - start
   def +(z: Int) = Idx(i + z, j + z)
-  def +(zi: Int, zj: Int) = Idx(i + zi, j + zj)
   def -(z: Int) = Idx(i - z, j - z)
+
+  def +(zi: Int, zj: Int) = Idx(i + zi, j + zj)
   def -(zi: Int, zj: Int) = Idx(i - zi, j - zj)
 
   def ==(o: Idx) = (i == o.i && j == o.j)
-  //required to simplify the concurrency - end
 
+  val MIN = min(i, j)
+  val MAX = max(i, j)
+
+  override def toString = "(" + i + ", " + j + ")"
 }
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
- * matrix to store the previous results. 
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+ * matrix to store the previous results.
+ *
+ * Current DynPro's structure:
+ * The dynpro's implementation of the dynamic programming algorithm is proceeded
+ * in 4 stages. Each of this stages can be computed sequentially or concurrently.
+ * - Stage i: the creation of an empty two-dimensional matrix.
+ * - Stage ii: the evaluation of the cells within this matrix.
+ *     This can be done either per row-wise or column-wise.
+ * - Stage iii: the conversion of the values into a values interpretable by "Matlab".
+ * - Stage iv: the back tracking of the correct path.
+ *
+ * The computation modes are the following:
+ * - NO CONCURRENCY =: 100% sequential
+ * - NO DEPENDENCY =: stage ii is sequential , the rest concurrent
+ *    stage-wise 25% sequential
+ * - CONCURRENCY =: 100% concurrent
+ *
+ * @author Markus Gumbel (m.gumbel@hs-mannheim.de), Patrick Meppe (tapmeppe@gmail.com)
  */
 abstract class DynPro[Decision] extends DynProBasic{
 
   /********************************************************
-  Abstract attributes and methods - START
+  concurrency mode setting - START
   ********************************************************/
-  //default configuration, OVERRIDE IF NECESSARY
-  val con = new Concurrency[Decision](NOT_CONCURRENT)
+  private val minRange = 10
+
+  private var timeMap: Map[Stage, Long] = Map()
+  protected def getRecordedTimes = timeMap
+
+  protected final def setCon(dep: ConClass, mode: ConMode): Concurrency[Decision] =
+    setCon(dep, mode, 0, 0, false)
+
+  protected final def setCon(dep: ConClass, mode: ConMode, recordTime: Boolean): Concurrency[Decision] =
+    setCon(dep, mode, 0, 0, recordTime)
+
+  protected final def setCon(dep: ConClass, mode: ConMode, _mxRange: Int, solRange: Int, recordTime: Boolean)
+  : Concurrency[Decision] = {
+    val mxRange = if(_mxRange < minRange || m - _mxRange < minRange) m else _mxRange
+
+    new Concurrency[Decision](dep, mode, mxRange, solRange, recordTime)
+  }
+
+
+  //default setting =: sequential mode, OVERRIDE IF NECESSARY
+  //protected val con: Concurrency[Decision] = setCon(NO_CON, SEQ, 0)
+
+  //debug setting
+  protected val con: Concurrency[Decision] = setCon(LEFT_UP, EVENT)
+
+  /********************************************************
+  concurrency mode setting - END
+  ********************************************************/
+
+  /********************************************************
+  attributes and methods to override - START
+  ********************************************************/
 
   /**
    * matrixForwardPathBackward = true:
@@ -98,7 +147,7 @@ abstract class DynPro[Decision] extends DynProBasic{
   def initValues: Array[Double] = Array(0.0)
 
   /********************************************************
-  Abstract attributes and methods - END
+  attributes and methods to override - END
   ********************************************************/
 
 
@@ -114,11 +163,14 @@ abstract class DynPro[Decision] extends DynProBasic{
     problem. Many versions go from top to bottom and left to right.
     However, any other order may also work. */
 
-    /* create an empty n*m matrix. Value{i,j} =: None
+    /*
+    STAGE i of iv
+    create an empty n*m matrix. Value{i,j} =: None
     n = mx.length
     m = mx(0).length */
-    var mx = con.dep match {
-      case NOT_CONCURRENT =>
+    val empStart = System.nanoTime
+    var mx = con.clazz match {
+      case NO_CON =>
         val _mx: Array[Array[Option[Double]]] = Array.ofDim(n, m)
         for (i <- 0 until n; j <- 0 until m) {
           _mx(i)(j) = None
@@ -126,56 +178,90 @@ abstract class DynPro[Decision] extends DynProBasic{
         _mx
       case _ => con.emptyMatrix(n, m)
     }
+    val empEnd = System.nanoTime
 
     //CAUTION: Do not merge both blocks
 
-    //evaluate the matrix cells sequentially or concurrently
-    con.dep match {
-      case LEFT_UPLEFT_UP_UPRIGHT =>
-        con.computeMatrix(mx, initValues(0), n, m, calcMatrixIndexValue)
+    /*
+    STAGE ii of iv
+    evaluate the matrix cells sequentially or concurrently
+     */
+    val mxStart = System.nanoTime
+    val toReturn = con.clazz match {
+      case NO_CON | NO_DEP | LESS_CON =>
+        /* inner method supporting the "calcCellCost" method */
+        def getPrevValues(prevIndexes: Array[Idx], prevValues: Array[Double]) = prevValues
+        //(Idx, Double) => Unit =: def handleNewValue(idx: Idx, newValue: Double){} //do nothing
 
-      case UPLEFT_UP_UPRIGHT =>
-        con.computeMatrix(mx, initValues(0), m, n, calcMatrixIndexValue)
-
-      case _ => for (k <- 0 until cellsSize)
-          mx = calcMatrixIndexValue(mx, getCellIndex(k), parsePrevValues, handleNewValue)
-
+        for (k <- 0 until cellsSize)
+              mx = calcCellCost(mx, getCellIndex(k), getPrevValues, (Idx, Double) => Unit)
         mx
+
+      case _ => //LEFT_UP | UP
+        con.computeMatrix(mx, initValues(0), calcCellCost)
     }
+    val mxEnd = System.nanoTime
+
+    if(con.recordTime){
+      timeMap += (Stage.empty -> (empEnd - empStart))
+      timeMap += (Stage.matrix -> (mxEnd - mxStart))
+    }
+
+    toReturn
   }
 
 
   /**
    * TODO Q&D hack for matlab
+   * STAGE iii of iv
    * Imporant: lazy, otherwise we get null pointer exceptions.
    */
-  lazy val matlabMatrix: Array[Array[Double]] = con.dep match {
-      case NOT_CONCURRENT =>
+  lazy val matlabMatrix: Array[Array[Double]] = {
+    val start = System.nanoTime
+    val toReturn = con.clazz match {
+      case NO_CON =>
         val mx: Array[Array[Double]] = Array.ofDim(n, m)
         for (i <- 0 until n; j <- 0 until m) {
           mx(i)(j) = matrix(i)(j) match {
             case a: Some[Double] => a.get
-            case _ => 0
+            case _ => 0.0
           }
         }
         mx
 
       case _ => con.convertMatrix(matrix)
     }
+    val end = System.nanoTime
+
+    if(con.recordTime) timeMap += (Stage.matlabMx -> (end - start))
+
+    toReturn
+  }
 
 
   /**
+   * STAGE iv of iv
    * Trace back the path starting from cell (i, j)
    * @param idx
    * @return List of PathEntry
    */
   def solution(idx: Idx): List[PathEntry[Decision]] = {
-    val solution = (con.dep match {
-      //(Idx) => false =: {def break(_idx: Idx) = false}
-      case NOT_CONCURRENT => calculateSolution(idx, (Idx) => false)
+    //(a:Idx, b:Idx) => false =: def break(startIdx: Idx, cIdx: Idx) = false
+    val start = System.nanoTime
+    val solution = (con.clazz match {
+      case LEFT_UP | UP | NO_DEP =>
+        if(con.solRange < minRange || idx.MAX - con.solRange < minRange)
+        //seemly concurrent, in reality sequential when the range hasn't been set adequately
+          getPathList(idx, matrix, (a:Idx, b:Idx) => false)
 
-      case _ => con.calculateSolution(idx, calculateSolution)
+        else con.calculateSolution(idx, matrix, getPathList)
+
+      case _ => //NO_CON | LESS_CON, sequential
+        getPathList(idx, matrix, (a:Idx, b:Idx) => false)
     }).toList
+    val end = System.nanoTime
+
+    if(con.recordTime) timeMap += (Stage.solution -> (end - start))
 
     if (matrixForwardPathBackward) solution.reverse else solution
   }
@@ -194,29 +280,29 @@ abstract class DynPro[Decision] extends DynProBasic{
    * @param break
    * @return
    */
-  private def calculateSolution(idx: Idx,  break:(Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
-    val eps = 0.001
-    val listBuffer = new ListBuffer[PathEntry[Decision]]()
+  private def getPathList(idx: Idx, mx: Array[Array[Option[Double]]],
+                          break:(Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
+    val (eps, listBuffer) = (0.001, new ListBuffer[PathEntry[Decision]]())
+
     /*
     * Inner function.
     * Note: Requires stack size of -Xss10m
     */
-    def calcSI(idx: Idx) {
+    def calcSI(innerIdx: Idx) {
       // Counter for all possible solutions (might be more than 1):
       //var count = 0
       var solutionFound = false //it makes a lil bit more sense this way
-      for (u <- decisions(idx); if !solutionFound) {
-        //TODO 08.05 implement the concept and merge both DynPor's
-        val prevIdx = prevStates(idx, u)
+      for (u <- decisions(innerIdx); if !solutionFound) {
+        val prevIdx = prevStates(innerIdx, u)
         // v is difference of the current value and the previous values
         // when decision u was made:
         val v = prevIdx match {
           // Empty array:
-          case Array() => calcFBack(matrix(idx.i)(idx.j).get, initValues, calcG)
+          case Array() => calcFBack(mx(innerIdx.i)(innerIdx.j).get, initValues, calcG)
           // Non-empty array:
           case indices: Array[Idx] => {
             val args: Array[Double] = for (pidx <- indices) yield {
-              matrix(pidx.i)(pidx.j) match {
+              mx(pidx.i)(pidx.j) match {
                 /*
                case None => throw new RuntimeException("Internal error: " +
                        "Illegal previous state " + pidx + " at " + idx.toString)
@@ -225,18 +311,18 @@ abstract class DynPro[Decision] extends DynProBasic{
                 case Some(value) => value
               }
             }
-            calcFBack(matrix(idx.i)(idx.j).get, args, calcG)
+            calcFBack(mx(innerIdx.i)(innerIdx.j).get, args, calcG)
           }
         }
         // If v (the difference) is the current value then
         // this decision was made. Note: We may get rounding errors,
         // so we use an epsilon. Also, if we have already found a
         // solution we skip any further solutions:
-        if (abs(v - value(idx, u)) < eps) {
-          listBuffer += new PathEntry(u, matrix(idx.i)(idx.j).get, idx, prevIdx)
+        if (abs(v - value(innerIdx, u)) < eps) {
+          listBuffer += new PathEntry(u, mx(innerIdx.i)(innerIdx.j).get, innerIdx, prevIdx)
           //count += 1
           solutionFound = true
-          for (nidx <- prevIdx if !break(idx)) calcSI(nidx)
+          for (nidx <- prevIdx if !break(idx, innerIdx)) calcSI(nidx)
         }
       }
     }
@@ -246,22 +332,17 @@ abstract class DynPro[Decision] extends DynProBasic{
   }
 
 
-
-  private def parsePrevValues(prevIndexes: Array[Idx], prevValues: Array[Double]) = prevValues
-  private def handleNewValue(idx: Idx, newValue: Double){} //do nothing
-
-
   /**
    *
    * @param currentMX
    * @param idx
-   * @param parsePrevValues
+   * @param getPrevValues
    * @param handleNewValue
    * @return
    */
-  private def calcMatrixIndexValue(currentMX: Array[Array[Option[Double]]],
+  private def calcCellCost(currentMX: Array[Array[Option[Double]]],
                                              idx: Idx,
-                                             parsePrevValues:(Array[Idx], Array[Double]) => Array[Double],
+                                             getPrevValues:(Array[Idx], Array[Double]) => Array[Double],
                                              handleNewValue:(Idx, Double) => Unit): Array[Array[Option[Double]]] = {
 
     // Get a list of values (or empty list):
@@ -281,7 +362,7 @@ abstract class DynPro[Decision] extends DynProBasic{
               case Some(value) => value
             }
           }
-          calcF(value(idx, u), parsePrevValues(prevIndexes, prevValues), calcG)
+          calcF(value(idx, u), getPrevValues(prevIndexes, prevValues), calcG)
           //calcF(value(idx, u), prevValues, calcG)
         }
       }
@@ -289,17 +370,17 @@ abstract class DynPro[Decision] extends DynProBasic{
 
 
     // Calculate the new value (min. or max.):
-    val newValue: Double = values match {
+    val newValue: Double = reviseMax(values match {
       case Array() => initValues(0)
       /*a double value, while overriding the initValues method, the dev should keep in mind that
       * the extreme value comes first*/
 
       case _ => values.toList.reduceLeft(extremeFunction(_, _)) //the maximum or min
-    }
+    })
 
     handleNewValue(idx, newValue)
 
-    currentMX(idx.i)(idx.j) = Some(reviseMax(newValue))
+    currentMX(idx.i)(idx.j) = Some(newValue)
     currentMX //return
   }
 

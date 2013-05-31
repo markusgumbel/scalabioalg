@@ -11,87 +11,58 @@ package net.gumbix.dynpro.concurrency
 
 import net.gumbix.dynpro.{PathEntry, Idx}
 import net.gumbix.dynpro.concurrency.threads.MatrixThread
-import net.gumbix.dynpro.concurrency.actors.{SolutionActor, NoDepEmptyMatrixActor, MatrixActor, NoDepMatlabMatrixActor}
-import ConcurrencyMode._
-import DependencyCase._
+import net.gumbix.dynpro.concurrency.actors.{SolutionActor, NoDepEmptyActor, MatrixActor, NoDepMatlabActor}
+import ConMode._
+import ConClass._
 import scala.collection.mutable.ListBuffer
-import net.gumbix.dynpro.concurrency.ConcurrencyMode
 import scala.Array
 
 
 /**
  *
- * @param dep =: dependencyCase.
- *           One of the 3 possible dependency cases.
- * @param mode =: concurrencyMode (EVENT or THREAD)
- * @param period =: matrixSlaveSleepPeriod
- * @param matSlAm =: matrixSlavesAmount
- * @param noDepSlAm =: noDependencySlavesAmount.
- *                 The amount of cell actors allowed to concurrently compute on the matrix "mx".
- * @param solSlAm =: solutionSlavesAmount
+ * @param clazz =: ConClass. One of the 3 possible dependency classes.
+ * @param mode =: ConMode (EVENT or THREAD)
+ * @param recordTime Although this isn't used here. Setting it this way makes
+ *                   the attribute immutable.
+ *
  * @tparam Decision
  */
-protected[dynpro] class Concurrency[Decision](
-    val dep: DependencyCase,
-    mode: ConcurrencyMode,
-    period: Int,
-    matSlAm: Int,
-    noDepSlAm: Int,
-    solSlAm: Int) {
-
-  def this(dep: DependencyCase) =
-    this(dep, ConcurrencyMode.EVENT, 10, 0, 0, 0)
-
-  def this(dep: DependencyCase, mode: ConcurrencyMode) =
-    this(dep, mode, 10, 0, 0, 0)
-
-  def this(dep: DependencyCase, mode: ConcurrencyMode, period: Int) =
-    this(dep, mode, period, 0, 0, 0)
+protected[dynpro] final class Concurrency[Decision](
+    val clazz: ConClass, mode: ConMode,
+    mxRange: Int, val solRange: Int, val recordTime: Boolean) {
 
 
   /**
-   * This method creates a master instance (MatrixActor or MatrixThread) depending on the given
-   * ConcurrencyMode, which then computes the cell values of the given matrix.
-   *
-   * @param mx The matrix used to store all the computed values.
-   * @param initValue The value used @ the beginning of the matrix (default value).
-   * @param subMatrixAmount
-   * @param cellActorMatrixLength
-   * @param calcMatrixIndexValue The method used to compute the value of each cells.
-   * @return
-   */
-  def computeMatrix(mx: Array[Array[Option[Double]]],
-                    initValue: Double,
-                    subMatrixAmount: Int,
-                    cellActorMatrixLength: Int,
-                    calcMatrixIndexValue:(Array[Array[Option[Double]]], Idx,
-                      (Array[Idx], Array[Double]) => Array[Double], (Idx, Double) => Unit)
-                      => Array[Array[Option[Double]]])
-  : Array[Array[Option[Double]]] = mode match {
-    case EVENT =>
-      new MatrixActor(mx, initValue, subMatrixAmount, cellActorMatrixLength,
-        dep, period, matSlAm, calcMatrixIndexValue).computeMatrix
-      asInstanceOf //[Array[Array[Option[Double]]]]
-    case THREAD =>
-      new MatrixThread(mx, initValue, subMatrixAmount, cellActorMatrixLength,
-        dep, period, matSlAm, calcMatrixIndexValue).computeMatrix
-    case _ => mx
-  }
-
-
-  /**
-   *
+   * Test status: OK
    * @param n
    * @param m
    * @return
    */
   def emptyMatrix(n: Int, m: Int): Array[Array[Option[Double]]] = mode match{
-    case EVENT =>
-      new NoDepEmptyMatrixActor(n, m, noDepSlAm).computeMatrix asInstanceOf
+    case EVENT => new NoDepEmptyActor(n, m, mxRange).getMatrix
 
     case THREAD => Array() //for now nothing
+  }
 
-    case _ => Array()
+
+  /**
+   * This method creates a master instance (MatrixActor or MatrixThread) depending on the given
+   * ConMode, which then computes the cell values of the given matrix.
+   *
+   * @param mx The matrix used to store all the computed values.
+   * @param initVal =: initValue The value used @ the beginning of the matrix (default value).
+   * @param calcCellCost The method used to compute the value of each cells.
+   * @return
+   */
+  def computeMatrix(mx: Array[Array[Option[Double]]],
+                    initVal: Double, calcCellCost:(Array[Array[Option[Double]]], Idx,
+                      (Array[Idx], Array[Double]) => Array[Double], (Idx, Double) => Unit)
+                      => Array[Array[Option[Double]]])
+  : Array[Array[Option[Double]]] = mode match {
+    case EVENT => new MatrixActor(mx, initVal, clazz, calcCellCost).computeMatrix
+
+    case THREAD =>
+      new MatrixThread(mx, initVal, clazz, calcCellCost).computeMatrix
   }
 
 
@@ -102,26 +73,46 @@ protected[dynpro] class Concurrency[Decision](
    */
   def convertMatrix(matrix: Array[Array[Option[Double]]]): Array[Array[Double]] = mode match {
     case EVENT =>
-      new NoDepMatlabMatrixActor(matrix, noDepSlAm).computeMatrix asInstanceOf
+      new NoDepMatlabActor(matrix, mxRange).getMatrix
 
     case THREAD => Array() //for now do nothing
-
-    case _ => Array()
   }
 
 
-
-  def calculateSolution(idx: Idx,
-                        calculateSolution:(Idx, (Idx)=> Boolean) => ListBuffer[PathEntry[Decision]])
+  /**
+   *
+   * @param idx
+   * @param matrix
+   * @param getPathList
+   * @return
+   */
+  def calculateSolution(idx: Idx, matrix: Array[Array[Option[Double]]],
+                        getPathList:(Idx, Array[Array[Option[Double]]], (Idx, Idx)=>Boolean) => ListBuffer[PathEntry[Decision]])
   : ListBuffer[PathEntry[Decision]] = mode match{
     case EVENT =>
-      new SolutionActor[Decision](idx, solSlAm, calculateSolution)
-        .computeMatrix asInstanceOf
+      new SolutionActor[Decision](idx, matrix, solRange, getPathList).getSolution
 
     case THREAD => new ListBuffer[PathEntry[Decision]]()//for now do nothing
-
-    case _ => new ListBuffer[PathEntry[Decision]]()
   }
+
+  /**
+   * 28.05.013 -> priority 50 :)
+   * @param method
+   * @param emptyVal
+   * @tparam DataType
+   */
+  private class BackUp[DataType](method: DataType, emptyVal: DataType){
+    def runMethod: DataType = {
+      var (keepLoopAlive, counter, toReturn) = (true, 0, emptyVal)
+      while(keepLoopAlive && counter < 3){
+        toReturn = method
+        if(toReturn == emptyVal) counter += 1
+        else keepLoopAlive = false
+      }
+      toReturn
+    }
+  }
+
 
 }
 

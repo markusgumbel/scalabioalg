@@ -34,7 +34,7 @@ object EditDistanceApp {
     background = new Color(240, 240, 240)
   }
 
-  val items = "wiesengrund" :: "schweinehund" :: Nil
+  val items = "wiesengrund lampe bringen" :: "schweinehund ampel trinken" :: Nil
 
   def main(args: Array[String]) {
 
@@ -48,11 +48,11 @@ object EditDistanceApp {
     val top = new MainFrame {
       preferredSize = new Dimension(700, 500)
       val textFrom = new TextField {
-        text = "wiesengrund"
+        text = "wiesengrund lampe bringen Meier Messer Ziele Straßburg"
         font = Font.decode(Font.MONOSPACED + "-18")
       }
       val textTo = new TextField {
-        text = "schweinehund"
+        text = "schweinehund ampel trinken Maier Metzger Zeile Strassbourg"
         font = Font.decode(Font.MONOSPACED + "-18")
       }
       title = "Edit Distance"
@@ -124,6 +124,7 @@ object EditDistanceApp {
   def calc(s1: String, s2: String) {
     val mode = AlignmentMode.GLOBAL
     object dp extends Alignment(s1, s2, mode) {
+
       override val values =
       Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1)
     }

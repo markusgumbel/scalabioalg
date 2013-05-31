@@ -1,6 +1,43 @@
+/*
+Copyright 2011 the original author or authors.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
 package net.gumbix.dynpro
 
-import scala.collection.mutable.ListBuffer
+/**
+ * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+ */
+trait DynProMatrix {
+
+  /**
+   * The number of rows of the matrix.
+   */
+  def n: Int
+
+  /**
+   * The number of columns of the matrix.
+   */
+  def m: Int
+
+  /**
+   * Matrix containing the accumulated values (costs).
+   * A cell may be empty (=None).
+   */
+  val matrix: Array[Array[Option[Double]]]
+
+}
+
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -10,7 +47,7 @@ import scala.collection.mutable.ListBuffer
  * Time: 8:22 AM
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de), Patrick Meppe (tapmeppe@gmail.com)
  */
-protected [dynpro] abstract class DynProBasic[Decision] extends DynProMatrix{
+abstract class DynProBasic[Decision] extends DynProMatrix{
 
   /********************************************************
   Support attributes and methods (mainly sequential support) - START

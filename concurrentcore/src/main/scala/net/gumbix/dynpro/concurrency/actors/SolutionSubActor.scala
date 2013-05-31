@@ -1,10 +1,9 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import net.gumbix.dynpro.{PathEntry, Idx}
-import scala.actors.Actor
-import scala.actors.Actor._
-import net.gumbix.dynpro.concurrency.{msgInternalDone, Messages, msgSolutionReady}
+import net.gumbix.dynpro.concurrency.{Debugger, Messages, msgSolInterDone, msgSolDone}
 import scala.collection.mutable.ListBuffer
+import scala.actors.Actor
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -15,17 +14,22 @@ import scala.collection.mutable.ListBuffer
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 protected[actors] final class SolutionSubActor[Decision]
-  (solActor: SolutionActor[Decision], mapKey: Int, idxList: ListBuffer[Idx])
+  (solActor: SolutionActor[Decision], mapKey: Int, idx: Idx)
   extends AbsSlaveActor(solActor){
 
-  override def startInternalActors = for(idx <- idxList) yield{
-    add //-> counter += 1
-    val a = actor{
-      react{
-        case Messages.start => this ! msgInternalDone(solActor.calculateSolution(idx))
+  override protected def startInternalActors = for(idx <- solActor.getIdxList(idx)) yield{
+    raiseCounter //-> counter += 1
+    class A(master: Actor) extends Actor{
+      //Anonymous class
+      override def act{
+        react{
+          case Messages.start => master ! msgSolInterDone(solActor.getPathList(idx))
+        }
       }
     }
 
+    val a = new A(this)
+    a.start
     a ! Messages.start
   }
 
@@ -37,15 +41,13 @@ protected[actors] final class SolutionSubActor[Decision]
     startInternalActors
     val pathListsList = ListBuffer[ListBuffer[PathEntry[Decision]]]()
 
-    //def _andThen = solActor ! msgSolutionReady(mapKey, pathListsList)
-
     loopWhile(keepLoopAlive){
       react{
-        case msgInternalDone(pathList) =>
-          pathListsList += (pathList asInstanceOf)
-          subtract //-> counter -= 1
+        case msgSolInterDone(pathList) =>
+          pathListsList += pathList.asInstanceOf[ListBuffer[PathEntry[Decision]]]
+          reduceCounter //-> counter -= 1
       }
-    }andThen( solActor ! msgSolutionReady(mapKey, pathListsList) )
+    }andThen(solActor ! msgSolDone(mapKey, pathListsList))
   }
 
 }

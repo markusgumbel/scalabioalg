@@ -11,7 +11,8 @@ import net.gumbix.dynpro.concurrency.IMaster
  * Time: 11:24 PM
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
-protected[actors] trait AbsMasterActor extends Actor with IMaster{
+protected[actors] trait AbsMasterActor
+  extends Actor with IMaster{
 
   //TO OVERRIDE - START
   /**
@@ -26,31 +27,39 @@ protected[actors] trait AbsMasterActor extends Actor with IMaster{
    */
   protected def actReact
 
+  /**
+   * This isn't an abstract method but should be considered as one.
+   * This way in contrast to the "actReact" method it will be
+   * overridden if only there's a need.
+  */
   protected def loopWhileAndThen{}
 
   /*from concurrency.IMaster
   protected def amPair: AmPair
-  protected def getComputedResult: Any
   protected def startNewSlave(key: Int)
   protected def startNewSlave(key:Int, pos: Int) ##if necessary##
    */
   //TO OVERRIDE - END
 
 
-  override protected def launchMaster = start
+  override final protected def launchMaster = start
 
 
-  override def act{
-    // create and start all the necessary cell actors (slaves)
-    startSlaves
+  override final def act{
+    /*
+    create and start all the necessary slave actors
+    This method is implemented in the IMaster trait.
+    */
+    startSlMods
 
     loopWhile(keepConLoopAlive){
-      actReact
+      actReact //This is an abstract method.
     }andThen(loopWhileAndThen)
+
   }
 
 
-  override def exceptionHandler = {
-    case e: Exception => println(e + "\n")
+  override final def exceptionHandler = {
+    case e: Exception => println(e + "\n\n")
   }
 }

@@ -1,13 +1,9 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import scala.actors.Actor
-import net.gumbix.dynpro.concurrency._
+import net.gumbix.dynpro.concurrency.{Debugger, msgException, msgSolDone}
 import net.gumbix.dynpro.{Idx, PathEntry}
 import scala.collection.mutable.ListBuffer
-import math.{max, min}
-import net.gumbix.dynpro.Idx
-import net.gumbix.dynpro.concurrency.msgException2
-import net.gumbix.dynpro.concurrency.msgSolutionReady
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -21,59 +17,72 @@ import net.gumbix.dynpro.concurrency.msgSolutionReady
 /**
  *
  * @param idx
- * @param solSubActorAm
- * @param calculateSolution
+ * @param matrix
+ * @param getPathList
  * @tparam Decision
  */
-protected[concurrency] class SolutionActor[Decision]
-  (idx: Idx, solSubActorAm: Int,
-   calculateSolution:(Idx, (Idx)=> Boolean) => ListBuffer[PathEntry[Decision]])
+protected[concurrency] final class SolutionActor[Decision]
+  (idx: Idx, matrix: Array[Array[Option[Double]]], range: Int,
+   getPathList:(Idx, Array[Array[Option[Double]]], (Idx, Idx)=> Boolean) => ListBuffer[PathEntry[Decision]])
   extends Actor with AbsMasterActor{
 
-  val pathListsListMap = Map[Int, ListBuffer[ListBuffer[PathEntry[Decision]]]]()
+  private var pathListsListMap = Map[Int, ListBuffer[ListBuffer[PathEntry[Decision]]]]()
 
-  lazy val (pathList, idxListsMap: Map[Int, ListBuffer[Idx]]) =
-    (calculateSolution(idx),
-      //SPLIT the matrix
-      { //Map of all the indices lists
-        val _map = Map[Int, ListBuffer[Idx]]()
-        var (baseIdx, range) = (Idx(-1, -1), intervalSize)
+  private lazy val pinPointIdxMap: Map[Int, Idx] = {
+    //SPLIT the matrix
+    //pin point all the start indexes within the matrix and store them in the map
+    var (map, newRange) = (Map(0 -> idx), range)
 
-        //collect all the start point within the matrix
-        while(range < max(idx.i, idx.j)){
-          val idxList = new ListBuffer[Idx]()
+    while(newRange < idx.MAX){
+      val (zi, zj) =
+        (if(newRange > idx.i) idx.i else newRange, if(newRange > idx.j) idx.j else newRange)
 
-          if(range < min(idx.i, idx.j)){
-            baseIdx = idx - range
-            idxList += baseIdx
-            for(z <- 1 until range + 1){
-              idxList += (baseIdx +(0, z))
-              idxList += (baseIdx +(z, 0))
-            }
-          }else if(range < idx.i){
-            baseIdx = new Idx(idx.i - range, 0)
-            for(z <- 0 until idx.j + 1) idxList += (baseIdx +(0, z))
-          }else if(range < idx.j){
-            baseIdx = new Idx(0, idx.j - range)
-            for(z <- 0 until idx.i + 1) idxList += (baseIdx +(z, 0))
-          }
-
-          _map + ((range/intervalSize) -> idxList)
-          range += intervalSize
-        }
-
-        _map
-      } )
+      //The keys start @ 1 since 0 is already taken.
+      map += (newRange/range) -> (idx - (zi, zj)) //pinPointIdx = idx - ~newRange
+      newRange += range
+    }
+    
+    map
+  }
 
 
   /**
    *
-   * @param currentIdx
+   * @param o
    * @return
    */
-  private def break(currentIdx: Idx): Boolean = {
-    val limitIdx = idx - intervalSize
-    if(currentIdx.i == limitIdx.i || currentIdx.j == limitIdx.j) true
+  protected[actors] def getIdxList(o: Idx): ListBuffer[Idx] = {
+    val idxList = new ListBuffer[Idx]()
+    idxList += o
+
+    if(o.MIN > 0){
+      val loopEnd = 1 + idx.i - o.i
+      for(z <- 1 until loopEnd){
+        idxList += (o +(0, z))
+        idxList += (o +(z, 0))
+      }
+    }else if(o.i > 0){
+      val loopEnd = 1 + idx.j - o.j
+      for(z <- 1 until loopEnd) idxList += (o +(0, z))
+    }else if(o.j > 0){
+      val loopEnd = 1 + idx.i - o.i
+      for(z <- 1 until loopEnd) idxList += (o +(z, 0))
+    }
+    //println(this + "\n\t" + o + "\n\t" + idxList)
+    idxList
+  }
+
+
+  /**
+   *
+   * @param cIdx
+   * @return
+   */
+  private def break(startIdx: Idx, cIdx: Idx): Boolean = {
+    val limIdx = startIdx - cIdx
+
+    if(cIdx.i == 0 || cIdx.j == 0) true
+    else if(limIdx.i == range || limIdx.j == range) true
     else false
   }
 
@@ -81,41 +90,56 @@ protected[concurrency] class SolutionActor[Decision]
   /**
    * @see
    */
-  protected[actor] def calculateSolution(idx: Idx) = calculateSolution(idx, break)
+  protected[actors] def getPathList(idx: Idx): ListBuffer[PathEntry[Decision]] =
+    getPathList(idx, matrix, break)
 
 
 
   override def actReact{
     react{
-      case msgException(key, 0) => restartSlave(key)
+      case msgException(key, 0) => restartSlMod(key)
 
-      case msgSolutionReady(key: Int, pathListBufferLists) =>
+      case msgSolDone(key: Int, pathListsList) =>
         congestionControl
-        pathListsListMap  + (key -> pathListBufferLists)
+        pathListsListMap  +=
+          key -> pathListsList.asInstanceOf[ListBuffer[ListBuffer[PathEntry[Decision]]]]
     }
   }
 
-  override protected def stage = "Path identification"
+  override protected def eTerms = ETerms("Path identification", "Range", "")
 
-  override protected def amPair = AmPair(idxListsMap.size, solSubActorAm)
+  override protected def getPoolSize =
+    PoolSize(
+    pinPointIdxMap.size,
+    {val size = pinPointIdxMap.size
+    size * (1 + (size - 1)*range)}
+    )
 
 
-  override def startNewSlave(key: Int){
-    val solSubActor = new SolutionSubActor[Decision](this, key, idxListsMap(key))
-    link(solSubActor)
-    solSubActor.start
+  override protected def startNewSlMod(key: Int){
+    new SolutionSubActor[Decision](this, key, pinPointIdxMap(key)).start
   }
 
 
-  override def getComputedResult: ListBuffer[PathEntry[Decision]] = {
+  def getSolution: ListBuffer[PathEntry[Decision]] = {
+    preCompute
+
     //MERGE the results
-    for(key <- pathListsListMap .keys.toList.sorted){
-      var break = false //both for-loops can't be merged because of the "break"
-      for(innerList <- pathListsListMap (key) if !break)
-        if(pathList.last.currCell == innerList.head.currCell){//the method "==" is defined in the case class "Idx"
-          pathList ++= innerList.drop(1)//the first element of the "list" must be dropped to avoid a redundancy
-          break = true
-        }
+    //val pathList = calcSol(idx)
+
+    val pathList = new ListBuffer[PathEntry[Decision]]()
+    //sort the keys before the iteration
+    pathListsListMap.keys.toList.sorted
+    for(key <- pathListsListMap.keys){
+      if(key == 0) pathList ++= pathListsListMap(key).head
+      else{
+        var break = false //both for-loops can't be merged because of the "break"
+        for(innerList <- pathListsListMap(key) if !break)
+          if(pathList.last.currCell == innerList.head.currCell){//the method "==" is defined in the case class "Idx"
+            pathList ++= innerList.drop(1)//the first element of the "list" must be dropped to avoid a redundancy
+            break = true
+          }
+      }
     }
 
     pathList
