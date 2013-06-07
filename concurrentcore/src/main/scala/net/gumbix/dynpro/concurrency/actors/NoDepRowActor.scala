@@ -1,7 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import scala.collection.mutable.ListBuffer
-import net.gumbix.dynpro.concurrency._
+import scala.collection.mutable.{ListBuffer, Map}
+import net.gumbix.dynpro.concurrency.{MsgNoDepInterDone, Messages}
 import scala.actors.Actor
 
 /**
@@ -19,8 +19,8 @@ protected[actors] final class NoDepRowActor[MxDT]
 
   override protected def startInternalActors{
     case class LoopPair(loopStart: Int, loopEnd: Int)
-    val loopEnd = mx.length
-    var (pairMap, start, end) = (Map[Int, LoopPair](), 0, 0)
+    val (loopEnd, pairMap) = (mx.length, Map[Int, LoopPair]())
+    var (start, end) = (0, 0)
 
     while(end < loopEnd){
       start = end; end += mxActor.range
@@ -33,24 +33,24 @@ protected[actors] final class NoDepRowActor[MxDT]
     }
 
 
-    for(key <- pairMap.keys){
-      class A(master: Actor) extends Actor{
-        //Anonymous class
+    for(pair <- pairMap){
+      class SubSlAc(slAc: Actor) extends Actor{
+        //sub slave actor
         override def act{
           react{
-            case Messages.start =>
+            case Messages.startsSlAc =>
               val list = new ListBuffer[MxDT]()
-              for(i <- pairMap(key).loopStart until pairMap(key).loopEnd)
+              for(i <- pair._2.loopStart until pair._2.loopEnd)
                 list += mxActor.handleCell(mx(i))
 
-              master ! msgNoDepInterDone[MxDT](key, list)
+              slAc ! MsgNoDepInterDone[MxDT](pair._1, list)
           }
         }
       }
 
-      val a = new A(this)
-      a.start
-      a ! Messages.start
+      val sslac = new SubSlAc(this)
+      sslac.start
+      sslac ! Messages.startsSlAc
     }
 
   }
@@ -65,20 +65,19 @@ protected[actors] final class NoDepRowActor[MxDT]
     val mxListBuffer = new ListBuffer[MxDT]()
     var listMap = Map[Int, ListBuffer[MxDT]]()
 
-    def _andThen{
+    def afterLoopWhile{
       for(key <- listMap.keys.toList.sorted) mxListBuffer ++= listMap(key)
       mxActor.sendMsg(row, mxListBuffer)
-      //mxActor ! msgCompDone(row, mxListBuffer.toArray)
-
+      //exit -> no need @ the moment
     }
 
     loopWhile(keepLoopAlive){
       react{
-        case msgNoDepInterDone(key, list) =>
+        case MsgNoDepInterDone(key, list) =>
           listMap += (key -> list.asInstanceOf[ListBuffer[MxDT]])
           reduceCounter //-> counter -= 1
       }
-    }andThen( _andThen )
+    }andThen(afterLoopWhile)
   }
 
 }

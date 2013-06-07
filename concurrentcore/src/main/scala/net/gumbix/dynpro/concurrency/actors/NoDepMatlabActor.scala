@@ -1,8 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import net.gumbix.dynpro.concurrency.{msgMatVecDone, msgException}
+import net.gumbix.dynpro.concurrency.{MsgMatDone, MsgMatVecDone, MsgException}
 import scala.collection.mutable.ListBuffer
-
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -29,9 +28,9 @@ protected[concurrency] final class NoDepMatlabActor(mx: Array[Array[Option[Doubl
 
   override protected final def actReact{
     react{
-      case msgException(row, 0) => restartSlMod(row)
+      case MsgException(e, row, 0) => handleException(e, row, 0)
 
-      case msgMatVecDone(row, vector) =>
+      case MsgMatVecDone(row, vector) =>
         congestionControl
         matrix(row) = vector.toArray
     }
@@ -39,7 +38,7 @@ protected[concurrency] final class NoDepMatlabActor(mx: Array[Array[Option[Doubl
 
 
   override protected[actors] final def sendMsg(row: Int, list: ListBuffer[Double]){
-    this ! msgMatVecDone(row, list)
+    this ! MsgMatVecDone(row, list)
   }
 
 
@@ -51,9 +50,10 @@ protected[concurrency] final class NoDepMatlabActor(mx: Array[Array[Option[Doubl
   }
 
 
-  override protected[concurrency] final def getMatrix: Array[Array[Double]] = {
-    preCompute
-    matrix
-  }
+  override protected def ackStart: MsgMatDone = MsgMatDone(matrix)
+
+  /*(sender: OutputChannel[Any]){
+    sender ! MsgMatDone(matrix)
+  } */
 
 }

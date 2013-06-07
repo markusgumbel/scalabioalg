@@ -1,6 +1,6 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import net.gumbix.dynpro.concurrency.{msgEmpVecDone, msgException}
+import net.gumbix.dynpro.concurrency.{MsgMxDone, MsgEmpVecDone, MsgException}
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -26,27 +26,28 @@ protected[concurrency] final class NoDepEmptyActor(n: Int, m: Int, range: Int)
   private val matrix: Array[Array[Option[Double]]] = Array.ofDim(n, m)
 
 
-  override protected final def actReact{
+  override protected def actReact{
     react{
-      case msgException(row, 0) => restartSlMod(row)
+      case MsgException(e, row, 0) => handleException(e, row, 0)
 
-      case msgEmpVecDone(row, vector) =>
+      case MsgEmpVecDone(row, vector) =>
         congestionControl
         matrix(row) = vector.toArray
     }
   }
 
 
-  override protected[actors] final def sendMsg(row: Int, list: ListBuffer[Option[Double]]){
-    this ! msgEmpVecDone(row, list)
+  override protected[actors] def sendMsg(row: Int, list: ListBuffer[Option[Double]]){
+    this ! MsgEmpVecDone(row, list)
   }
 
-  override protected[actors] final def handleCell(cell: Option[Double]) = None
+  override protected[actors] def handleCell(cell: Option[Double]) = None
 
 
-  override protected[concurrency] final def getMatrix: Array[Array[Option[Double]]] = {
-    preCompute
-    matrix
-  }
+  override protected def ackStart: MsgMxDone = MsgMxDone(matrix)
 
+  /*(sender: OutputChannel[Any]){
+    print(sender)
+    sender ! MsgMxDone(matrix)
+  } */
 }

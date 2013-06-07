@@ -14,17 +14,24 @@ import scala.collection.mutable.ListBuffer
 protected[concurrency] object Messages {
 //symbol messages
   val compDone = 'MatrixCellActorComputationDone
-  val start = 'startInternalActor
-  val die = 'Die
+  val startsSlAc = 'startSubSlaveActor
+  val start = 'startMasterActor
 }
 
-////All
-protected[concurrency] case class msgException(key: Int, pointer: Int)
+
+////Used in more than one communication
+protected[concurrency] case class MsgException(e: Exception, key: Int, pointer: Int)
+protected[concurrency] case class MsgMxDone(matrix: Array[Array[Option[Double]]])
+protected[concurrency] case class MsgCostPairs(costPairs: ListBuffer[CostPair])
+protected[concurrency] case class MsgRegister(channels: ListBuffer[Int])
+
 
 ////~NoDepActor & NoDepRowActor
-protected[concurrency] case class msgEmpVecDone(row: Int, vector: ListBuffer[Option[Double]])
-protected[concurrency] case class msgMatVecDone(row: Int, vector: ListBuffer[Double])
-protected[concurrency] case class msgNoDepInterDone[MxDT](key: Int, list: ListBuffer[MxDT])
+protected[concurrency] case class MsgEmpVecDone(row: Int, vector: ListBuffer[Option[Double]])
+protected[concurrency] case class MsgMatVecDone(row: Int, vector: ListBuffer[Double])
+protected[concurrency] case class MsgMatDone(matrix: Array[Array[Double]])
+protected[concurrency] case class MsgNoDepInterDone[MxDT](key: Int, list: ListBuffer[MxDT])
+
 
 ////MatrixActor & MatrixVectorActor
 /**
@@ -33,14 +40,14 @@ protected[concurrency] case class msgNoDepInterDone[MxDT](key: Int, list: ListBu
  * @param mValIdxList =: missingValIndexesList
  *                   The index list of cells without values (value =: None).
  */
-protected[concurrency] case class msgGetValues(mValIdxList: ListBuffer[Idx])
+protected[concurrency] case class MsgGetValues(mValIdxList: ListBuffer[Idx])
 
 /**
  * This case class is invoked in the MatrixActor class to answer to one of its
  * MatrixVectorActor class slaves "msgGetValues" request.
  * @param values The list of the values requested.
  */
-protected[concurrency] case class msgAckGetValues(values: ListBuffer[Option[Double]])
+protected[concurrency] case class MsgAckGetValues(values: ListBuffer[Option[Double]])
 
 /**
  * This case class is used by the MasterCellActor class to send newly computed
@@ -48,10 +55,19 @@ protected[concurrency] case class msgAckGetValues(values: ListBuffer[Option[Doub
  * @param idx The index where the values should be stored.
  * @param newValue The newly computed value.
  */
-protected[concurrency] case class msgUpdateMatrix(idx: Idx, newValue: Double)
+protected[concurrency] case class MsgUpdateMatrix(idx: Idx, newValue: Double)
+
+
+////MxLeftUpActor & MxLeftUpVecActor
+protected[concurrency] case class MsgRow(i:Int, row: Array[Option[Double]])
+
+
+////MxUpActor & MxUpVecActor
+protected[concurrency] case class MsgCol(j:Int, costPairs: ListBuffer[CostPair])
 
 
 ////SolutionActor & SolutionSubActor
-protected[concurrency] case class msgSolInterDone[Decision](pathList: ListBuffer[PathEntry[Decision]])
-protected[concurrency] case class msgSolDone[Decision](key: Int, pathListsList: ListBuffer[ListBuffer[PathEntry[Decision]]])
+protected[concurrency] case class MsgRelSolDone[Decision](pathList: ListBuffer[PathEntry[Decision]])
+protected[concurrency] case class MsgRelSolListDone[Decision](key: Int, pathListsList: ListBuffer[ListBuffer[PathEntry[Decision]]])
+protected[concurrency] case class MsgSolDone[Decision](pathList: ListBuffer[PathEntry[Decision]])
 

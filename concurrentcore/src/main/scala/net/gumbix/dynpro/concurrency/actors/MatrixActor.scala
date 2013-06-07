@@ -1,8 +1,8 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import scala.actors.Actor
 import net.gumbix.dynpro.Idx
-import net.gumbix.dynpro.concurrency._
+import net.gumbix.dynpro.concurrency.
+{ConClass, Messages, MsgGetValues, MsgAckGetValues, MsgUpdateMatrix, MsgException, MsgMxDone}
 import ConClass._
 
 /**
@@ -24,13 +24,21 @@ import ConClass._
  * @param clazz =: dependencyCase One of the 3 possible dependency cases.
  * @param calcCellCost The method used to compute the value of each cells.
  */
+
+@deprecated
+/**
+ * 06.06.2013
+ * This stage's master - slave communication bridge has been replaced by
+ * a peer - peer communication bridge, making this class and its slave class unnecessary.
+ * It could however be useful in future
+ */
 protected[concurrency] final class MatrixActor(
-                        mx: Array[Array[Option[Double]]], val initVal: Double,
-                        val clazz: ConClass,
-                        val calcCellCost:(Array[Array[Option[Double]]], Idx,
-                          (Array[Idx], Array[Double]) => Array[Double], (Idx, Double) => Unit)
-                          => Array[Array[Option[Double]]]
-                 ) extends Actor with AbsMasterActor{
+  mx: Array[Array[Option[Double]]], val initVal: Double,
+  val clazz: ConClass,
+  val calcCellCost:(Array[Array[Option[Double]]], Idx,
+    (Array[Idx], Array[Double]) => Array[Double], (Idx, Double) => Unit)
+    => Array[Array[Option[Double]]]
+) extends AbsMasterActor{
 
   //trapExit = true; //receive all the exceptions from the cellActors in form of messages
 
@@ -46,14 +54,14 @@ protected[concurrency] final class MatrixActor(
 
   override protected def actReact{
     react{
-      case msgGetValues(mValIdxList) =>
+      case MsgGetValues(mValIdxList) =>
         //val values = for(idx <- missingValIndexes) yield mx(idx.i)(idx.j)
-        sender ! msgAckGetValues(for(idx <- mValIdxList) yield mx(idx.i)(idx.j))
+        sender ! MsgAckGetValues(for(idx <- mValIdxList) yield mx(idx.i)(idx.j))
 
-      case msgUpdateMatrix(idx, newValue) => mx(idx.i)(idx.j) = Some(newValue)
+      case MsgUpdateMatrix(idx, newValue) => mx(idx.i)(idx.j) = Some(newValue)
 
-      case msgException(constantCoordinate, loopStart) =>
-        restartSlMod(constantCoordinate, loopStart)
+      case MsgException(e, constCoor, loopStart) =>
+        handleException(e, constCoor, loopStart)
 
       case Messages.compDone => congestionControl
     }
@@ -77,25 +85,23 @@ protected[concurrency] final class MatrixActor(
 
   /**
    * This method creates and starts one MatrixVectorActor.
-   * @param constCoord =: constantCoordinate The row/column from the original matrix considered as the sub matrix that
+   * @param constCoor =: constantCoordinate The row/column from the original matrix considered as the sub matrix that
    *                 the new MatrixVectorActor will compute.
    * @param loopStart The start position in the sub matrix.
    */
-  override protected def startNewSlMod(constCoord: Int, loopStart: Int){
+  override protected def startNewSlMod(constCoor: Int, loopStart: Int){
     //start a row or column computation with the current version of the matrix.
-      new MatrixVectorActor(this, constCoord, loopStart)
-        .startActor(mx)
+    new MatrixVectorActor(this, mx, constCoor, loopStart).start
   }
 
-  override protected def startNewSlMod(constantCoordinate: Int) = startNewSlMod(constantCoordinate, 0)
+  override protected def startNewSlMod(constantCoordinate: Int){startNewSlMod(constantCoordinate, 0)}
 
 
-  def computeMatrix: Array[Array[Option[Double]]] = {
-    preCompute
-    mx
-  }
+  override protected def ackStart: MsgMxDone = MsgMxDone(mx)
 
-
+  /*(sender: OutputChannel[Any]){
+    sender ! MsgMxDone(mx)
+  } */
 
 }
 

@@ -1,7 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import scala.actors.Actor
-import net.gumbix.dynpro.concurrency.msgException
+import net.gumbix.dynpro.concurrency.MsgException
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -64,7 +64,10 @@ protected[actors] abstract class AbsSlaveActor(master: AbsMasterActor)
    * @return
    */
   override final def exceptionHandler = {
-    case e: Exception => master ! msgException(ePair.key, ePair.pointer)
+    case e: ArrayIndexOutOfBoundsException =>
+      master ! MsgException(e, ePair.key, ePair.pointer)
+    case e: Exception =>
+      master ! MsgException(e, ePair.key, ePair.pointer)
   }
 
   /**

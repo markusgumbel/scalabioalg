@@ -17,7 +17,7 @@ package net.gumbix.dynpro
 
 import collection.mutable.ListBuffer
 import math.{abs, min, max}
-import net.gumbix.dynpro.concurrency.{Stage, Debugger, Concurrency}
+import net.gumbix.dynpro.concurrency.{Stage, Debugger, DynProConfig}
 import net.gumbix.dynpro.concurrency.ConClass._
 import net.gumbix.dynpro.concurrency.ConMode._
 import scala.Some
@@ -76,25 +76,25 @@ abstract class DynPro[Decision] extends DynProBasic{
   private var timeMap: Map[Stage, Long] = Map()
   protected def getRecordedTimes = timeMap
 
-  protected final def setCon(dep: ConClass, mode: ConMode): Concurrency[Decision] =
+  protected final def setCon(dep: ConClass, mode: ConMode): DynProConfig[Decision] =
     setCon(dep, mode, 0, 0, false)
 
-  protected final def setCon(dep: ConClass, mode: ConMode, recordTime: Boolean): Concurrency[Decision] =
+  protected final def setCon(dep: ConClass, mode: ConMode, recordTime: Boolean): DynProConfig[Decision] =
     setCon(dep, mode, 0, 0, recordTime)
 
   protected final def setCon(dep: ConClass, mode: ConMode, _mxRange: Int, solRange: Int, recordTime: Boolean)
-  : Concurrency[Decision] = {
+  : DynProConfig[Decision] = {
     val mxRange = if(_mxRange < minRange || m - _mxRange < minRange) m else _mxRange
 
-    new Concurrency[Decision](dep, mode, mxRange, solRange, recordTime)
+    new DynProConfig[Decision](dep, mode, mxRange, solRange, recordTime)
   }
 
 
   //default setting =: sequential mode, OVERRIDE IF NECESSARY
-  //protected val con: Concurrency[Decision] = setCon(NO_CON, SEQ, 0)
+  //protected val config: DynProConfig[Decision] = setCon(NO_CON, SEQ, 0)
 
   //debug setting
-  protected val con: Concurrency[Decision] = setCon(LEFT_UP, EVENT)
+  protected val config: DynProConfig[Decision] = setCon(LEFT_UP, EVENT)
 
   /********************************************************
   concurrency mode setting - END
@@ -169,14 +169,14 @@ abstract class DynPro[Decision] extends DynProBasic{
     n = mx.length
     m = mx(0).length */
     val empStart = System.nanoTime
-    var mx = con.clazz match {
+    var mx = config.clazz match {
       case NO_CON =>
         val _mx: Array[Array[Option[Double]]] = Array.ofDim(n, m)
         for (i <- 0 until n; j <- 0 until m) {
           _mx(i)(j) = None
         }
         _mx
-      case _ => con.emptyMatrix(n, m)
+      case _ => config.emptyMatrix(n, m)
     }
     val empEnd = System.nanoTime
 
@@ -187,22 +187,24 @@ abstract class DynPro[Decision] extends DynProBasic{
     evaluate the matrix cells sequentially or concurrently
      */
     val mxStart = System.nanoTime
-    val toReturn = con.clazz match {
+    val toReturn = config.clazz match {
       case NO_CON | NO_DEP | LESS_CON =>
         /* inner method supporting the "calcCellCost" method */
         def getPrevValues(prevIndexes: Array[Idx], prevValues: Array[Double]) = prevValues
         //(Idx, Double) => Unit =: def handleNewValue(idx: Idx, newValue: Double){} //do nothing
 
         for (k <- 0 until cellsSize)
-              mx = calcCellCost(mx, getCellIndex(k), getPrevValues, (Idx, Double) => Unit)
+          mx = calcCellCost(mx, getCellIndex(k))
+          //04.06.2013 old version mx = calcCellCost(mx, getCellIndex(k), getPrevValues, (Idx, Double) => Unit)
         mx
 
       case _ => //LEFT_UP | UP
-        con.computeMatrix(mx, initValues(0), calcCellCost)
+        // 04.06.2013 old version =: config.computeMatrix(mx, initValues(0), calcCellCost)
+        config.computeMatrix(mx, initValues(0), getAccValues, calcNewAccValue)
     }
     val mxEnd = System.nanoTime
 
-    if(con.recordTime){
+    if(config.recordTime){
       timeMap += (Stage.empty -> (empEnd - empStart))
       timeMap += (Stage.matrix -> (mxEnd - mxStart))
     }
@@ -218,7 +220,7 @@ abstract class DynPro[Decision] extends DynProBasic{
    */
   lazy val matlabMatrix: Array[Array[Double]] = {
     val start = System.nanoTime
-    val toReturn = con.clazz match {
+    val toReturn = config.clazz match {
       case NO_CON =>
         val mx: Array[Array[Double]] = Array.ofDim(n, m)
         for (i <- 0 until n; j <- 0 until m) {
@@ -229,11 +231,11 @@ abstract class DynPro[Decision] extends DynProBasic{
         }
         mx
 
-      case _ => con.convertMatrix(matrix)
+      case _ => config.convertMatrix(matrix)
     }
     val end = System.nanoTime
 
-    if(con.recordTime) timeMap += (Stage.matlabMx -> (end - start))
+    if(config.recordTime) timeMap += (Stage.matlabMx -> (end - start))
 
     toReturn
   }
@@ -248,20 +250,20 @@ abstract class DynPro[Decision] extends DynProBasic{
   def solution(idx: Idx): List[PathEntry[Decision]] = {
     //(a:Idx, b:Idx) => false =: def break(startIdx: Idx, cIdx: Idx) = false
     val start = System.nanoTime
-    val solution = (con.clazz match {
+    val solution = (config.clazz match {
       case LEFT_UP | UP | NO_DEP =>
-        if(con.solRange < minRange || idx.MAX - con.solRange < minRange)
+        if(config.solRange < minRange || idx.MAX - config.solRange < minRange)
         //seemly concurrent, in reality sequential when the range hasn't been set adequately
           getPathList(idx, matrix, (a:Idx, b:Idx) => false)
 
-        else con.calculateSolution(idx, matrix, getPathList)
+        else config.calculateSolution(idx, matrix, getPathList)
 
       case _ => //NO_CON | LESS_CON, sequential
         getPathList(idx, matrix, (a:Idx, b:Idx) => false)
     }).toList
     val end = System.nanoTime
 
-    if(con.recordTime) timeMap += (Stage.solution -> (end - start))
+    if(config.recordTime) timeMap += (Stage.solution -> (end - start))
 
     if (matrixForwardPathBackward) solution.reverse else solution
   }
@@ -333,7 +335,7 @@ abstract class DynPro[Decision] extends DynProBasic{
 
 
   /**
-   *
+   * 04.062013 old version
    * @param currentMX
    * @param idx
    * @param getPrevValues
@@ -382,6 +384,65 @@ abstract class DynPro[Decision] extends DynProBasic{
 
     currentMX(idx.i)(idx.j) = Some(newValue)
     currentMX //return
+  }
+
+
+  private def getAccValues(currentMX: Array[Array[Option[Double]]], idx: Idx,
+                           handleNoneState:(Idx) => Unit): Array[Double] = {
+    for (u <- decisions(idx)) yield prevStates(idx, u) match {
+        // Empty array, i.e. there are no prev. states:
+        case Array() => calcF(value(idx, u), initValues, calcG)//sum of current and previous values
+        // Non-empty array:
+        case prevIndexes: Array[Idx] => {
+          val prevValues: Array[Double] = for (pidx <- prevIndexes) yield {
+            currentMX(pidx.i)(pidx.j) match {
+              /*
+              Status (june 2013): This state will be now known as the "none state"
+              - sequential
+              case None => throw new RuntimeException("Internal error: " +
+                      "Illegal previous state " + pidx + " at " + idx.toString)
+
+              - concurrent
+              case None => legal and required state
+
+              */
+              case None =>
+                handleNoneState(pidx)//used in concurrent mode
+                initValues(0)
+
+              case Some(value) => value
+            }
+          }
+          calcF(value(idx, u), prevValues , calcG)
+          //calcF(value(idx, u), prevValues, calcG)
+        }
+    }
+  }
+
+
+  /**
+   * @param values list of values or empty list in form of an array
+   * @return
+   */
+  private def calcNewAccValue(values: Array[Double]): Option[Double] = {
+    // Calculate the new value (min. or max.):
+    Some(reviseMax(values match {
+      case Array() => initValues(0)
+      /*a double value, while overriding the initValues method, the dev should keep in mind that
+      * the extreme value comes first*/
+
+      case _ => values.toList.reduceLeft(extremeFunction(_, _)) //the maximum or min
+    }))
+  }
+
+
+  private def calcCellCost(currentMX: Array[Array[Option[Double]]],
+                           idx: Idx): Array[Array[Option[Double]]] = {
+    //(idx) => Unit =: def handleNoneState(idx: Idx){}//do nothing
+    currentMX(idx.i)(idx.j) =
+      calcNewAccValue(getAccValues(currentMX, idx,(idx) => Unit))
+
+    currentMX
   }
 
   /********************************************************

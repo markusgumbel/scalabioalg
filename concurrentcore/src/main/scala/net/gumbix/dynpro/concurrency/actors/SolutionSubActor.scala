@@ -1,7 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import net.gumbix.dynpro.{PathEntry, Idx}
-import net.gumbix.dynpro.concurrency.{Debugger, Messages, msgSolInterDone, msgSolDone}
+import net.gumbix.dynpro.concurrency.{Messages, MsgRelSolDone, MsgRelSolListDone}
 import scala.collection.mutable.ListBuffer
 import scala.actors.Actor
 
@@ -19,18 +19,18 @@ protected[actors] final class SolutionSubActor[Decision]
 
   override protected def startInternalActors = for(idx <- solActor.getIdxList(idx)) yield{
     raiseCounter //-> counter += 1
-    class A(master: Actor) extends Actor{
-      //Anonymous class
+    class SubSlAc(slAc: Actor) extends Actor{
+      //sub slave actor
       override def act{
         react{
-          case Messages.start => master ! msgSolInterDone(solActor.getPathList(idx))
+          case Messages.startsSlAc => slAc ! MsgRelSolDone(solActor.getPathList(idx))
         }
       }
     }
 
-    val a = new A(this)
-    a.start
-    a ! Messages.start
+    val sslac = new SubSlAc(this)
+    sslac.start
+    sslac ! Messages.startsSlAc
   }
 
 
@@ -40,14 +40,20 @@ protected[actors] final class SolutionSubActor[Decision]
   override def act{
     startInternalActors
     val pathListsList = ListBuffer[ListBuffer[PathEntry[Decision]]]()
+    /**
+    def afterLoopWhile{
+      solActor ! MsgRelSolListDone(mapKey, pathListsList)
+      exit
+    }
+    */
 
     loopWhile(keepLoopAlive){
       react{
-        case msgSolInterDone(pathList) =>
+        case MsgRelSolDone(pathList) =>
           pathListsList += pathList.asInstanceOf[ListBuffer[PathEntry[Decision]]]
           reduceCounter //-> counter -= 1
       }
-    }andThen(solActor ! msgSolDone(mapKey, pathListsList))
+    }andThen(solActor ! MsgRelSolListDone(mapKey, pathListsList)) //(afterLoopWhile)
   }
 
 }

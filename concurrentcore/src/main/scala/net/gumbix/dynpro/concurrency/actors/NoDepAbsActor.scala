@@ -28,7 +28,7 @@ protected[actors] abstract class NoDepAbsActor[MxDT] (mx: Array[Array[Option[Dou
     PoolSize(mx.length, mx.length * (mx(0).length/range + 1))
 
 
-  override protected final def startNewSlMod(row: Int){
+  override protected final def startNewSlMod(row: Int) {
     new NoDepRowActor[MxDT](this, row, mx(row)).start
   }
 
@@ -36,8 +36,6 @@ protected[actors] abstract class NoDepAbsActor[MxDT] (mx: Array[Array[Option[Dou
   protected[actors] def handleCell(cell: Option[Double]): MxDT
 
   protected[actors] def sendMsg(row: Int, list: ListBuffer[MxDT])
-
-  protected[concurrency] def getMatrix: Any
 
 }
 

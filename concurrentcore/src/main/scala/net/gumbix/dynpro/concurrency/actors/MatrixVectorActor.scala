@@ -23,7 +23,16 @@ import scala.collection.mutable.ListBuffer
  * @param constCoor =: constantCoordinate The value of the indexes constant coordinate.
  * @param loopStart The start position of the loop.
  */
-protected[actors] final class MatrixVectorActor(mxActor: MatrixActor, constCoor: Int, loopStart: Int)
+
+@deprecated
+/**
+ * 06.06.2013
+ * This stage's master - slave communication bridge has been replaced by
+ * a peer - peer communication bridge, making this class and its master class unnecessary.
+ * It could however be useful in future
+ */
+protected[actors] final class MatrixVectorActor
+(mxActor: MatrixActor, mx: Array[Array[Option[Double]]], constCoor: Int, loopStart: Int)
   extends AbsSlaveActor(mxActor){
 
   /*
@@ -37,7 +46,7 @@ protected[actors] final class MatrixVectorActor(mxActor: MatrixActor, constCoor:
   * because they are supposed to be updated by 2 different blocks or even methods.
   */
   private var (matrix , loopPointer, ratio, secondHeadStart, cellCounter) =
-    (Array[Array[Option[Double]]](), 0, 0, 0, 0)
+    (mx, 0, 0, 0, 0)
   private val headStart = 5 //[ms]
   //This value has been chosen after just some few trials during the implementation stage.
   //It could therefore theoretically be improved. 30.05.2013
@@ -97,8 +106,8 @@ protected[actors] final class MatrixVectorActor(mxActor: MatrixActor, constCoor:
       //Although "loopWhile" avoid blocking the underlying thread.
       // It seems to cause a malfunction here, therefore the use of "while".
       while(keepAlive){
-        prevValues = mxActor !? msgGetValues(mValIdxList) match{
-          case msgAckGetValues(newValues) =>
+        prevValues = mxActor !? MsgGetValues(mValIdxList) match{
+          case MsgAckGetValues(newValues) =>
             if(newValues.contains(None)){//the values aren't totally computed yet
               /*
               The head start is set automatically for both dependency classes
@@ -155,7 +164,7 @@ protected[actors] final class MatrixVectorActor(mxActor: MatrixActor, constCoor:
    * @param newValue The newly computed value.
    */
   private def sendMsgSaveNewValue(idx: Idx, newValue: Double){
-    mxActor ! msgUpdateMatrix(idx, newValue)
+    mxActor ! MsgUpdateMatrix(idx, newValue)
   }
 
 
@@ -170,17 +179,6 @@ protected[actors] final class MatrixVectorActor(mxActor: MatrixActor, constCoor:
 
     //the computation of the values is done, notify the master (matrix actor) and forget (die)
     mxActor ! Messages.compDone
-  }
-
-
-  /**
-   * This method takes care of the preliminary settings and starts the slave (this actor).
-   *
-   * @param mx The current version of the matrix.
-   */
-  def startActor(mx: Array[Array[Option[Double]]]){
-    matrix = mx
-    start
   }
 
 }
