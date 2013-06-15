@@ -1,7 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import scala.collection.mutable.{ListBuffer, Map}
-import net.gumbix.dynpro.concurrency.{CostPair, MsgRegister}
+import net.gumbix.dynpro.concurrency.CostPair
 import net.gumbix.dynpro.Idx
 
 /**
@@ -17,13 +17,12 @@ protected[actors] abstract class MxVecActor[Broadcast]
 extends AbsSlaveActor(mxActor){
 
 
-  protected val (bcPointerMap, channelList, bcFreq) =
-    (Map[Int, Int](), new ListBuffer[Int](), 10)
+  protected val (bcPointerMap, channelList) = (Map[Int, Int](), new ListBuffer[Int]())
 
 
   protected def registerTo(channels: ListBuffer[Int]) {
     if(channels.nonEmpty){
-      mxActor ! MsgRegister(channels) //register listener to channels
+      mxActor ! channels //register listener to channels
       channelList ++= channels
     }
   }

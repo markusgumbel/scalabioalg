@@ -1,7 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import scala.collection.mutable.{ListBuffer, Map}
-import net.gumbix.dynpro.concurrency.{MsgCol, MsgCostPairs, CostPair, MsgRegister}
+import net.gumbix.dynpro.concurrency.{MsgCol, CostPair}
 import net.gumbix.dynpro.Idx
 
 /**
@@ -35,7 +35,7 @@ extends MxVecActor[Map[Int, ListBuffer[CostPair]]](mxActor, matrix){
     for(cp <- costPairsMap){
       //cp = cost pair combination, channel = cp._1, broadcast = cp._2
       for(listener <- listenerListMap(cp._1))
-        listener ! MsgCostPairs(cp._2)
+        listener ! cp._2
     }
   }
 
@@ -63,7 +63,7 @@ extends MxVecActor[Map[Int, ListBuffer[CostPair]]](mxActor, matrix){
           registerTo(channels)
 
           react{//exclusively react on broadcasts
-            case MsgCostPairs(costPairs) =>
+            case costPairs: ListBuffer[CostPair] =>
               if(sender.isInstanceOf[MxUpActor])//from master actor
                 for(cp <- costPairs) matrix(cp.idx.i)(cp.idx.j) = cp.value
 
@@ -102,10 +102,10 @@ extends MxVecActor[Map[Int, ListBuffer[CostPair]]](mxActor, matrix){
       use the next block instead of the block above.
 
       val z = i + 1
-      if(z % bcFreq == 0) broadcast(costPairsMap)
+      if(z % mxActor.bcSize == 0) broadcast(costPairsMap)
 
       if(z == loopEnd1){
-        if(z % bcFreq != 0) broadcast(costPairsMap)
+        if(z % mxActor.bcSize != 0) broadcast(costPairsMap)
 
         val costPairs = new ListBuffer[CostPair]()
         for(cps <- costPairsMap) costPairs ++= cps._2

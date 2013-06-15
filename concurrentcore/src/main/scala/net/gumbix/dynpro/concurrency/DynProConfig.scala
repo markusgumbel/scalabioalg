@@ -23,6 +23,9 @@ import net.gumbix.dynpro.Idx
  *
  * @param clazz =: ConClass. One of the 3 possible dependency classes.
  * @param mode =: ConMode (EVENT or THREAD)
+ * @param mxRange
+ * @param bcSize
+ * @param solRange
  * @param recordTime Although this isn't used here. Setting it this way makes
  *                   the attribute immutable.
  *
@@ -30,7 +33,7 @@ import net.gumbix.dynpro.Idx
  */
 protected[dynpro] final class DynProConfig[Decision](
     val clazz: ConClass, mode: ConMode,
-    mxRange: Int, val solRange: Int, val recordTime: Boolean) {
+    mxRange: Int, bcSize: Int, val solRange: Int, val recordTime: Boolean) {
 
 
   /**
@@ -44,26 +47,11 @@ protected[dynpro] final class DynProConfig[Decision](
       val actor = new NoDepEmptyActor(n, m, mxRange)
       actor.start
       actor !? Messages.start match{
-        case MsgMxDone(matrix) => matrix
+        case matrix: Array[Array[Option[Double]]] => matrix
       }
 
     case THREAD => Array() //for now nothing
   }
-
-  /*
-  def computeMatrix(mx: Array[Array[Option[Double]]],
-                    initVal: Double, calcCellCost:(Array[Array[Option[Double]]], Idx,
-                      (Array[Idx], Array[Double]) => Array[Double], (Idx, Double) => Unit)
-                      => Array[Array[Option[Double]]])
-  : Array[Array[Option[Double]]] = mode match {
-    case EVENT =>
-      Debugger.print
-      new MatrixActor(mx, initVal, clazz, calcCellCost).computeMatrix
-
-    case THREAD =>
-      new MatrixThread(mx, initVal, clazz, calcCellCost).computeMatrix
-  }
-  */
 
 
   /**
@@ -71,23 +59,22 @@ protected[dynpro] final class DynProConfig[Decision](
    * ConMode, which then computes the cell values of the given matrix.
    *
    * @param mx The matrix used to store all the computed values.
-   * @param initVal =: initValue The value used @ the beginning of the matrix (default value).
    * @param getAccValues The first method used to compute the value of each cells.
    * @param calcNewAccValue The second method used to compute the value of each cells.
    * @return
    */
-  def computeMatrix(mx: Array[Array[Option[Double]]], initVal: Double,
+  def computeMatrix(mx: Array[Array[Option[Double]]],
   getAccValues:(Array[Array[Option[Double]]], Idx, Idx => Unit) => Array[Double],
   calcNewAccValue:(Array[Double]) => Option[Double])
   : Array[Array[Option[Double]]] = mode match{
     case EVENT =>
       val actor = clazz match{
-        case LEFT_UP => new MxLeftUpActor(mx, initVal, getAccValues, calcNewAccValue)
-        case UP => new MxUpActor(mx, initVal, getAccValues, calcNewAccValue)
+        case LEFT_UP => new MxLeftUpActor(mx, bcSize, getAccValues, calcNewAccValue)
+        case UP => new MxUpActor(mx, bcSize, getAccValues, calcNewAccValue)
       }
       actor.start
       actor !? Messages.start match{
-        case MsgMxDone(matrix) => matrix
+        case matrix: Array[Array[Option[Double]]] => matrix
       }
 
     case THREAD => Array()
@@ -104,7 +91,7 @@ protected[dynpro] final class DynProConfig[Decision](
       val actor = new NoDepMatlabActor(matrix, mxRange)
       actor.start
       actor !? Messages.start match{
-        case MsgMatDone(matrix) => matrix
+        case matrix: Array[Array[Double]] => matrix
       }
 
     case THREAD => Array() //for now do nothing
@@ -125,7 +112,7 @@ protected[dynpro] final class DynProConfig[Decision](
       val actor = new SolutionActor[Decision](idx, matrix, solRange, getPathList)
       actor.start
       actor !? Messages.start match{
-        case MsgSolDone(pathList) => pathList.asInstanceOf[ListBuffer[PathEntry[Decision]]]
+        case pathList: ListBuffer[PathEntry[Decision]] => pathList
       }
 
     case THREAD => new ListBuffer[PathEntry[Decision]]()//for now do nothing

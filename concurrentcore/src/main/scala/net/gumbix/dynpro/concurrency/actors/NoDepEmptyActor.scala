@@ -1,6 +1,6 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import net.gumbix.dynpro.concurrency.{MsgMxDone, MsgEmpVecDone, MsgException}
+import net.gumbix.dynpro.concurrency.{MsgEmpVecDone, MsgException}
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -44,7 +44,7 @@ protected[concurrency] final class NoDepEmptyActor(n: Int, m: Int, range: Int)
   override protected[actors] def handleCell(cell: Option[Double]) = None
 
 
-  override protected def ackStart: MsgMxDone = MsgMxDone(matrix)
+  override protected def ackStart: Array[Array[Option[Double]]] = matrix
 
   /*(sender: OutputChannel[Any]){
     print(sender)

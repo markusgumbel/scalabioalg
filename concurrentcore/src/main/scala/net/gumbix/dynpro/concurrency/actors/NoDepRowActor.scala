@@ -1,7 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import scala.collection.mutable.{ListBuffer, Map}
-import net.gumbix.dynpro.concurrency.{MsgNoDepInterDone, Messages}
+import net.gumbix.dynpro.concurrency.MsgNoDepInterDone
 import scala.actors.Actor
 
 /**
@@ -37,20 +37,14 @@ protected[actors] final class NoDepRowActor[MxDT]
       class SubSlAc(slAc: Actor) extends Actor{
         //sub slave actor
         override def act{
-          react{
-            case Messages.startsSlAc =>
-              val list = new ListBuffer[MxDT]()
-              for(i <- pair._2.loopStart until pair._2.loopEnd)
-                list += mxActor.handleCell(mx(i))
+          val list = new ListBuffer[MxDT]()
+          for(i <- pair._2.loopStart until pair._2.loopEnd)
+            list += mxActor.handleCell(mx(i))
 
-              slAc ! MsgNoDepInterDone[MxDT](pair._1, list)
-          }
+          slAc ! MsgNoDepInterDone[MxDT](pair._1, list)
         }
       }
-
-      val sslac = new SubSlAc(this)
-      sslac.start
-      sslac ! Messages.startsSlAc
+      new SubSlAc(this).start
     }
 
   }

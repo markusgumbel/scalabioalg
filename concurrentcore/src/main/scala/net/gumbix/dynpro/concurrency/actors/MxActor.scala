@@ -1,7 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import net.gumbix.dynpro.Idx
-import net.gumbix.dynpro.concurrency.MsgMxDone
+
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -12,8 +12,9 @@ import net.gumbix.dynpro.concurrency.MsgMxDone
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 protected[actors] abstract class MxActor
-(matrix: Array[Array[Option[Double]]],
- val getAccValues:(Array[Array[Option[Double]]], Idx, Idx => Unit) => Array[Double])
+(matrix: Array[Array[Option[Double]]], val bcSize: Int,
+ val getAccValues:(Array[Array[Option[Double]]], Idx, Idx => Unit) => Array[Double],
+ val calcNewAccValue:(Array[Double]) => Option[Double])
 extends AbsMasterActor{
   //trapExit = true; //receive all the exceptions from the cellActors in form of messages
 
@@ -26,8 +27,8 @@ extends AbsMasterActor{
   override protected def startNewSlMod(c: Int){startNewSlMod(c, 0)}
 
 
-  override protected def ackStart: MsgMxDone = MsgMxDone(matrix)
-
+  //override protected def ackStart: MsgMxDone = MsgMxDone(matrix)
+  override protected def ackStart: Array[Array[Option[Double]]] = matrix
 
   protected def eTermKey: String
 }

@@ -1,7 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import net.gumbix.dynpro.{PathEntry, Idx}
-import net.gumbix.dynpro.concurrency.{Messages, MsgRelSolDone, MsgRelSolListDone}
+import net.gumbix.dynpro.concurrency.MsgRelSolListDone
 import scala.collection.mutable.ListBuffer
 import scala.actors.Actor
 
@@ -22,15 +22,11 @@ protected[actors] final class SolutionSubActor[Decision]
     class SubSlAc(slAc: Actor) extends Actor{
       //sub slave actor
       override def act{
-        react{
-          case Messages.startsSlAc => slAc ! MsgRelSolDone(solActor.getPathList(idx))
-        }
+        slAc ! solActor.getPathList(idx)
       }
     }
 
-    val sslac = new SubSlAc(this)
-    sslac.start
-    sslac ! Messages.startsSlAc
+    new SubSlAc(this).start
   }
 
 
@@ -49,8 +45,8 @@ protected[actors] final class SolutionSubActor[Decision]
 
     loopWhile(keepLoopAlive){
       react{
-        case MsgRelSolDone(pathList) =>
-          pathListsList += pathList.asInstanceOf[ListBuffer[PathEntry[Decision]]]
+        case pathList: ListBuffer[PathEntry[Decision]] =>
+          pathListsList += pathList
           reduceCounter //-> counter -= 1
       }
     }andThen(solActor ! MsgRelSolListDone(mapKey, pathListsList)) //(afterLoopWhile)

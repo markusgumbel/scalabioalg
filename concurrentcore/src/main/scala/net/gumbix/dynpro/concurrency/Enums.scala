@@ -55,7 +55,7 @@ object ConMode extends Enumeration{
 
 object Stage extends Enumeration{
   type Stage = Value
-
+  val total = Value("Stage i + ii + iv")
   val empty = Value("Stage i")
   val matrix = Value("Stage ii")
   val matlabMx = Value("Stage iii")

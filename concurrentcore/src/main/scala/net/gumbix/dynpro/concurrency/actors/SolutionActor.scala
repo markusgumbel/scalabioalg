@@ -1,7 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import scala.actors.Actor
-import net.gumbix.dynpro.concurrency.{MsgSolDone, MsgRelSolListDone, MsgException}
+import net.gumbix.dynpro.concurrency.{MsgRelSolListDone, MsgException}
 import net.gumbix.dynpro.{Idx, PathEntry}
 import scala.collection.mutable.{ListBuffer, Map}
 
@@ -100,7 +100,7 @@ protected[concurrency] final class SolutionActor[Decision]
     react{
       case MsgException(e, key, 0) => handleException(e, key, 0)
 
-      case MsgRelSolListDone(key: Int, pathListsList) =>
+      case MsgRelSolListDone(key, pathListsList) =>
         congestionControl
         pathListsListMap  +=
           key -> pathListsList.asInstanceOf[ListBuffer[ListBuffer[PathEntry[Decision]]]]
@@ -119,7 +119,7 @@ protected[concurrency] final class SolutionActor[Decision]
   }
 
 
-  override protected def ackStart: MsgSolDone[Decision] = {
+  override protected def ackStart: ListBuffer[PathEntry[Decision]] = {
     //MERGE the results (the relative path lists)
     val (pathList, sortedKeys) =
     (new ListBuffer[PathEntry[Decision]](), pathListsListMap.keys.toList.sorted)
@@ -138,7 +138,7 @@ protected[concurrency] final class SolutionActor[Decision]
     }
 
     //all the relative path lists have been merged to ONE absolute path list
-    MsgSolDone(pathList)
+    pathList
   }
 
 }

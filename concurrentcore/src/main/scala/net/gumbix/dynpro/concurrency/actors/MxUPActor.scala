@@ -1,7 +1,6 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import net.gumbix.dynpro.concurrency.
-{MsgCol, MsgRegister, MsgException, MsgMxDone, CostPair, MsgCostPairs}
+import net.gumbix.dynpro.concurrency.{MsgCol, MsgException, CostPair}
 import scala.collection.mutable.{ListBuffer, Map}
 import net.gumbix.dynpro.Idx
 
@@ -15,19 +14,20 @@ import net.gumbix.dynpro.Idx
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 protected[concurrency] final class MxUpActor(
-matrix: Array[Array[Option[Double]]], initVal: Double,
+matrix: Array[Array[Option[Double]]], bcSize: Int,
 getAccValues:(Array[Array[Option[Double]]], Idx, Idx => Unit) => Array[Double] ,
-val calcNewAccValue:(Array[Double]) => Option[Double]
-) extends MxActor(matrix, getAccValues){
+calcNewAccValue:(Array[Double]) => Option[Double]
+) extends MxActor(matrix, bcSize, getAccValues, calcNewAccValue){
   //trapExit = true; //receive all the exceptions from the cellActors in form of messages
   //val loopEnd = matrix.length
   private val channelMap = Map[Int, MxUpVecActor]()
   //amount of slaves actors
   protected[actors] val slAm = getPoolSize.slMod
 
+
   override protected def actReact{
     react{
-      case MsgRegister(channels) =>
+      case channels: ListBuffer[Int] =>
         /*
         during the registration the master actor is the man in the middle
         all further communications will be been proceeded between the slave actors
@@ -41,8 +41,9 @@ val calcNewAccValue:(Array[Double]) => Option[Double]
             case e: NoSuchElementException => //the actor has already been destroyed
               val costPairs = new ListBuffer[CostPair]
               for(i <- 0 to matrix.length) costPairs += CostPair(Idx(i, ch), matrix(i)(ch))
-
-              sender ! MsgCostPairs(costPairs)//broadcast
+              reply(costPairs)
+              //reply(MsgCostPairs(costPairs)) =: sender ! MsgCostPairs(costPairs)
+              //this is an acknowledgement
           }
         }
 

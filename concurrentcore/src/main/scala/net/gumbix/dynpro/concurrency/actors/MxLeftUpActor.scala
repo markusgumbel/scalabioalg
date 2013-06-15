@@ -1,7 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import net.gumbix.dynpro.concurrency.{MsgRow, MsgException, MsgRegister, MsgMxDone}
-import scala.collection.mutable.Map
+import net.gumbix.dynpro.concurrency.{MsgRow, MsgException}
+import scala.collection.mutable.{ListBuffer, Map}
 import net.gumbix.dynpro.Idx
 
 /**
@@ -13,17 +13,17 @@ import net.gumbix.dynpro.Idx
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 protected[concurrency] final class MxLeftUpActor(
-  matrix: Array[Array[Option[Double]]], initVal: Double,
+  matrix: Array[Array[Option[Double]]], bcSize: Int,
   getAccValues:(Array[Array[Option[Double]]], Idx, Idx => Unit) => Array[Double] ,
-  val calcNewAccValue:(Array[Double]) => Option[Double]
-) extends MxActor(matrix, getAccValues){
+  calcNewAccValue:(Array[Double]) => Option[Double]
+) extends MxActor(matrix, bcSize, getAccValues, calcNewAccValue){
   //val loopEnd = matrix(0).length
   private val channelMap = Map[Int, MxLeftUpVecActor]()
 
 
   override protected def actReact{
     react{
-      case MsgRegister(channels) =>
+      case channels: ListBuffer[Int] =>
         /*
         during the registration the master actor is the man in the middle
         all further communications will be been proceeded between the slave actors
@@ -36,7 +36,7 @@ protected[concurrency] final class MxLeftUpActor(
             case e: NoSuchElementException => //the actor has already been destroyed
               reply(MsgRow(ch, matrix(ch)))
               //reply(MsgRow(ch, matrix(ch))) =: sender ! MsgRow(ch, matrix(ch))
-              //this is a broadcast
+              //this is an acknowledgement
           }
         }
 

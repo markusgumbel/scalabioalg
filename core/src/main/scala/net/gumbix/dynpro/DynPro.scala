@@ -17,7 +17,7 @@ package net.gumbix.dynpro
 
 import collection.mutable.ListBuffer
 import math.{abs, min, max}
-import net.gumbix.dynpro.concurrency.{Stage, Debugger, DynProConfig}
+import net.gumbix.dynpro.concurrency.{Stage, DynProConfig}
 import net.gumbix.dynpro.concurrency.ConClass._
 import net.gumbix.dynpro.concurrency.ConMode._
 import scala.Some
@@ -71,30 +71,37 @@ abstract class DynPro[Decision] extends DynProBasic{
   /********************************************************
   concurrency mode setting - START
   ********************************************************/
-  private val minRange = 10
+  //default values
+  private val (minRange, defaultBcSize) = (10, 5)
 
   private var timeMap: Map[Stage, Long] = Map()
-  protected def getRecordedTimes = timeMap
+  def getRecordedTimes = timeMap
 
-  protected final def setCon(dep: ConClass, mode: ConMode): DynProConfig[Decision] =
-    setCon(dep, mode, 0, 0, false)
+  protected final def setConfig(dep: ConClass, mode: ConMode): DynProConfig[Decision] =
+    setConfig(dep, mode, 0, defaultBcSize, 0, false)
 
-  protected final def setCon(dep: ConClass, mode: ConMode, recordTime: Boolean): DynProConfig[Decision] =
-    setCon(dep, mode, 0, 0, recordTime)
+  protected final def setConfig(dep: ConClass, mode: ConMode, recordTime: Boolean): DynProConfig[Decision] =
+    setConfig(dep, mode, 0, defaultBcSize, 0, recordTime)
 
-  protected final def setCon(dep: ConClass, mode: ConMode, _mxRange: Int, solRange: Int, recordTime: Boolean)
+  protected final def setConfig(dep: ConClass, mode: ConMode, _mxRange: Int, _bcSize: Int, solRange: Int, recordTime: Boolean)
   : DynProConfig[Decision] = {
-    val mxRange = if(_mxRange < minRange || m - _mxRange < minRange) m else _mxRange
+    val (mxRange, bcSize) =
+      (if(_mxRange < minRange || m - _mxRange < minRange) m else _mxRange,
+       dep match{
+         case LEFT_UP => abs(_bcSize)
+         case UP => 1 //for now.
+         case _ => 0
+       })
 
-    new DynProConfig[Decision](dep, mode, mxRange, solRange, recordTime)
+    new DynProConfig[Decision](dep, mode, mxRange, bcSize, solRange, recordTime)
   }
 
 
   //default setting =: sequential mode, OVERRIDE IF NECESSARY
-  //protected val config: DynProConfig[Decision] = setCon(NO_CON, SEQ, 0)
+  //protected val config: DynProConfig[Decision] = setConfig(NO_CON, SEQ, 0)
 
   //debug setting
-  protected val config: DynProConfig[Decision] = setCon(LEFT_UP, EVENT)
+  protected val config: DynProConfig[Decision] = setConfig(LEFT_UP, EVENT)
 
   /********************************************************
   concurrency mode setting - END
@@ -189,9 +196,11 @@ abstract class DynPro[Decision] extends DynProBasic{
     val mxStart = System.nanoTime
     val toReturn = config.clazz match {
       case NO_CON | NO_DEP | LESS_CON =>
-        /* inner method supporting the "calcCellCost" method */
+        /** 04.06.2013 old version
+        inner method supporting the "calcCellCost" method
         def getPrevValues(prevIndexes: Array[Idx], prevValues: Array[Double]) = prevValues
-        //(Idx, Double) => Unit =: def handleNewValue(idx: Idx, newValue: Double){} //do nothing
+        (Idx, Double) => Unit =: def handleNewValue(idx: Idx, newValue: Double){} //do nothing
+        */
 
         for (k <- 0 until cellsSize)
           mx = calcCellCost(mx, getCellIndex(k))
@@ -200,7 +209,7 @@ abstract class DynPro[Decision] extends DynProBasic{
 
       case _ => //LEFT_UP | UP
         // 04.06.2013 old version =: config.computeMatrix(mx, initValues(0), calcCellCost)
-        config.computeMatrix(mx, initValues(0), getAccValues, calcNewAccValue)
+        config.computeMatrix(mx, getAccValues, calcNewAccValue)
     }
     val mxEnd = System.nanoTime
 
@@ -263,7 +272,11 @@ abstract class DynPro[Decision] extends DynProBasic{
     }).toList
     val end = System.nanoTime
 
-    if(config.recordTime) timeMap += (Stage.solution -> (end - start))
+    if(config.recordTime){
+      val time = end - start
+      timeMap += Stage.solution -> (time - timeMap(Stage.empty) - timeMap(Stage.matrix))
+      timeMap += Stage.total -> time
+    }
 
     if (matrixForwardPathBackward) solution.reverse else solution
   }
@@ -277,9 +290,10 @@ abstract class DynPro[Decision] extends DynProBasic{
   Support methods (sequential & concurrent support) - START
     ********************************************************/
   /**
-   *
-   * @param idx
-   * @param break
+   * This method builds the solution path within the given matrix,
+   * starting from the given idx
+   * @param idx cell within the given matrix
+   * @param break limit (end of the solution path)
    * @return
    */
   private def getPathList(idx: Idx, mx: Array[Array[Option[Double]]],
@@ -335,58 +349,28 @@ abstract class DynPro[Decision] extends DynProBasic{
 
 
   /**
-   * 04.062013 old version
+   * This method calculates the cost of the given cell based on the current matrix.
    * @param currentMX
    * @param idx
-   * @param getPrevValues
-   * @param handleNewValue
    * @return
    */
   private def calcCellCost(currentMX: Array[Array[Option[Double]]],
-                                             idx: Idx,
-                                             getPrevValues:(Array[Idx], Array[Double]) => Array[Double],
-                                             handleNewValue:(Idx, Double) => Unit): Array[Array[Option[Double]]] = {
+                           idx: Idx): Array[Array[Option[Double]]] = {
+    //(idx) => Unit =: def handleNoneState(idx: Idx){}//do nothing
+    currentMX(idx.i)(idx.j) =
+      calcNewAccValue(getAccValues(currentMX, idx,(idx) => Unit))
 
-    // Get a list of values (or empty list):
-    val values = for (u <- decisions(idx)) yield {
-      prevStates(idx, u) match {
-        // Empty array, i.e. there are no prev. states:
-        case Array() => calcF(value(idx, u), initValues, calcG)//sum of current and previous values
-        // Non-empty array:
-        case prevIndexes: Array[Idx] => {
-          val prevValues: Array[Double] = for (pidx <- prevIndexes) yield {
-            currentMX(pidx.i)(pidx.j) match {
-              /*
-             case None => throw new RuntimeException("Internal error: " +
-                     "Illegal previous state " + pidx + " at " + idx.toString)
-              */
-              case None => initValues(0)
-              case Some(value) => value
-            }
-          }
-          calcF(value(idx, u), getPrevValues(prevIndexes, prevValues), calcG)
-          //calcF(value(idx, u), prevValues, calcG)
-        }
-      }
-    }
-
-
-    // Calculate the new value (min. or max.):
-    val newValue: Double = reviseMax(values match {
-      case Array() => initValues(0)
-      /*a double value, while overriding the initValues method, the dev should keep in mind that
-      * the extreme value comes first*/
-
-      case _ => values.toList.reduceLeft(extremeFunction(_, _)) //the maximum or min
-    })
-
-    handleNewValue(idx, newValue)
-
-    currentMX(idx.i)(idx.j) = Some(newValue)
-    currentMX //return
+    currentMX
   }
 
 
+  /**
+   * This method is used to get all the possible cost of the given cell
+   * @param currentMX the matrix containing all the cells evaluated so far.
+   * @param idx the coordinates of the cell whose cost is about to be calculated
+   * @param handleNoneState sort of protocol to foolow in case a "None" value occurs
+   * @return Array
+   */
   private def getAccValues(currentMX: Array[Array[Option[Double]]], idx: Idx,
                            handleNoneState:(Idx) => Unit): Array[Double] = {
     for (u <- decisions(idx)) yield prevStates(idx, u) match {
@@ -421,7 +405,9 @@ abstract class DynPro[Decision] extends DynProBasic{
 
 
   /**
-   * @param values list of values or empty list in form of an array
+   * This method selects the most extreme value (cost)
+   * out of an array of values (costs)
+   * @param values
    * @return
    */
   private def calcNewAccValue(values: Array[Double]): Option[Double] = {
@@ -433,16 +419,6 @@ abstract class DynPro[Decision] extends DynProBasic{
 
       case _ => values.toList.reduceLeft(extremeFunction(_, _)) //the maximum or min
     }))
-  }
-
-
-  private def calcCellCost(currentMX: Array[Array[Option[Double]]],
-                           idx: Idx): Array[Array[Option[Double]]] = {
-    //(idx) => Unit =: def handleNoneState(idx: Idx){}//do nothing
-    currentMX(idx.i)(idx.j) =
-      calcNewAccValue(getAccValues(currentMX, idx,(idx) => Unit))
-
-    currentMX
   }
 
   /********************************************************

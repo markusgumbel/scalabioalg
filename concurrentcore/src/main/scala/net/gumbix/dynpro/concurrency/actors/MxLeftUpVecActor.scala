@@ -1,7 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import scala.collection.mutable.{ListBuffer, Map}
-import net.gumbix.dynpro.concurrency.{CostPair, MsgRow, MsgRegister, MsgCostPairs}
+import scala.collection.mutable.ListBuffer
+import net.gumbix.dynpro.concurrency.{CostPair, MsgRow}
 import net.gumbix.dynpro.Idx
 
 /**
@@ -27,7 +27,7 @@ extends MxVecActor[ListBuffer[CostPair]](mxActor, matrix){
 
 
   protected def broadcast(costPairs: ListBuffer[CostPair]){
-    for(listener <- listenerList) yield listener ! MsgCostPairs(costPairs)
+    for(listener <- listenerList) yield listener ! costPairs
   }
 
 
@@ -49,7 +49,7 @@ extends MxVecActor[ListBuffer[CostPair]](mxActor, matrix){
         react{//exclusively react on broadcasts
           case MsgRow(z, row) => matrix(z) = row //from master actor
 
-          case MsgCostPairs(costPairs) => //from another slave actor (peer)
+          case costPairs: ListBuffer[CostPair] => //from another slave actor (peer)
             handlePeerBroadcast(costPairs, costPairs(0).idx.i)
             //if(I == a) print("[" + costPairs(0).idx.i + "] ")
         }
@@ -59,10 +59,10 @@ extends MxVecActor[ListBuffer[CostPair]](mxActor, matrix){
         //if(I == a) print(idx + "=" + matrix(idx.i)(idx.j) + " ")
 
         val z = j + 1
-        if(z % bcFreq == 0) broadcast(costPairList)
+        if(z % mxActor.bcSize == 0) broadcast(costPairList)
 
         if(z == loopEnd){
-          if(z % bcFreq != 0) broadcast(costPairList)
+          if(z % mxActor.bcSize != 0) broadcast(costPairList)
           mxActor ! MsgRow(I, matrix(I))
           exit
         }

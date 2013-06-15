@@ -1,6 +1,6 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import net.gumbix.dynpro.concurrency.{MsgMatDone, MsgMatVecDone, MsgException}
+import net.gumbix.dynpro.concurrency.{MsgMatVecDone, MsgException}
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -50,7 +50,7 @@ protected[concurrency] final class NoDepMatlabActor(mx: Array[Array[Option[Doubl
   }
 
 
-  override protected def ackStart: MsgMatDone = MsgMatDone(matrix)
+  override protected def ackStart: Array[Array[Double]] = matrix
 
   /*(sender: OutputChannel[Any]){
     sender ! MsgMatDone(matrix)
