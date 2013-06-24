@@ -1,6 +1,8 @@
 package net.gumbix.dynpro.concurrency
 
 import net.gumbix.dynpro.Idx
+import scala.collection.mutable.ListBuffer
+import scala.actors.Actor
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -25,7 +27,10 @@ protected[concurrency] trait IMaster{
   Each slave will receive a unique part of the original matrix based on the pointer's location.
   */
   private var (pointer, _keepConLoopAlive, compSlCounter) = (-1, true, 0)
+  protected var (matrix, mlMatrix) = (Array(Array(Option(0.0))), Array(Array(0.0)))
 
+  //all the slave modules
+  protected val slModules = ListBuffer[Actor]()
 
   /*Exception handlers - START*/
   /**
@@ -62,7 +67,6 @@ protected[concurrency] trait IMaster{
   protected def getPoolSize: PoolSize
 
   protected val dMaxPoolSize = Runtime.getRuntime().availableProcessors() * 100E6
-  private val slPoolSize = getPoolSize.slMod
   /**********Pool size - END**********/
 
 
@@ -78,9 +82,8 @@ protected[concurrency] trait IMaster{
    * This way in contrast to the "actReact" method it will be
    * overridden if only there's a need.
    * @param key
-   * @param pos
    */
-  protected def startNewSlMod(key:Int, pos: Int){startNewSlMod(key)}
+  protected def restartSlMod(key:Int)
   /**********Abstract methods - END**********/
 
 
@@ -91,7 +94,10 @@ protected[concurrency] trait IMaster{
    * @return
    */
   protected final def keepConLoopAlive = _keepConLoopAlive
-
+  protected final def setLoopCond{
+    _keepConLoopAlive = true
+    pointer = -1
+  }
 
   /**
    * This method is invoked if an exception is fired by a slave module.
@@ -118,10 +124,19 @@ protected[concurrency] trait IMaster{
     /*The pool size value 100E6 is an experimental value
     * To get the value appropriate to your os run: Debugger.getMaxPoolSize*/
 
-    val maxPoolSize = dMaxPoolSize - getPoolSize.subSlMod
+    val (maxPoolSize, slPoolSize) = (dMaxPoolSize - getPoolSize.subSlMod, getPoolSize.slMod)
     val realPoolSize = if (slPoolSize > maxPoolSize) maxPoolSize else slPoolSize //getPoolSize.slMod
     //println(this + " ---> " + slPoolSize + " - " +realPoolSize + " - " +maxPoolSize)
-    for(i <- 0 until realPoolSize.asInstanceOf[Int]){
+
+    for(i <- 0 until slModules.length){
+      if(i >= realPoolSize) return
+      compSlCounter += 1 //update
+      restartSlMod(i)
+      pointer = i //update the pointer
+    }
+
+    val len = slModules.length
+    for(i <- len until realPoolSize.asInstanceOf[Int]){
       compSlCounter += 1 //update
       startNewSlMod(i)
       pointer = i //update the pointer
@@ -140,7 +155,7 @@ protected[concurrency] trait IMaster{
     In fact the method (independently from the moment the event related to it will be fired)
     won't be proceeded before the for - loop in the "startSlaves" method is done iterating.
     */
-    if (pointer < slPoolSize)
+    if (pointer < getPoolSize.slMod)
       startNewSlMod(pointer)
     else{//One slave just died and no new one will be started at his place
       compSlCounter -= 1

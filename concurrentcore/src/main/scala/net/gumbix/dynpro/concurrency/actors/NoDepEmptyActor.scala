@@ -18,12 +18,11 @@ import scala.collection.mutable.ListBuffer
  * @param m
  */
 protected[concurrency] final class NoDepEmptyActor(n: Int, m: Int, range: Int)
-  extends NoDepAbsActor[Option[Double]](Array.ofDim(n, m), range){
+  extends NoDepAbsActor[Option[Double]](() => Array.ofDim(n, m), range){
 
 
   override def eTerms = ETerms("Empty matrix creation", "Row", "")
-
-  private val matrix: Array[Array[Option[Double]]] = Array.ofDim(n, m)
+  //private val matrix: Array[Array[Option[Double]]] = Array.ofDim(n, m)
 
 
   override protected def actReact{
@@ -46,8 +45,4 @@ protected[concurrency] final class NoDepEmptyActor(n: Int, m: Int, range: Int)
 
   override protected def ackStart: Array[Array[Option[Double]]] = matrix
 
-  /*(sender: OutputChannel[Any]){
-    print(sender)
-    sender ! MsgMxDone(matrix)
-  } */
 }

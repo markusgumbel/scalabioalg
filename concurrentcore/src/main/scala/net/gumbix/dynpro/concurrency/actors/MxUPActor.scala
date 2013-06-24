@@ -1,6 +1,6 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import net.gumbix.dynpro.concurrency.{MsgCol, MsgException, CostPair}
+import net.gumbix.dynpro.concurrency.{Debugger, MsgCol, MsgException, CostPair}
 import scala.collection.mutable.{ListBuffer, Map}
 import net.gumbix.dynpro.Idx
 
@@ -14,15 +14,15 @@ import net.gumbix.dynpro.Idx
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 protected[concurrency] final class MxUpActor(
-matrix: Array[Array[Option[Double]]], bcSize: Int,
-getAccValues:(Array[Array[Option[Double]]], Idx, Idx => Unit) => Array[Double] ,
-calcNewAccValue:(Array[Double]) => Option[Double]
-) extends MxActor(matrix, bcSize, getAccValues, calcNewAccValue){
+  getMatrix:() => Array[Array[Option[Double]]], bcSize: Int,
+  getAccValues:(Array[Array[Option[Double]]], Idx, Idx => Unit) => Array[Double] ,
+  calcNewAccValue:(Array[Double]) => Option[Double]
+)extends MxActor(getMatrix, bcSize, getAccValues, calcNewAccValue){
   //trapExit = true; //receive all the exceptions from the cellActors in form of messages
   //val loopEnd = matrix.length
   private val channelMap = Map[Int, MxUpVecActor]()
   //amount of slaves actors
-  protected[actors] val slAm = getPoolSize.slMod
+  protected[actors] def slAm = getPoolSize.slMod
 
 
   override protected def actReact{
@@ -35,8 +35,7 @@ calcNewAccValue:(Array[Double]) => Option[Double]
         */
         for(ch <- channels){
           try{
-            channelMap(ch % slAm).
-              registerListener(sender.asInstanceOf[MxUpVecActor], ch)
+            channelMap(ch % slAm).registerListener(sender.asInstanceOf[MxUpVecActor], ch)
           }catch{
             case e: NoSuchElementException => //the actor has already been destroyed
               val costPairs = new ListBuffer[CostPair]
@@ -53,7 +52,7 @@ calcNewAccValue:(Array[Double]) => Option[Double]
       case MsgCol(mxj, costPairs) =>
         //this broadcast is received once a slave actor is done computing
         for(cp <- costPairs) matrix(cp.idx.i)(cp.idx.j) = cp.value
-        channelMap -= (mxj)
+        channelMap -= mxj
         congestionControl
     }
   }
@@ -78,17 +77,31 @@ calcNewAccValue:(Array[Double]) => Option[Double]
    * This method creates and starts one MatrixVectorActor.
    * @param firstJ =: firstCoordinate The column from the original matrix considered as the sub matrix that
    *                 the new MatrixVectorActor will compute @ first.
-   * @param loopStart The start position in the sub matrix.
    */
-  override protected def startNewSlMod(firstJ: Int, loopStart: Int){
+  override protected def startNewSlMod(firstJ: Int){
     //start a column computation with the current version of the matrix.
-    val actor = new MxUpVecActor(this, matrix, firstJ, loopStart)
+    val actor = new MxUpVecActor(this, firstJ)
     channelMap += (firstJ -> actor)
+    slModules += actor
+  }
+
+
+  /**
+   * This isn't an abstract method but should be considered as one.
+   * This way in contrast to the "actReact" method it will be
+   * overridden if only there's a need.
+   * @param j
+   */
+  override protected def restartSlMod(j: Int){//j ~= firstJ
+    val actor = slModules(j).asInstanceOf[MxUpVecActor]
+    channelMap += (j -> actor)
   }
 
 
   override protected def beforeLoopWhile{
-    for(actor <- channelMap.values) actor.start
+    for(actor <- channelMap.values) try{ actor.restart
+      }catch{ case e: IllegalStateException => actor.start
+    }
   }
 
 }

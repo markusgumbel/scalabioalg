@@ -3,6 +3,7 @@ package net.gumbix.dynpro.concurrency.actors
 import scala.Array
 import scala.collection.mutable.ListBuffer
 import net.gumbix.dynpro.concurrency.Debugger
+import scala.actors.Actor
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -15,21 +16,23 @@ import net.gumbix.dynpro.concurrency.Debugger
 
 /**
  *
- * @param mx
+ * @param getMatrix
  * @tparam MxDT
  */
-protected[actors] abstract class NoDepAbsActor[MxDT] (mx: Array[Array[Option[Double]]], val range: Int)
-  extends AbsMasterActor{
-
-  //def this(n: Int, m: Int, noDepRowActorAm: Int) = this(Array.ofDim(n, m), noDepRowActorAm)
-
+protected[actors] abstract class NoDepAbsActor[MxDT](getMatrix:() => Array[Array[Option[Double]]], val range: Int)
+  extends AbsMasterActor(getMatrix){
 
   override protected final def getPoolSize =
-    PoolSize(mx.length, mx.length * (mx(0).length/range + 1))
+    PoolSize(matrix.length, matrix.length * (matrix(0).length/range + 1))
+
+
+  override protected final def restartSlMod(row: Int){slModules(row).restart}
 
 
   override protected final def startNewSlMod(row: Int) {
-    new NoDepRowActor[MxDT](this, row, mx(row)).start
+    val actor = new NoDepRowActor[MxDT](this, row)
+    actor.start
+    slModules += actor
   }
 
 

@@ -12,14 +12,15 @@ import scala.actors.Actor
  * Time: 2:00 AM
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
-protected[actors] final class NoDepRowActor[MxDT]
-          (mxActor: NoDepAbsActor[MxDT], row: Int,
-           mx: Array[Option[Double]])
-          extends AbsSlaveActor(mxActor){
+protected[actors] final class NoDepRowActor[MxDT](mxActor: NoDepAbsActor[MxDT], row: Int)
+extends AbsSlaveActor(mxActor){
+
+  private def getVector = mxActor.getMatrix()(row)
+
 
   override protected def startInternalActors{
     case class LoopPair(loopStart: Int, loopEnd: Int)
-    val (loopEnd, pairMap) = (mx.length, Map[Int, LoopPair]())
+    val (loopEnd, pairMap) = (getVector.length, Map[Int, LoopPair]())
     var (start, end) = (0, 0)
 
     while(end < loopEnd){
@@ -39,7 +40,7 @@ protected[actors] final class NoDepRowActor[MxDT]
         override def act{
           val list = new ListBuffer[MxDT]()
           for(i <- pair._2.loopStart until pair._2.loopEnd)
-            list += mxActor.handleCell(mx(i))
+            list += mxActor.handleCell(getVector(i))
 
           slAc ! MsgNoDepInterDone[MxDT](pair._1, list)
         }
@@ -56,13 +57,11 @@ protected[actors] final class NoDepRowActor[MxDT]
   override def act{
     startInternalActors
 
-    val mxListBuffer = new ListBuffer[MxDT]()
-    var listMap = Map[Int, ListBuffer[MxDT]]()
-
+    val (mxListBuffer, listMap) = (new ListBuffer[MxDT](), Map[Int, ListBuffer[MxDT]]())
     def afterLoopWhile{
       for(key <- listMap.keys.toList.sorted) mxListBuffer ++= listMap(key)
       mxActor.sendMsg(row, mxListBuffer)
-      //exit -> no need @ the moment
+      //exit
     }
 
     loopWhile(keepLoopAlive){

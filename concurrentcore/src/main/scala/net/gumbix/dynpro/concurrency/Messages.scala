@@ -14,6 +14,7 @@ import scala.collection.mutable.ListBuffer
 protected[concurrency] object Messages {
 //symbol messages
   val start = 'startMasterActor
+  val wakeUp = 'wakeUp
 }
 
 

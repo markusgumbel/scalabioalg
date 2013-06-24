@@ -3,6 +3,7 @@ package net.gumbix.dynpro.concurrency.actors
 import net.gumbix.dynpro.concurrency.{MsgRow, MsgException}
 import scala.collection.mutable.{ListBuffer, Map}
 import net.gumbix.dynpro.Idx
+import scala.actors.Actor
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -13,13 +14,12 @@ import net.gumbix.dynpro.Idx
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 protected[concurrency] final class MxLeftUpActor(
-  matrix: Array[Array[Option[Double]]], bcSize: Int,
+  getMatrix:() => Array[Array[Option[Double]]], bcSize: Int,
   getAccValues:(Array[Array[Option[Double]]], Idx, Idx => Unit) => Array[Double] ,
   calcNewAccValue:(Array[Double]) => Option[Double]
-) extends MxActor(matrix, bcSize, getAccValues, calcNewAccValue){
+)extends MxActor(getMatrix, bcSize, getAccValues, calcNewAccValue){
   //val loopEnd = matrix(0).length
   private val channelMap = Map[Int, MxLeftUpVecActor]()
-
 
   override protected def actReact{
     react{
@@ -46,7 +46,7 @@ protected[concurrency] final class MxLeftUpActor(
       case MsgRow(mxi, row) =>
         //this broadcast is received once a slave actor is done computing
         matrix(mxi) = row
-        channelMap -= (mxi)
+        channelMap -= mxi
         congestionControl
     }
   }
@@ -54,26 +54,37 @@ protected[concurrency] final class MxLeftUpActor(
 
   override protected def eTermKey = "Row"
 
-
   /**
    * Slave module =: vector actor
    * @return
    */
-  override protected def getPoolSize = PoolSize(matrix.length, 0)
+  override protected def getPoolSize = PoolSize(getMatrix().length, 0)
+
+
+  //override protected def beforeLoopWhile{print(matrix.length)}
+  /**
+   * This method creates and starts one MatrixVectorActor.
+   * @param I =: firstCoordinate The column from the original matrix considered as the sub matrix that
+   *                 the new MatrixVectorActor will compute @ first.
+   */
+  override protected def startNewSlMod(I: Int){
+    //start a column computation with the current version of the matrix.
+    val actor = new MxLeftUpVecActor(this, I)
+    channelMap += (I -> actor)
+    actor.start
+    slModules += actor
+  }
 
 
   /**
-   * This method creates and starts one MatrixVectorActor.
-   * @param constI =: constantCoordinate The row from the original matrix considered as the sub matrix that
-   *                 the new MatrixVectorActor will compute.
-   * @param loopStart The start position in the sub matrix.
+   * This isn't an abstract method but should be considered as one.
+   * This way in contrast to the "actReact" method it will be
+   * overridden if only there's a need.
+   * @param I
    */
-  override protected def startNewSlMod(constI: Int, loopStart: Int){
-    //start a row computation with the current version of the matrix.
-    //print(constI+ "-> ")
-    val actor = new MxLeftUpVecActor(this, matrix, constI, loopStart)
-    actor.start
-    channelMap += (constI -> actor)
+  override protected def restartSlMod(I: Int){//j ~= firstJ
+    val actor = slModules(I).asInstanceOf[MxLeftUpVecActor]
+    channelMap += (I -> actor)
+    actor.restart
   }
-
 }

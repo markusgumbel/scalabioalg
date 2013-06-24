@@ -34,7 +34,7 @@ import net.gumbix.dynpro.{PathEntry, MatrixPrinter, Idx, DynPro}
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 
-class Alignment(val s1: String, val s2: String,
+class Alignment(val s1: StringBuilder, val s2: StringBuilder,
                 val mode: AlignmentMode,
                 override val substMatrix: Option[String])
         extends DynPro[AlignmentStep]
@@ -43,9 +43,15 @@ class Alignment(val s1: String, val s2: String,
                 with AlignmentPrinter[AlignmentStep]
                 with Score {
   // Helper constructor if no substitution matrix is used:
-  def this(s1: String, s2: String, mode: AlignmentMode) = this (s1, s2, mode, None)
+  def this(s1: StringBuilder, s2: StringBuilder, mode: AlignmentMode) = this (s1, s2, mode, None)
 
   formatter = INT
+
+
+  def updateXY(newS1: String, newS2: String){
+    s1.append(newS1)
+    s2.append(newS2)
+  }
 
   def n = s1.length + 1
 
@@ -142,8 +148,8 @@ class Alignment(val s1: String, val s2: String,
     import scala.math._
 
     if (solution.isEmpty) {
-      val as1 = new AlignedString(s1)
-      val as2 = new AlignedString(s2)
+      val as1 = new AlignedString(s1.toString)
+      val as2 = new AlignedString(s2.toString)
       as1.insertGapBefore(0, s2.length, EMPTY)
       as2.insertGapAtEnd(s1.length, EMPTY)
       (as1, as2)
@@ -170,8 +176,8 @@ class Alignment(val s1: String, val s2: String,
     val gapE1 = e - ie
     val gapE2 = e - je
 
-    val as1 = new AlignedString(s1)
-    val as2 = new AlignedString(s2)
+    val as1 = new AlignedString(s1.toString)
+    val as2 = new AlignedString(s2.toString)
 
     as1.insertGapBefore(0, gapB1, EMPTY)
     as2.insertGapBefore(0, gapB2, EMPTY)
@@ -199,9 +205,10 @@ class Alignment(val s1: String, val s2: String,
    */
   val deltaIdx = Map(INSERT -> Idx(0, -1), DELETE -> Idx(-1, 0), BOTH -> Idx(-1, -1))
 
-  override def rowLabels = makeLabels(s1).toArray
+  override def rowLabels = makeLabels(s1.toString).toArray
 
-  override def columnLabels = Some(makeLabels(s2).toArray)
+  override def columnLabels = Some(makeLabels(s2.toString).toArray)
 
   private def makeLabels(s: String) = "-" :: s.toCharArray.map(_.toString).toList
+
 }

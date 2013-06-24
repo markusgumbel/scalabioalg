@@ -98,8 +98,8 @@ class MultipleAlignment(val strings: Array[String], val mode: AlignmentMode)
     val alignments = Array.ofDim[Alignment](n, n)
     for (i <- 0 until n; j <- i until n) {
       // Note that j starts with i (not i + 1)
-      val s1 = strings(i)
-      val s2 = strings(j)
+      val s1 = new StringBuilder(strings(i))
+      val s2 = new StringBuilder(strings(j))
       val a = new Alignment(s1, s2, mode)
       alignments(i)(j) = a
       alignments(j)(i) = a

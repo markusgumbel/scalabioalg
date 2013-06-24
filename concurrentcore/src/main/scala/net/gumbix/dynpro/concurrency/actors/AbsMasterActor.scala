@@ -2,6 +2,7 @@ package net.gumbix.dynpro.concurrency.actors
 
 import scala.actors.{OutputChannel, Actor}
 import net.gumbix.dynpro.concurrency.{Messages, IMaster}
+import scala.collection.mutable.ListBuffer
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -11,8 +12,8 @@ import net.gumbix.dynpro.concurrency.{Messages, IMaster}
  * Time: 11:24 PM
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
-protected[actors] trait AbsMasterActor
-  extends Actor with IMaster{
+protected[actors] abstract class AbsMasterActor(val getMatrix:() => Array[Array[Option[Double]]])
+  extends IMaster with Actor{
 
   //TO OVERRIDE - START
   /**
@@ -55,6 +56,7 @@ protected[actors] trait AbsMasterActor
 
 
   override final def act{
+    matrix = getMatrix()
     react{
       case Messages.start => //this is an synchronous message
         val to = sender
@@ -71,9 +73,10 @@ protected[actors] trait AbsMasterActor
         startSlMods
 
         beforeLoopWhile
+        setLoopCond
         loopWhile(keepConLoopAlive){
           actReact //This is an abstract method.
-        }andThen(to ! ackStart) //(afterLoopWhile)
+        }andThen to ! ackStart //afterLoopWhile
     }
    }
 

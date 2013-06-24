@@ -14,10 +14,10 @@ import scala.actors.Actor
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 protected[actors] final class SolutionSubActor[Decision]
-  (solActor: SolutionActor[Decision], mapKey: Int, idx: Idx)
+  (solActor: SolutionActor[Decision], mapKey: Int, getPpIdx:() => Idx)
   extends AbsSlaveActor(solActor){
 
-  override protected def startInternalActors = for(idx <- solActor.getIdxList(idx)) yield{
+  override protected def startInternalActors = for(idx <- solActor.getIdxList(getPpIdx())) yield{
     raiseCounter //-> counter += 1
     class SubSlAc(slAc: Actor) extends Actor{
       //sub slave actor

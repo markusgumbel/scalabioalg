@@ -11,12 +11,15 @@ package net.gumbix.dynpro.concurrency
 
 import net.gumbix.dynpro.{PathEntry, Idx}
 import net.gumbix.dynpro.concurrency.threads.MatrixThread
-import net.gumbix.dynpro.concurrency.actors._
+import net.gumbix.dynpro.concurrency.actors.
+{NoDepEmptyActor, MxLeftUpActor, MxUpActor, NoDepMatlabActor, SolutionActor}
 import ConMode._
 import ConClass._
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{Map, ListBuffer}
 import scala.Array
-import net.gumbix.dynpro.Idx
+import Module._
+import Stage._
+import scala.actors.Actor
 
 
 /**
@@ -35,6 +38,19 @@ protected[dynpro] final class DynProConfig[Decision](
     val clazz: ConClass, mode: ConMode,
     mxRange: Int, bcSize: Int, val solRange: Int, val recordTime: Boolean) {
 
+  private val maModules: Map[Stage, Actor] = Map()
+
+  private def getActor(stage: Stage, newVal: Actor) = try{
+    //maModules(stage).update
+    maModules(stage).restart
+    maModules(stage)
+  }catch{ case e: NoSuchElementException =>
+    newVal.start
+    maModules(stage) = newVal
+    newVal
+  }
+
+
 
   /**
    * Test status: OK
@@ -44,9 +60,7 @@ protected[dynpro] final class DynProConfig[Decision](
    */
   def emptyMatrix(n: Int, m: Int): Array[Array[Option[Double]]] = mode match{
     case EVENT =>
-      val actor = new NoDepEmptyActor(n, m, mxRange)
-      actor.start
-      actor !? Messages.start match{
+      getActor(empty, new NoDepEmptyActor(n, m, mxRange)) !? Messages.start match{
         case matrix: Array[Array[Option[Double]]] => matrix
       }
 
@@ -58,23 +72,27 @@ protected[dynpro] final class DynProConfig[Decision](
    * This method creates a master instance (MatrixActor or MatrixThread) depending on the given
    * ConMode, which then computes the cell values of the given matrix.
    *
-   * @param mx The matrix used to store all the computed values.
+   * @param _matrix The matrix used to store all the computed values.
    * @param getAccValues The first method used to compute the value of each cells.
    * @param calcNewAccValue The second method used to compute the value of each cells.
    * @return
    */
-  def computeMatrix(mx: Array[Array[Option[Double]]],
+  def computeMatrix(_matrix: Array[Array[Option[Double]]],
   getAccValues:(Array[Array[Option[Double]]], Idx, Idx => Unit) => Array[Double],
   calcNewAccValue:(Array[Double]) => Option[Double])
   : Array[Array[Option[Double]]] = mode match{
-    case EVENT =>
+    case EVENT => //print("Matrix " + Runtime.getRuntime.freeMemory + " => ")
+      def getMatrix() = _matrix
       val actor = clazz match{
-        case LEFT_UP => new MxLeftUpActor(mx, bcSize, getAccValues, calcNewAccValue)
-        case UP => new MxUpActor(mx, bcSize, getAccValues, calcNewAccValue)
+        case LEFT_UP =>
+          getActor(matrix, new MxLeftUpActor(getMatrix, bcSize, getAccValues, calcNewAccValue))
+        case UP =>
+          getActor(matrix, new MxUpActor(getMatrix, bcSize, getAccValues, calcNewAccValue))
       }
-      actor.start
+
       actor !? Messages.start match{
-        case matrix: Array[Array[Option[Double]]] => matrix
+        case matrix: Array[Array[Option[Double]]] =>  matrix
+          //println(" => return " + actor.getState)
       }
 
     case THREAD => Array()
@@ -88,9 +106,8 @@ protected[dynpro] final class DynProConfig[Decision](
    */
   def convertMatrix(matrix: Array[Array[Option[Double]]]): Array[Array[Double]] = mode match {
     case EVENT =>
-      val actor = new NoDepMatlabActor(matrix, mxRange)
-      actor.start
-      actor !? Messages.start match{
+      def getMatrix() = matrix
+      getActor(matlabMx, new NoDepMatlabActor(getMatrix, mxRange)) !? Messages.start match{
         case matrix: Array[Array[Double]] => matrix
       }
 
@@ -109,9 +126,9 @@ protected[dynpro] final class DynProConfig[Decision](
                         getPathList:(Idx, Array[Array[Option[Double]]], (Idx, Idx)=>Boolean) => ListBuffer[PathEntry[Decision]])
   : ListBuffer[PathEntry[Decision]] = mode match{
     case EVENT =>
-      val actor = new SolutionActor[Decision](idx, matrix, solRange, getPathList)
-      actor.start
-      actor !? Messages.start match{
+      def getMatrix() = matrix
+      def getIdx() = idx
+      getActor(solution, new SolutionActor[Decision](getIdx, getMatrix, solRange, getPathList)) !? Messages.start match{
         case pathList: ListBuffer[PathEntry[Decision]] => pathList
       }
 

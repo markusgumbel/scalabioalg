@@ -14,16 +14,14 @@ import scala.collection.mutable.ListBuffer
 
 /**
  *
- * @param mx
+ * @param getMatrix
  */
-protected[concurrency] final class NoDepMatlabActor(mx: Array[Array[Option[Double]]], range: Int)
-  extends NoDepAbsActor[Double](mx, range){
+protected[concurrency] final class NoDepMatlabActor(getMatrix:() => Array[Array[Option[Double]]], range: Int)
+  extends NoDepAbsActor[Double](getMatrix, range){
 
 
   override def eTerms = ETerms("Matrix conversion", "Row", "")
-
-
-  private val matrix: Array[Array[Double]] = Array.ofDim(mx.length, mx(0).length)
+  //private val matrix: Array[Array[Double]] = Array.ofDim(getMatrix.length, getMatrix(0).length)
 
 
   override protected final def actReact{
@@ -32,7 +30,7 @@ protected[concurrency] final class NoDepMatlabActor(mx: Array[Array[Option[Doubl
 
       case MsgMatVecDone(row, vector) =>
         congestionControl
-        matrix(row) = vector.toArray
+        mlMatrix(row) = vector.toArray
     }
   }
 
@@ -50,7 +48,7 @@ protected[concurrency] final class NoDepMatlabActor(mx: Array[Array[Option[Doubl
   }
 
 
-  override protected def ackStart: Array[Array[Double]] = matrix
+  override protected def ackStart: Array[Array[Double]] = mlMatrix
 
   /*(sender: OutputChannel[Any]){
     sender ! MsgMatDone(matrix)

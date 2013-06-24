@@ -72,7 +72,7 @@ abstract class DynPro[Decision] extends DynProBasic{
   concurrency mode setting - START
   ********************************************************/
   //default values
-  private val (minRange, defaultBcSize) = (10, 5)
+  private val (minRange, defaultBcSize) = (10, 10)
 
   private var timeMap: Map[Stage, Long] = Map()
   def getRecordedTimes = timeMap
@@ -98,10 +98,10 @@ abstract class DynPro[Decision] extends DynProBasic{
 
 
   //default setting =: sequential mode, OVERRIDE IF NECESSARY
-  //protected val config: DynProConfig[Decision] = setConfig(NO_CON, SEQ, 0)
+  //protected val config: DynProConfig[Decision] = setConfig(LEFT_UP, EVENT)
 
   //debug setting
-  protected val config: DynProConfig[Decision] = setConfig(LEFT_UP, EVENT)
+  protected val config: DynProConfig[Decision] = setConfig(NO_CON, __)
 
   /********************************************************
   concurrency mode setting - END
@@ -153,6 +153,9 @@ abstract class DynPro[Decision] extends DynProBasic{
    */
   def initValues: Array[Double] = Array(0.0)
 
+
+  def updateXY(newX: String, newY: String)
+
   /********************************************************
   attributes and methods to override - END
   ********************************************************/
@@ -165,7 +168,7 @@ abstract class DynPro[Decision] extends DynProBasic{
   /**
    * matrix containing the accumulated values (costs).
    */
-  lazy val matrix: Array[Array[Option[Double]]] = {
+  def matrix: Array[Array[Option[Double]]] = {println("---")
     /* Iterate through all the cells. Note that the order depends on the
     problem. Many versions go from top to bottom and left to right.
     However, any other order may also work. */
@@ -201,15 +204,10 @@ abstract class DynPro[Decision] extends DynProBasic{
         def getPrevValues(prevIndexes: Array[Idx], prevValues: Array[Double]) = prevValues
         (Idx, Double) => Unit =: def handleNewValue(idx: Idx, newValue: Double){} //do nothing
         */
-
-        for (k <- 0 until cellsSize)
-          mx = calcCellCost(mx, getCellIndex(k))
-          //04.06.2013 old version mx = calcCellCost(mx, getCellIndex(k), getPrevValues, (Idx, Double) => Unit)
+        for (k <- 0 until cellsSize) mx = calcCellCost(mx, getCellIndex(k))
         mx
 
-      case _ => //LEFT_UP | UP
-        // 04.06.2013 old version =: config.computeMatrix(mx, initValues(0), calcCellCost)
-        config.computeMatrix(mx, getAccValues, calcNewAccValue)
+      case _ => config.computeMatrix(mx, getAccValues, calcNewAccValue) //LEFT_UP | UP
     }
     val mxEnd = System.nanoTime
 
@@ -228,19 +226,19 @@ abstract class DynPro[Decision] extends DynProBasic{
    * Imporant: lazy, otherwise we get null pointer exceptions.
    */
   lazy val matlabMatrix: Array[Array[Double]] = {
-    val start = System.nanoTime
+    val (start, _matrix) = (System.nanoTime, matrix)
     val toReturn = config.clazz match {
       case NO_CON =>
         val mx: Array[Array[Double]] = Array.ofDim(n, m)
         for (i <- 0 until n; j <- 0 until m) {
-          mx(i)(j) = matrix(i)(j) match {
+          mx(i)(j) = _matrix(i)(j) match {
             case a: Some[Double] => a.get
             case _ => 0.0
           }
         }
         mx
 
-      case _ => config.convertMatrix(matrix)
+      case _ => config.convertMatrix(_matrix)
     }
     val end = System.nanoTime
 
@@ -298,7 +296,7 @@ abstract class DynPro[Decision] extends DynProBasic{
    */
   private def getPathList(idx: Idx, mx: Array[Array[Option[Double]]],
                           break:(Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
-    val (eps, listBuffer) = (0.001, new ListBuffer[PathEntry[Decision]]())
+    val (eps, pathList) = (0.001, new ListBuffer[PathEntry[Decision]]())
 
     /*
     * Inner function.
@@ -335,7 +333,7 @@ abstract class DynPro[Decision] extends DynProBasic{
         // so we use an epsilon. Also, if we have already found a
         // solution we skip any further solutions:
         if (abs(v - value(innerIdx, u)) < eps) {
-          listBuffer += new PathEntry(u, mx(innerIdx.i)(innerIdx.j).get, innerIdx, prevIdx)
+          pathList += new PathEntry(u, mx(innerIdx.i)(innerIdx.j).get, innerIdx, prevIdx)
           //count += 1
           solutionFound = true
           for (nidx <- prevIdx if !break(idx, innerIdx)) calcSI(nidx)
@@ -344,7 +342,7 @@ abstract class DynPro[Decision] extends DynProBasic{
     }
 
     calcSI(idx)
-    listBuffer
+    pathList
   }
 
 
@@ -442,6 +440,8 @@ class IntDynPro extends DynPro[java.lang.Integer] with MatrixPrinter[java.lang.I
   def prevStates(idx: Idx, d: java.lang.Integer) = Array()
 
   def value(idx: Idx, d: java.lang.Integer) = 0
+
+  def updateXY(newX: String, newY: String) = {}//do nothing
 
   formatter = INT
 }

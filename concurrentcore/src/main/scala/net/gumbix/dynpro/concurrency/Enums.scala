@@ -47,7 +47,7 @@ object ConMode extends Enumeration{
   /*thread based concurrence
   * Side note: this type of concurrence is as well reachable with actors as with threads. */
 
-  val SEQ = Value("no concurrency")
+  val __ = Value("no concurrency")
   //this value simply a placeholder when the DepCase is set to "NO_CON"
 
 }
@@ -60,6 +60,12 @@ object Stage extends Enumeration{
   val matrix = Value("Stage ii")
   val matlabMx = Value("Stage iii")
   val solution = Value("Stage iv")
+}
 
+
+object Module extends Enumeration{
+  type Module = Value
+  val maMod = Value("the master module")
+  val slMod = Value("the slave module")
 }
 

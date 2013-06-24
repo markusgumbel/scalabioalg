@@ -1,7 +1,8 @@
 package net.gumbix.dynpro.concurrency
 
 import scala.actors.Actor
-import scala.actors.Actor._
+import scala.actors.Actor.State._
+import scala.collection.mutable.ListBuffer
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -31,15 +32,18 @@ private class StressActor extends Actor{
 
   override def act{
     var i: Long = 0
+    val state = new ListBuffer[Value]()
     loopWhile(true){
       if(i % quot == 0){
         counter += 1
-        toPrint = counter + " * " + quot
+        toPrint = counter + " * " + quot + " [" + state + "] " + Runtime.getRuntime.freeMemory
         println("-> " + toPrint)
+        state.clear
         i = 0
       }
       val a = new SubActor
       a.start
+      if(!state.contains(a.getState)) state += a.getState
       i += 1
     }
   }
@@ -53,14 +57,22 @@ private class StressActor extends Actor{
 
 object Debugger {
 
-  def print(text: String){
+  def printE(text: String){
     println(text)
     System.exit(0)
   }
 
-  def print(any: Any){print(any.toString)}
+  def printE(any: Any){printE(any.toString)}
 
-  def print(){print("here i am!!!")}
+  def printE{printE("here i am!!!")}
+
+  def printMemories{
+    val (ttMem, frMem) = (Runtime.getRuntime.totalMemory, Runtime.getRuntime.freeMemory)
+    val toPrint = " FREE MEMORY = " + frMem +
+      ", USED MEMORY = " + (ttMem - frMem)
+    //"  MAX MEMORY = " + Runtime.getRuntime.maxMemory +
+    println(toPrint)
+  }
 
   def getMaxPoolSize{
     println("Los geht's")

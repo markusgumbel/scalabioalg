@@ -12,12 +12,11 @@ import net.gumbix.dynpro.Idx
  * Time: 2:57 AM
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
-protected[actors] abstract class MxVecActor[Broadcast]
-(mxActor: MxActor, matrix: Array[Array[Option[Double]]])
+protected[actors] abstract class MxVecActor[Broadcast](mxActor: MxActor)
 extends AbsSlaveActor(mxActor){
 
 
-  protected val (bcPointerMap, channelList) = (Map[Int, Int](), new ListBuffer[Int]())
+  protected val channelList = new ListBuffer[Int]()
 
 
   protected def registerTo(channels: ListBuffer[Int]) {
@@ -44,10 +43,8 @@ extends AbsSlaveActor(mxActor){
     def handleNoneState(idx: Idx){
       val channel = getIdxCoor(idx) //get the constant coordinate
       noneStateInvoked = true
-      if(!(channelList.contains(channel) || channels.contains(channel))){
+      if(!(channelList.contains(channel) || channels.contains(channel)))
         channels += channel
-        bcPointerMap += (channel -> 0)
-      }
     }
 
     val values = mxActor.getAccValues(matrix, idx, handleNoneState)
@@ -63,13 +60,10 @@ extends AbsSlaveActor(mxActor){
    * @param Z
    */
   protected def handlePeerBroadcast(costPairs: ListBuffer[CostPair], Z: Int){
-    var z = bcPointerMap(Z)
-    while(z < costPairs.length){
-      val cp = costPairs(z)
-      matrix(cp.idx.i)(cp.idx.j) = cp.value
-      z += 1
-    }
-    bcPointerMap += (Z -> z)
+    for(cp <- costPairs.reverse)
+      if (matrix(cp.idx.i)(cp.idx.j) == None)
+        matrix(cp.idx.i)(cp.idx.j) = cp.value
+      else return
   }
 
 

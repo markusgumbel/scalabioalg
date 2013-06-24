@@ -4,6 +4,7 @@ import scala.collection.mutable.{ListBuffer, Map}
 import scala.actors.Actor
 import scala.util.Random
 import scala.collection.mutable
+import net.gumbix.dynpro.concurrency.Debugger
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -21,10 +22,10 @@ extends Actor{
     class SubCreatorActor(_actor: CreatorActor[SeqDT]) extends Actor{
       override def act{
         val seq = new mutable.StringBuilder
-        for(i <- 0 until len)
-          seq ++= Random.shuffle(elements).head.toString
+        for(i <- 0 until len) seq ++= Random.shuffle(elements).head.toString
 
-        _actor ! seq
+        _actor ! seq.toString
+        //exit
       }
     }
 
@@ -38,15 +39,16 @@ extends Actor{
     val sequences = new ListBuffer[String]()
     react{
       case Message.start =>
+        val to = sender
         var i = 0
         loopWhile(i < nrOfSeq){
           react{
-            case seq:String =>
+            case seq: String =>
               sequences += seq
               i += 1
           }
-        }
-      reply(sequences)
+        }andThen to ! sequences
+
     }
   }
 }

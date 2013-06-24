@@ -36,6 +36,7 @@ protected[actors] abstract class AbsSlaveActor(master: AbsMasterActor)
   protected def reduceCounter = counter -= 1
   protected def keepLoopAlive = counter > -1
 
+  protected var matrix = Array(Array(Option(0.0)))
 
   /**
    * This method should be used to start all the internal actors.
