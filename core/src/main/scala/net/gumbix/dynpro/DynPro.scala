@@ -17,11 +17,10 @@ package net.gumbix.dynpro
 
 import collection.mutable.ListBuffer
 import math.{abs, min, max}
-import net.gumbix.dynpro.concurrency.{Stage, DynProConfig}
-import net.gumbix.dynpro.concurrency.ConClass._
-import net.gumbix.dynpro.concurrency.ConMode._
-import scala.Some
-import Stage.Stage
+import concurrency.DynProConfig
+import concurrency.ConClass._
+import concurrency.ConMode._
+import concurrency.Stage._
 
 /**
  * Convenient class for a two-dimensional index pair (i, j).
@@ -77,23 +76,29 @@ abstract class DynPro[Decision] extends DynProBasic{
   private var timeMap: Map[Stage, Long] = Map()
   def getRecordedTimes = timeMap
 
-  protected final def setConfig(dep: ConClass, mode: ConMode): DynProConfig[Decision] =
-    setConfig(dep, mode, 0, defaultBcSize, 0, false)
+  //methods used to configure the "DynPro" computation
+  protected final def setConfig(clazz: ConClass, mode: ConMode): DynProConfig[Decision] =
+    setConfig(clazz, mode, 0, defaultBcSize, 0, false)
 
-  protected final def setConfig(dep: ConClass, mode: ConMode, recordTime: Boolean): DynProConfig[Decision] =
-    setConfig(dep, mode, 0, defaultBcSize, 0, recordTime)
+  protected final def setConfig(clazz: ConClass, mode: ConMode, recordTime: Boolean): DynProConfig[Decision] =
+    setConfig(clazz, mode, 0, defaultBcSize, 0, recordTime)
 
-  protected final def setConfig(dep: ConClass, mode: ConMode, _mxRange: Int, _bcSize: Int, solRange: Int, recordTime: Boolean)
+  protected final def setConfig(clazz: ConClass, mode: ConMode, _mxRange: Int, _bcSize: Int, solRange: Int, recordTime: Boolean)
   : DynProConfig[Decision] = {
     val (mxRange, bcSize) =
       (if(_mxRange < minRange || m - _mxRange < minRange) m else _mxRange,
-       dep match{
+       clazz match{
          case LEFT_UP => abs(_bcSize)
          case UP => 1 //for now.
          case _ => 0
        })
 
-    new DynProConfig[Decision](dep, mode, mxRange, bcSize, solRange, recordTime)
+    new DynProConfig[Decision](
+      clazz, mode, recordTime,
+      bcSize, () => (n, m), getAccValues, calcCellCost,
+      mxRange, convert,
+      getIdx, getPathList, solRange
+    )
   }
 
 
@@ -165,89 +170,82 @@ abstract class DynPro[Decision] extends DynProBasic{
   /********************************************************
   Main methods (potentially concurrent) - START
   ********************************************************/
+  //this block solely concerns the "matrix" method
+  //private val inf = Double.NegativeInfinity
+  private var lazyMatrix: Array[Array[Option[Double]]] = Array.ofDim(1, 1)
   /**
-   * matrix containing the accumulated values (costs).
+   * STAGE i of ii: costs evaluation
+   * 25.06.2013 The prefix had to be changed from "lazy val" to "def"
+   * because as from now the same object can apply a dynamic programming algorithm
+   * on more than one case.
+   * The addition of the private attribute "lazyMatrix" helps to preserve the properties
+   * provided by the "lazy val" prefix for a given case.
+   * Meaning the new matrix will be seemly evaluated once and only once
+   * for each case
    */
-  def matrix: Array[Array[Option[Double]]] = {println("---")
+  def getMatrix: Array[Array[Option[Double]]] = {
     /* Iterate through all the cells. Note that the order depends on the
     problem. Many versions go from top to bottom and left to right.
     However, any other order may also work. */
+    if(newRound){
+      lazyMatlabMatrix = Array.ofDim(n, m)
 
-    /*
-    STAGE i of iv
-    create an empty n*m matrix. Value{i,j} =: None
-    n = mx.length
-    m = mx(0).length */
-    val empStart = System.nanoTime
-    var mx = config.clazz match {
-      case NO_CON =>
-        val _mx: Array[Array[Option[Double]]] = Array.ofDim(n, m)
-        for (i <- 0 until n; j <- 0 until m) {
-          _mx(i)(j) = None
-        }
-        _mx
-      case _ => config.emptyMatrix(n, m)
+      val mxStart = System.nanoTime
+      config.clazz match {
+        case NO_CON | NO_DEP | LESS_CON =>
+          for (k <- 0 until cellsSize){
+            val idx = getCellIndex(k)
+            //(idx) => Unit =: def handleNullState(idx: Idx){}//do nothing
+            calcCellCost(idx, getAccValues(idx,(idx) => Unit))
+          }
+
+        case _ => config.evaluateMatrix //LEFT_UP | UP
+      }
+      val mxEnd = System.nanoTime
+
+      if(config.recordTime) timeMap += (MATRIX -> (mxEnd - mxStart))
+      newRound = false
     }
-    val empEnd = System.nanoTime
-
-    //CAUTION: Do not merge both blocks
-
-    /*
-    STAGE ii of iv
-    evaluate the matrix cells sequentially or concurrently
-     */
-    val mxStart = System.nanoTime
-    val toReturn = config.clazz match {
-      case NO_CON | NO_DEP | LESS_CON =>
-        /** 04.06.2013 old version
-        inner method supporting the "calcCellCost" method
-        def getPrevValues(prevIndexes: Array[Idx], prevValues: Array[Double]) = prevValues
-        (Idx, Double) => Unit =: def handleNewValue(idx: Idx, newValue: Double){} //do nothing
-        */
-        for (k <- 0 until cellsSize) mx = calcCellCost(mx, getCellIndex(k))
-        mx
-
-      case _ => config.computeMatrix(mx, getAccValues, calcNewAccValue) //LEFT_UP | UP
-    }
-    val mxEnd = System.nanoTime
-
-    if(config.recordTime){
-      timeMap += (Stage.empty -> (empEnd - empStart))
-      timeMap += (Stage.matrix -> (mxEnd - mxStart))
-    }
-
-    toReturn
+    lazyMatrix
   }
 
 
+  //matlab matrix block
+  private var lazyMatlabMatrix = Array.ofDim[Double](1, 1)
+  def convert(idx: Idx){
+    lazyMatlabMatrix(idx.i)(idx.j) = lazyMatrix(idx.i)(idx.j) match {
+      case value: Some[Double] => value.get
+      case _ => 0.0
+    }
+  }
   /**
    * TODO Q&D hack for matlab
-   * STAGE iii of iv
+   * Concerning the concurrency this stage has a very low priority.
    * Imporant: lazy, otherwise we get null pointer exceptions.
    */
   lazy val matlabMatrix: Array[Array[Double]] = {
-    val (start, _matrix) = (System.nanoTime, matrix)
-    val toReturn = config.clazz match {
-      case NO_CON =>
-        val mx: Array[Array[Double]] = Array.ofDim(n, m)
-        for (i <- 0 until n; j <- 0 until m) {
-          mx(i)(j) = _matrix(i)(j) match {
-            case a: Some[Double] => a.get
-            case _ => 0.0
-          }
-        }
-        mx
+    lazyMatlabMatrix = Array.ofDim(n, m)
+    getMatrix
 
-      case _ => config.convertMatrix(_matrix)
+    val start = System.nanoTime
+    config.clazz match {
+      case NO_CON => for (i <- 0 until n; j <- 0 until m) convert(Idx(i,j))
+
+      case _ => config.convertMatrix
     }
     val end = System.nanoTime
-
-    if(config.recordTime) timeMap += (Stage.matlabMx -> (end - start))
-
-    toReturn
+    if(config.recordTime) timeMap += (MATLABMX -> (end - start))
+    lazyMatlabMatrix
   }
 
 
+  private var newRound = true //new computation round
+  private var _idx = Idx(-1, -1)
+  /**
+   * This method is used to always have an accurate index value.
+   * @return
+   */
+  private def getIdx = _idx
   /**
    * STAGE iv of iv
    * Trace back the path starting from cell (i, j)
@@ -255,28 +253,31 @@ abstract class DynPro[Decision] extends DynProBasic{
    * @return List of PathEntry
    */
   def solution(idx: Idx): List[PathEntry[Decision]] = {
-    //(a:Idx, b:Idx) => false =: def break(startIdx: Idx, cIdx: Idx) = false
+    //set the values for the current computation round
+    newRound = true
+    _idx = idx
+
     val start = System.nanoTime
-    val solution = (config.clazz match {
+    val sol = (config.clazz match {
       case LEFT_UP | UP | NO_DEP =>
         if(config.solRange < minRange || idx.MAX - config.solRange < minRange)
         //seemly concurrent, in reality sequential when the range hasn't been set adequately
-          getPathList(idx, matrix, (a:Idx, b:Idx) => false)
+          getPathList(idx, (a:Idx, b:Idx) => false)
+        else config.calculateSolution
 
-        else config.calculateSolution(idx, matrix, getPathList)
-
-      case _ => //NO_CON | LESS_CON, sequential
-        getPathList(idx, matrix, (a:Idx, b:Idx) => false)
+      case _ => getPathList(idx, (a:Idx, b:Idx) => false)
+      //(a:Idx, b:Idx) => false =: def break(startIdx: Idx, cIdx: Idx) = false
     }).toList
     val end = System.nanoTime
 
     if(config.recordTime){
       val time = end - start
-      timeMap += Stage.solution -> (time - timeMap(Stage.empty) - timeMap(Stage.matrix))
-      timeMap += Stage.total -> time
+      timeMap += SOLUTION -> (time - timeMap(MATRIX))
+      timeMap += TOTAL -> time
     }
 
-    if (matrixForwardPathBackward) solution.reverse else solution
+    if (matrixForwardPathBackward) sol.reverse else sol
+
   }
 
   /********************************************************
@@ -294,10 +295,10 @@ abstract class DynPro[Decision] extends DynProBasic{
    * @param break limit (end of the solution path)
    * @return
    */
-  private def getPathList(idx: Idx, mx: Array[Array[Option[Double]]],
-                          break:(Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
-    val (eps, pathList) = (0.001, new ListBuffer[PathEntry[Decision]]())
+  private def getPathList(idx: Idx, break:(Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
+    getMatrix
 
+    val (eps, pathList) = (0.001, new ListBuffer[PathEntry[Decision]]())
     /*
     * Inner function.
     * Note: Requires stack size of -Xss10m
@@ -312,20 +313,20 @@ abstract class DynPro[Decision] extends DynProBasic{
         // when decision u was made:
         val v = prevIdx match {
           // Empty array:
-          case Array() => calcFBack(mx(innerIdx.i)(innerIdx.j).get, initValues, calcG)
+          case Array() => calcFBack(lazyMatrix(innerIdx.i)(innerIdx.j).get, initValues, calcG)
           // Non-empty array:
           case indices: Array[Idx] => {
             val args: Array[Double] = for (pidx <- indices) yield {
-              mx(pidx.i)(pidx.j) match {
+              lazyMatrix(pidx.i)(pidx.j) match {
                 /*
                case None => throw new RuntimeException("Internal error: " +
                        "Illegal previous state " + pidx + " at " + idx.toString)
                 */
-                case None => initValues(0)
                 case Some(value) => value
+                case _ => initValues(0)
               }
             }
-            calcFBack(mx(innerIdx.i)(innerIdx.j).get, args, calcG)
+            calcFBack(lazyMatrix(innerIdx.i)(innerIdx.j).get, args, calcG)
           }
         }
         // If v (the difference) is the current value then
@@ -333,7 +334,7 @@ abstract class DynPro[Decision] extends DynProBasic{
         // so we use an epsilon. Also, if we have already found a
         // solution we skip any further solutions:
         if (abs(v - value(innerIdx, u)) < eps) {
-          pathList += new PathEntry(u, mx(innerIdx.i)(innerIdx.j).get, innerIdx, prevIdx)
+          pathList += PathEntry(u, lazyMatrix(innerIdx.i)(innerIdx.j).get, innerIdx, prevIdx)
           //count += 1
           solutionFound = true
           for (nidx <- prevIdx if !break(idx, innerIdx)) calcSI(nidx)
@@ -347,58 +348,29 @@ abstract class DynPro[Decision] extends DynProBasic{
 
 
   /**
-   * This method calculates the cost of the given cell based on the current matrix.
-   * @param currentMX
-   * @param idx
-   * @return
-   */
-  private def calcCellCost(currentMX: Array[Array[Option[Double]]],
-                           idx: Idx): Array[Array[Option[Double]]] = {
-    //(idx) => Unit =: def handleNoneState(idx: Idx){}//do nothing
-    currentMX(idx.i)(idx.j) =
-      calcNewAccValue(getAccValues(currentMX, idx,(idx) => Unit))
-
-    currentMX
-  }
-
-
-  /**
    * This method is used to get all the possible cost of the given cell
-   * @param currentMX the matrix containing all the cells evaluated so far.
-   * @param idx the coordinates of the cell whose cost is about to be calculated
-   * @param handleNoneState sort of protocol to foolow in case a "None" value occurs
+   * @param idx the coordinates of the cell whose cost is about to be calculated.
+   * @param handleNullState sort of protocol to follow in case a "None" value occurs in
+   *                        concurrent mode.
    * @return Array
    */
-  private def getAccValues(currentMX: Array[Array[Option[Double]]], idx: Idx,
-                           handleNoneState:(Idx) => Unit): Array[Double] = {
-    for (u <- decisions(idx)) yield prevStates(idx, u) match {
-        // Empty array, i.e. there are no prev. states:
-        case Array() => calcF(value(idx, u), initValues, calcG)//sum of current and previous values
-        // Non-empty array:
-        case prevIndexes: Array[Idx] => {
-          val prevValues: Array[Double] = for (pidx <- prevIndexes) yield {
-            currentMX(pidx.i)(pidx.j) match {
-              /*
-              Status (june 2013): This state will be now known as the "none state"
-              - sequential
-              case None => throw new RuntimeException("Internal error: " +
-                      "Illegal previous state " + pidx + " at " + idx.toString)
-
-              - concurrent
-              case None => legal and required state
-
-              */
-              case None =>
-                handleNoneState(pidx)//used in concurrent mode
-                initValues(0)
-
-              case Some(value) => value
-            }
+  private def getAccValues(idx: Idx, handleNullState:(Idx) => Unit): Array[Double] =
+  for (u <- decisions(idx)) yield prevStates(idx, u) match {
+      // Empty array, i.e. there are no prev. states:
+      case Array() => calcF(value(idx, u), initValues, calcG)//sum of current and previous values
+      // Non-empty array:
+      case prevIndexes: Array[Idx] => {
+        val prevValues: Array[Double] = for (pidx <- prevIndexes) yield {
+          /*
+          Status (july 2013): This state is now known as the "null state
+          */
+          lazyMatrix(pidx.i)(pidx.j) match {
+            case Some(value) => value
+            case _ => handleNullState(pidx); initValues(0)
           }
-          calcF(value(idx, u), prevValues , calcG)
-          //calcF(value(idx, u), prevValues, calcG)
         }
-    }
+        calcF(value(idx, u), prevValues , calcG)
+      }
   }
 
 
@@ -408,9 +380,9 @@ abstract class DynPro[Decision] extends DynProBasic{
    * @param values
    * @return
    */
-  private def calcNewAccValue(values: Array[Double]): Option[Double] = {
+  private def calcCellCost(idx: Idx, values: Array[Double]){
     // Calculate the new value (min. or max.):
-    Some(reviseMax(values match {
+    lazyMatrix(idx.i)(idx.j) = Some(reviseMax(values match {
       case Array() => initValues(0)
       /*a double value, while overriding the initValues method, the dev should keep in mind that
       * the extreme value comes first*/

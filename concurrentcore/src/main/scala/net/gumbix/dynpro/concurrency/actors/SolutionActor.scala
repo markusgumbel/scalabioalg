@@ -1,7 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import scala.actors.Actor
-import net.gumbix.dynpro.concurrency.{MsgRelSolListDone, MsgException}
+import net.gumbix.dynpro.concurrency.{Messages, MsgException}
 import net.gumbix.dynpro.{Idx, PathEntry}
 import scala.collection.mutable.{ListBuffer, Map}
 
@@ -12,21 +12,23 @@ import scala.collection.mutable.{ListBuffer, Map}
  * Date: 5/8/13
  * Time: 5:56 AM
  * @author Patrick Meppe (tapmeppe@gmail.com)
- */
-
-/**
  *
- * @param getIdx
- * @param getMatrix
- * @param getPathList
- * @tparam Decision
+ * This class represents the master actor during the path finding stage
+ * @param getIdx see DynProConfig.scala
+ * @param getPathList see DynProConfig.scala
+ * @param range ...
+ * @tparam Decision see DynProConfig.scala
  */
-protected[concurrency] final class SolutionActor[Decision]
-  (getIdx:() => Idx, getMatrix:() => Array[Array[Option[Double]]], range: Int,
-   getPathList:(Idx, Array[Array[Option[Double]]], (Idx, Idx)=> Boolean) => ListBuffer[PathEntry[Decision]])
-  extends AbsMasterActor(getMatrix){
+protected[concurrency] final class SolutionActor[Decision](
+  getIdx: => Idx,
+  getPathList:(Idx, (Idx, Idx)=> Boolean) => ListBuffer[PathEntry[Decision]],
+  range: Int
+)extends AbsMasterActor(() => (0,0)){
 
   private val pathListsListMap = Map[Int, ListBuffer[ListBuffer[PathEntry[Decision]]]]()
+  protected[actors] def updatePathListsListMap(key: Int, list: ListBuffer[ListBuffer[PathEntry[Decision]]]){
+    pathListsListMap  += key -> list
+  }
 
   /**
    * This object is used to reduce to computation period
@@ -40,44 +42,45 @@ protected[concurrency] final class SolutionActor[Decision]
    *  it would be unwise to use "lazy val" instead of "def"
    * @return
    */
-  private def pinPointIdxMap: Map[Int, Idx] = if(ppiMap.isEmpty){
+  private def pinPointIdxMap: Map[Int, Idx] = {
+    if(ppiMap.isEmpty){
+      val idx = getIdx
+      //SPLIT the matrix
+      //pin point all the start indexes within the matrix and store them in the map
+      ppiMap += 0 -> idx
+      var newRange = range
+      while(newRange < idx.MAX){
+        val (zi, zj) =
+          (if(newRange > idx.i) idx.i else newRange, if(newRange > idx.j) idx.j else newRange)
 
-    //SPLIT the matrix
-    //pin point all the start indexes within the matrix and store them in the map
-    ppiMap += 0 -> getIdx()
-    var newRange = range
-    while(newRange < getIdx().MAX){
-      val (zi, zj) =
-        (if(newRange > getIdx().i) getIdx().i else newRange, if(newRange > getIdx().j) getIdx().j else newRange)
-
-      //The keys start @ 1 since 0 is already taken.
-      ppiMap(newRange/range) = (getIdx() - (zi, zj)) //pinPointIdx = idx - ~newRange
-      newRange += range
+        //The keys start @ 1 since 0 is already taken.
+        ppiMap(newRange/range) = idx - (zi, zj) //pinPointIdx = idx - ~newRange
+        newRange += range
+      }
     }
-
     ppiMap
-  }else ppiMap
-
+  }
 
   /**
    *
-   * @param o
+   * @param key
    * @return
    */
-  protected[actors] def getIdxList(o: Idx): ListBuffer[Idx] = {
-    val idxList = ListBuffer(o)
+  protected[actors] def getIdxList(key: Int): ListBuffer[Idx] = {
+    val o = pinPointIdxMap(key)
+    val (idx, idxList) = (getIdx, ListBuffer(o))
 
     if(o.MIN > 0){
-      val loopEnd = 1 + getIdx().i - o.i
+      val loopEnd = 1 + idx.i - o.i
       for(z <- 1 until loopEnd){
         idxList += (o +(0, z))
         idxList += (o +(z, 0))
       }
     }else if(o.i > 0){
-      val loopEnd = 1 + getIdx().j - o.j
+      val loopEnd = 1 + idx.j - o.j
       for(z <- 1 until loopEnd) idxList += (o +(0, z))
     }else if(o.j > 0){
-      val loopEnd = 1 + getIdx().i - o.i
+      val loopEnd = 1 + idx.i - o.i
       for(z <- 1 until loopEnd) idxList += (o +(z, 0))
     }
     //println(this + "\n\t" + o + "\n\t" + idxList)
@@ -103,7 +106,7 @@ protected[concurrency] final class SolutionActor[Decision]
       else false
     }
 
-    getPathList(idx, matrix, break)
+    getPathList(idx, break)
   }
 
 
@@ -112,10 +115,7 @@ protected[concurrency] final class SolutionActor[Decision]
     react{
       case MsgException(e, key, 0) => handleException(e, key, 0)
 
-      case MsgRelSolListDone(key, pathListsList) =>
-        congestionControl
-        pathListsListMap  +=
-          key -> pathListsList.asInstanceOf[ListBuffer[ListBuffer[PathEntry[Decision]]]]
+      case Messages.DONE => congestionControl
     }
   }
 
@@ -129,8 +129,9 @@ protected[concurrency] final class SolutionActor[Decision]
 
 
   override protected def startNewSlMod(key: Int){
-    def getPpIdx() = pinPointIdxMap(key)
-    val actor = new SolutionSubActor[Decision](this, key, getPpIdx)
+    //the key value doesn't depend on the matrix dimensions.
+    //Once set it is fix for the given slave actor.
+    val actor = new SolutionSubActor[Decision](this, key)
     slModules += actor
     actor.start
   }

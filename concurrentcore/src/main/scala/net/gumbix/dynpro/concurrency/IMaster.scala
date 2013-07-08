@@ -3,6 +3,7 @@ package net.gumbix.dynpro.concurrency
 import net.gumbix.dynpro.Idx
 import scala.collection.mutable.ListBuffer
 import scala.actors.Actor
+import net.gumbix.dynpro.concurrency.actors.MxLUpActor
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -27,12 +28,11 @@ protected[concurrency] trait IMaster{
   Each slave will receive a unique part of the original matrix based on the pointer's location.
   */
   private var (pointer, _keepConLoopAlive, compSlCounter) = (-1, true, 0)
-  protected var (matrix, mlMatrix) = (Array(Array(Option(0.0))), Array(Array(0.0)))
 
   //all the slave modules
   protected val slModules = ListBuffer[Actor]()
 
-  /*Exception handlers - START*/
+  /**********Exception handlers - START**********/
   /**
    * This case class represents the term instance that will be used to
    * print out of the crash report.
@@ -84,6 +84,12 @@ protected[concurrency] trait IMaster{
    * @param key
    */
   protected def restartSlMod(key:Int)
+
+  /**
+   *
+   * @return
+   */
+  //protected[concurrency] def getMatrix: Array[Array[Option[Double]]]
   /**********Abstract methods - END**********/
 
 
@@ -123,19 +129,17 @@ protected[concurrency] trait IMaster{
   protected final def startSlMods{
     /*The pool size value 100E6 is an experimental value
     * To get the value appropriate to your os run: Debugger.getMaxPoolSize*/
+    val (realPoolSize, len) =
+      (math.min(dMaxPoolSize - getPoolSize.subSlMod, getPoolSize.slMod),
+       slModules.length)
 
-    val (maxPoolSize, slPoolSize) = (dMaxPoolSize - getPoolSize.subSlMod, getPoolSize.slMod)
-    val realPoolSize = if (slPoolSize > maxPoolSize) maxPoolSize else slPoolSize //getPoolSize.slMod
-    //println(this + " ---> " + slPoolSize + " - " +realPoolSize + " - " +maxPoolSize)
-
-    for(i <- 0 until slModules.length){
-      if(i >= realPoolSize) return
+    for(i <- 0 until len){
+      if(i == realPoolSize) return
       compSlCounter += 1 //update
       restartSlMod(i)
       pointer = i //update the pointer
     }
 
-    val len = slModules.length
     for(i <- len until realPoolSize.asInstanceOf[Int]){
       compSlCounter += 1 //update
       startNewSlMod(i)
@@ -155,23 +159,13 @@ protected[concurrency] trait IMaster{
     In fact the method (independently from the moment the event related to it will be fired)
     won't be proceeded before the for - loop in the "startSlaves" method is done iterating.
     */
-    if (pointer < getPoolSize.slMod)
-      startNewSlMod(pointer)
-    else{//One slave just died and no new one will be started at his place
+
+    if(pointer < slModules.length) restartSlMod(pointer)
+    else if(pointer < getPoolSize.slMod) startNewSlMod(pointer)
+    else{//One slave just finished and no new one will be (re)started at his place
       compSlCounter -= 1
-      if(compSlCounter == 0)  _keepConLoopAlive = false
-        //this ! Messages.matrixDone //'MatrixTotallyComputed
+      if(compSlCounter == 0) _keepConLoopAlive = false
     }
   }
   /**********Final protected methods - END**********/
 }
-
-
-/**
- * This case class is used to temporary allocate a cost with the purpose
- * of transporting it from one module to another.
- * So far it's used in the MxLeftUp's and MxUp's classes.
- * @param idx Location of the cost.
- * @param value the cost itself.
- */
-protected[concurrency] case class CostPair(idx: Idx, value: Option[Double])

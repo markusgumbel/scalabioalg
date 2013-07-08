@@ -127,11 +127,9 @@ object MyDistanceApp {
     1
   }
 
-  val temp = new StringBuilder("")
-  object dp extends Alignment(temp, temp, AlignmentMode.GLOBAL) {
-    override val config = setConfig(LEFT_UP, EVENT)
-    override val values =
-      Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1)
+  object dp extends Alignment(new StringBuilder(""), new StringBuilder(""), AlignmentMode.GLOBAL) {
+    override val (config, values) = (setConfig(LEFT_UP, EVENT),
+      Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1))
   }
 
   def calc(s1: String, s2: String) {

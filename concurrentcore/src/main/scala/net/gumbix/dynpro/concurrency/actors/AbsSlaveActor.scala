@@ -10,13 +10,18 @@ import net.gumbix.dynpro.concurrency.MsgException
  * Date: 5/11/13
  * Time: 7:22 AM
  * @author Patrick Meppe (tapmeppe@gmail.com)
+ *
+ * This class is a part of each slave actor in this prototype.
+ * It simplifies the implementation of each specific slave actor
+ * by creating an abstraction level.
+ * @param maAc the master actor
  */
-protected[actors] abstract class AbsSlaveActor(master: AbsMasterActor)
+protected[actors] abstract class AbsSlaveActor(maAc: AbsMasterActor)
   extends Actor{
 
   /*
-  This way all NoDepRowActor objects will crash if their
-  NoDepAbsActor crashes. That way we save resources.
+  This way all MasterActor objects will crash if their
+  SlaveActor crashes. That way we save resources.
   */
   //link(master)
 
@@ -28,15 +33,13 @@ protected[actors] abstract class AbsSlaveActor(master: AbsMasterActor)
   alive.
   Caution:
   The counter has to be initialized with -1 cuz besides being the overview instance
-  it's used as the key in in the NoDepRowActor.startInternalActors.pairMap .
+  it's used as the key in in the MatlabVecActor.startInternalActors.pairMap .
   */
   private var counter = -1
   protected def getCounter = counter
   protected def raiseCounter = counter += 1
   protected def reduceCounter = counter -= 1
   protected def keepLoopAlive = counter > -1
-
-  protected var matrix = Array(Array(Option(0.0)))
 
   /**
    * This method should be used to start all the internal actors.
@@ -49,8 +52,13 @@ protected[actors] abstract class AbsSlaveActor(master: AbsMasterActor)
    */
   protected def startInternalActors{}
 
+  /**
+   *
+   */
+  protected def reset{}
 
-  //exception
+
+  /**********Exception handlers - START**********/
   /**
    * This case class stores all values necessary to be restart a crashed slave actor.
    * @param key The unique identifier given to the slave actor by it's master object.
@@ -66,9 +74,9 @@ protected[actors] abstract class AbsSlaveActor(master: AbsMasterActor)
    */
   override final def exceptionHandler = {
     case e: ArrayIndexOutOfBoundsException =>
-      master ! MsgException(e, ePair.key, ePair.pointer)
+      maAc ! MsgException(e, ePair.key, ePair.pointer)
     case e: Exception =>
-      master ! MsgException(e, ePair.key, ePair.pointer)
+      maAc ! MsgException(e, ePair.key, ePair.pointer)
   }
 
   /**
@@ -76,6 +84,6 @@ protected[actors] abstract class AbsSlaveActor(master: AbsMasterActor)
    * @return
    */
   protected def ePair: EPair
-
+  /**********Exception handlers - END**********/
 
 }

@@ -1,7 +1,8 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import net.gumbix.dynpro.concurrency.{Debugger, MsgCol, MsgException, CostPair}
-import scala.collection.mutable.{ListBuffer, Map}
+import scala.collection.mutable.ListBuffer
+import net.gumbix.dynpro.concurrency.MsgException
+import net.gumbix.dynpro.concurrency.Messages._
 import net.gumbix.dynpro.Idx
 
 
@@ -14,13 +15,12 @@ import net.gumbix.dynpro.Idx
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 protected[concurrency] final class MxUpActor(
-  getMatrix:() => Array[Array[Option[Double]]], bcSize: Int,
-  getAccValues:(Array[Array[Option[Double]]], Idx, Idx => Unit) => Array[Double] ,
-  calcNewAccValue:(Array[Double]) => Option[Double]
-)extends MxActor(getMatrix, bcSize, getAccValues, calcNewAccValue){
+  _getDim:() => (Int, Int), bcSize: Int,
+  getAccValues:(Idx, Idx => Unit) => Array[Double] ,
+  calcCellCost:(Idx, Array[Double]) => Unit
+)extends MxActor(_getDim, bcSize, getAccValues, calcCellCost){
   //trapExit = true; //receive all the exceptions from the cellActors in form of messages
   //val loopEnd = matrix.length
-  private val channelMap = Map[Int, MxUpVecActor]()
   //amount of slaves actors
   protected[actors] def slAm = getPoolSize.slMod
 
@@ -34,26 +34,19 @@ protected[concurrency] final class MxUpActor(
         hence the peer to peer communication model
         */
         for(ch <- channels){
-          try{
-            channelMap(ch % slAm).registerListener(sender.asInstanceOf[MxUpVecActor], ch)
-          }catch{
-            case e: NoSuchElementException => //the actor has already been destroyed
-              val costPairs = new ListBuffer[CostPair]
-              for(i <- 0 to matrix.length) costPairs += CostPair(Idx(i, ch), matrix(i)(ch))
-              reply(costPairs)
-              //reply(MsgCostPairs(costPairs)) =: sender ! MsgCostPairs(costPairs)
-              //this is an acknowledgement
+          val channel = slModules(ch % slAm).asInstanceOf[MxUpVecActor]
+          channel.getState match{
+            case scala.actors.Actor.State.Terminated => reply(WAKEUP)
+            //the actor is no longer computing
+
+            case _ => channel.registerListener(sender.asInstanceOf[MxUpVecActor])
           }
         }
 
-      case MsgException(e, firstJ, loopPointer) =>
-        handleException(e, firstJ, loopPointer)
-
-      case MsgCol(mxj, costPairs) =>
+      case DONE => congestionControl
         //this broadcast is received once a slave actor is done computing
-        for(cp <- costPairs) matrix(cp.idx.i)(cp.idx.j) = cp.value
-        channelMap -= mxj
-        congestionControl
+
+      case MsgException(e, firstJ, loopPointer) => handleException(e, firstJ, loopPointer)
     }
   }
 
@@ -66,7 +59,7 @@ protected[concurrency] final class MxUpActor(
    * @return
    */
   override protected def getPoolSize = {
-    var slAm = matrix(0).length
+    var slAm = getDim._2
     while(slAm > dMaxPoolSize) slAm /= 2
 
     PoolSize(slAm, 0)
@@ -79,10 +72,8 @@ protected[concurrency] final class MxUpActor(
    *                 the new MatrixVectorActor will compute @ first.
    */
   override protected def startNewSlMod(firstJ: Int){
-    //start a column computation with the current version of the matrix.
-    val actor = new MxUpVecActor(this, firstJ)
-    channelMap += (firstJ -> actor)
-    slModules += actor
+    slModules += new MxUpVecActor(this, firstJ)
+    //no start
   }
 
 
@@ -93,14 +84,21 @@ protected[concurrency] final class MxUpActor(
    * @param j
    */
   override protected def restartSlMod(j: Int){//j ~= firstJ
-    val actor = slModules(j).asInstanceOf[MxUpVecActor]
-    channelMap += (j -> actor)
+    //no restart
   }
 
-
+  /**
+   * In this dependency case the actor objects can't be started directly.
+   * They first have to be created (hence "startSlMod" and "restartSlMod").
+   * Once the creation stage done they can be (re)started.
+   */
   override protected def beforeLoopWhile{
-    for(actor <- channelMap.values) try{ actor.restart
-      }catch{ case e: IllegalStateException => actor.start
+    /*the loop condition was intentionally chosen. The following loop condition "actor <- slModules" isn't
+     adequate because it is possible that the required amount of actors is less than the number of actors
+     allocated in the "slModules" list.
+    */
+    for(j <- 0 until slAm) try{ slModules(j).restart
+    }catch{ case e: IllegalStateException => slModules(j).start
     }
   }
 

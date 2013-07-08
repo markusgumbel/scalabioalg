@@ -18,12 +18,12 @@ package net.gumbix.dynpro
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class PathEntry[Decision](
-        val decision: Decision,
-        val value: Double,
-        val currCell: Idx,
-        val prevCell: Array[Idx]) {
-
+case class PathEntry[Decision](
+  decision: Decision,
+  value: Double,
+  currCell: Idx,
+  prevCell: Array[Idx]
+){
 
   override def toString = {
     val prev = prevCell match {

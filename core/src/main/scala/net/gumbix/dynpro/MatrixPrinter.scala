@@ -40,7 +40,7 @@ trait MatrixPrinter[Decision] {
    */
   var formatter = ENGINEER
 
-  def matrix: Array[Array[Option[Double]]]
+  def getMatrix: Array[Array[Option[Double]]]
 
   var innerColumnSeparator = ' '
 
@@ -48,33 +48,33 @@ trait MatrixPrinter[Decision] {
    * What labels should the columns get?
    */
   def columnLabels: Option[Array[String]] = {
-    Some((1 to matrix(0).length).toList.map("col" + _.toString).toArray)
+    Some((1 to getMatrix(0).length).toList.map("col" + _.toString).toArray)
   }
 
   /**
    * What labels should the rows get?
    */
   def rowLabels: Array[String] = {
-    (1 to matrix.length).toList.map("row" + _.toString).toArray
+    (1 to getMatrix.length).toList.map("row" + _.toString).toArray
   }
 
   /**
    * A counter for each column, beginning with 0.
    */
   def columnCounter =
-    (0 until matrix(0).length).map(_.toString).toArray
+    (0 until getMatrix(0).length).map(_.toString).toArray
 
   /**
    * A counter for each row, beginning with 0.
    */
   def rowCounter =
-    (0 until matrix.length).map(_.toString).toArray
+    (0 until getMatrix.length).map(_.toString).toArray
 
   /**
    * Create a string that represents the entire matrix.
    */
   def mkMatrixString =
-    makeTable(matrix, Array.ofDim(matrix.size, matrix(0).size)).toString
+    makeTable(getMatrix, Array.ofDim(getMatrix.size, getMatrix(0).size)).toString
 
   /**
    * Create a string that represents the entire matrix.
@@ -84,12 +84,12 @@ trait MatrixPrinter[Decision] {
    */
   def mkMatrixString(solution: List[PathEntry[Decision]]) = {
 
-    val pathMatrix: Array[Array[Boolean]] = Array.ofDim(matrix.size, matrix(0).size)
-    for (i <- 0 until matrix.size; j <- 0 until matrix(0).size) {
+    val pathMatrix: Array[Array[Boolean]] = Array.ofDim(getMatrix.size, getMatrix(0).size)
+    for (i <- 0 until getMatrix.size; j <- 0 until getMatrix(0).size) {
       pathMatrix(i)(j) = false
     }
     solution.foreach(x => pathMatrix(x.currCell.i)(x.currCell.j) = true)
-    makeTable(matrix, pathMatrix).toString
+    makeTable(getMatrix, pathMatrix).toString
   }
 
   def makeTable(matrix: Array[Array[Option[Double]]], pathMatrix: Array[Array[Boolean]]):

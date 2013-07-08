@@ -18,7 +18,7 @@ object ConClass extends Enumeration{
   type ConClass = Value
 
   private val (seq, con) = ("seq","con")
-  private def stage(nr: String, txt: String)  = " \nstage "+ nr +" => "+ txt
+  private def stage(nr: String, txt: String)  = " \n\tstage "+ nr +" => "+ txt
   private def stageI(txt: String) = stage("I", txt)
   private def stageII(txt: String) = stage("II", txt)
   private def stageIII(txt: String) = stage("III", txt)
@@ -55,17 +55,10 @@ object ConMode extends Enumeration{
 
 object Stage extends Enumeration{
   type Stage = Value
-  val total = Value("Stage i + ii + iv")
-  val empty = Value("Stage i")
-  val matrix = Value("Stage ii")
-  val matlabMx = Value("Stage iii")
-  val solution = Value("Stage iv")
+  val TOTAL = Value("Stage i + ii")
+  val MATRIX = Value("Stage i")
+  val MATLABMX = Value("Stage matlab matrix")
+  val SOLUTION = Value("Stage ii")
 }
 
-
-object Module extends Enumeration{
-  type Module = Value
-  val maMod = Value("the master module")
-  val slMod = Value("the slave module")
-}
 

@@ -1,7 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import scala.collection.mutable.{ListBuffer, Map}
-import net.gumbix.dynpro.concurrency.CostPair
+import scala.collection.mutable.ListBuffer
+import net.gumbix.dynpro.concurrency.Messages.WAKEUP
 import net.gumbix.dynpro.Idx
 
 /**
@@ -11,13 +11,16 @@ import net.gumbix.dynpro.Idx
  * Date: 6/6/13
  * Time: 2:57 AM
  * @author Patrick Meppe (tapmeppe@gmail.com)
+ *
+ * This class increases the abstraction level for the slave actors
+ * used during the cost calculation stage.
+ * @param mxActor see AbsSlaveActor.scala
  */
-protected[actors] abstract class MxVecActor[Broadcast](mxActor: MxActor)
+protected[actors] abstract class MxVecActor(mxActor: MxActor)
 extends AbsSlaveActor(mxActor){
 
 
-  protected val channelList = new ListBuffer[Int]()
-
+  protected val (channelList, listenerList) = (new ListBuffer[Int](), new ListBuffer[MxVecActor]())
 
   protected def registerTo(channels: ListBuffer[Int]) {
     if(channels.nonEmpty){
@@ -26,47 +29,64 @@ extends AbsSlaveActor(mxActor){
     }
   }
 
+  /**
+   * This method is invoked the master actor (MxLUpActor) to
+   * register a potential new listener to the channel of the current
+   * slave actor.
+   * @param listener
+   */
+  protected[actors] final def registerListener(listener: MxVecActor){
+    listenerList += listener
+  }
+
+
+  protected final def broadcast{
+    for(listener <- listenerList) listener.getState match{
+      /*this matching is made to avoid unnecessary mails, by only waking up
+        actors waiting in a react.*/
+      case scala.actors.Actor.State.Suspended => listener ! WAKEUP
+      case _ => //do nothing
+    }
+  }
+
 
   /**
    *
    * @param idx
-   * @param getIdxCoor get the (seemly) constant coordinate.
-   *                   Idx.i for the "LEFT UP" dependency class.
-   *                   Idx.j for the "UP" dependency class.
    * @return
    */
-  protected def getAccValues(idx: Idx, getIdxCoor:(Idx) => Int) = {
+  protected def getAccValues(idx: Idx) = {
     val channels = new ListBuffer[Int]()
     var noneStateInvoked = false
 
     //block =: inner method
-    def handleNoneState(idx: Idx){
+    def handleNullState(idx: Idx){
       val channel = getIdxCoor(idx) //get the constant coordinate
       noneStateInvoked = true
       if(!(channelList.contains(channel) || channels.contains(channel)))
         channels += channel
     }
 
-    val values = mxActor.getAccValues(matrix, idx, handleNoneState)
+    val values = mxActor.getAccValues(idx, handleNullState)
 
     (noneStateInvoked, channels, values)
   }
 
 
-  /**
-   * This methods enables the storage of messages coming from one or more
-   * channels.
-   * @param costPairs
-   * @param Z
-   */
-  protected def handlePeerBroadcast(costPairs: ListBuffer[CostPair], Z: Int){
-    for(cp <- costPairs.reverse)
-      if (matrix(cp.idx.i)(cp.idx.j) == None)
-        matrix(cp.idx.i)(cp.idx.j) = cp.value
-      else return
+  override protected def reset = {
+    channelList.clear
+    listenerList.clear
   }
 
 
-  protected def broadcast(toBC: Broadcast)
+  /**
+   * This method returns the (seemly) constant coordinate of the given index.
+   * Idx.i for the "LEFT UP" dependency class.
+   * Idx.j for the "UP" dependency class.
+   *
+   * @param idx
+   * @return
+   */
+  protected def getIdxCoor(idx: Idx): Int
 
 }

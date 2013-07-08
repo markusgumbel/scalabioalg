@@ -13,26 +13,11 @@ import scala.collection.mutable.ListBuffer
  */
 protected[concurrency] object Messages {
 //symbol messages
-  val start = 'startMasterActor
-  val wakeUp = 'wakeUp
+  val START = 'startMasterModule
+  val WAKEUP = 'wakeSlaveModuleUp
+  val DONE = 'computationDone
 }
-
 
 ////Used in all master actors
 protected[concurrency] case class MsgException(e: Exception, key: Int, pointer: Int)
-
-
-////~NoDepActor & NoDepRowActor
-protected[concurrency] case class MsgEmpVecDone(row: Int, vector: ListBuffer[Option[Double]])
-protected[concurrency] case class MsgMatVecDone(row: Int, vector: ListBuffer[Double])
-protected[concurrency] case class MsgNoDepInterDone[MxDT](key: Int, list: ListBuffer[MxDT])
-
-
-////MxLeftUpActor & MxLeftUpVecActor - MxUpActor & MxUpVecActor
-protected[concurrency] case class MsgRow(i:Int, row: Array[Option[Double]])
-protected[concurrency] case class MsgCol(j:Int, costPairs: ListBuffer[CostPair])
-
-
-////SolutionActor & SolutionSubActor
-protected[concurrency] case class MsgRelSolListDone[Decision](key: Int, pathListsList: ListBuffer[ListBuffer[PathEntry[Decision]]])
 

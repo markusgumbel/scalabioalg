@@ -79,18 +79,18 @@ protected[analysis] class Timer(_minLen: Int, maxLen: Long, factor: Int, mode: F
         case GLOBALG =>
           for(i <- 0 until nrOfCom){ //Debugger.printMemories
             val timeMap = DNASeqCreator.runGlobalAlignment(seqs(i), seqs(i+nrOfCom))
-            seqMx += timeMap._1(matrix)
-            seqTt += timeMap._1(total)
-            conMx += timeMap._2(matrix)
-            conTt += timeMap._2(total)
+            seqMx += timeMap._1(MATRIX)
+            seqTt += timeMap._1(TOTAL)
+            conMx += timeMap._2(MATRIX)
+            conTt += timeMap._2(TOTAL)
           }
         case VITERBI =>
           for(i <- 0 until nrOfCom){
             val timeMap = DNASeqCreator.runViterbi(seqs(i))
-            seqMx += timeMap._1(matrix)
-            seqTt += timeMap._1(total)
-            conMx += timeMap._2(matrix)
-            conTt += timeMap._2(total)
+            seqMx += timeMap._1(MATRIX)
+            seqTt += timeMap._1(TOTAL)
+            conMx += timeMap._2(MATRIX)
+            conTt += timeMap._2(TOTAL)
           }
       }
 
@@ -127,14 +127,14 @@ protected[analysis] class Timer(_minLen: Int, maxLen: Long, factor: Int, mode: F
     }
     printStatus
 
-    map(matrix)(MIN) = GraphValues(curLens, seqMxMins, conMxMins)
-    map(matrix)(MAX) = GraphValues(curLens, seqMxMaxs, conMxMaxs)
-    map(matrix)(AVG) = GraphValues(curLens, seqMxAvgs, conMxAvgs)
-    map(matrix)(MED) = GraphValues(curLens, seqMxMeds, conMxMeds)
-    map(total)(MIN) = GraphValues(curLens, seqTtMins, conTtMins)
-    map(total)(MAX) = GraphValues(curLens, seqTtMaxs, conTtMaxs)
-    map(total)(AVG) = GraphValues(curLens, seqTtAvgs, conTtAvgs)
-    map(total)(MED) = GraphValues(curLens, seqTtMeds, conTtMeds)
+    map(MATRIX)(MIN) = GraphValues(curLens, seqMxMins, conMxMins)
+    map(MATRIX)(MAX) = GraphValues(curLens, seqMxMaxs, conMxMaxs)
+    map(MATRIX)(AVG) = GraphValues(curLens, seqMxAvgs, conMxAvgs)
+    map(MATRIX)(MED) = GraphValues(curLens, seqMxMeds, conMxMeds)
+    map(TOTAL)(MIN) = GraphValues(curLens, seqTtMins, conTtMins)
+    map(TOTAL)(MAX) = GraphValues(curLens, seqTtMaxs, conTtMaxs)
+    map(TOTAL)(AVG) = GraphValues(curLens, seqTtAvgs, conTtAvgs)
+    map(TOTAL)(MED) = GraphValues(curLens, seqTtMeds, conTtMeds)
 
     map
   }

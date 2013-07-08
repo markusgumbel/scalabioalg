@@ -49,7 +49,9 @@ class Alignment(val s1: StringBuilder, val s2: StringBuilder,
 
 
   def updateXY(newS1: String, newS2: String){
+    s1.clear
     s1.append(newS1)
+    s2.clear
     s2.append(newS2)
   }
 
@@ -70,7 +72,7 @@ class Alignment(val s1: StringBuilder, val s2: StringBuilder,
    */
   def similarity = {
     val idx = cellIndices(backpropagationStart)
-    matrix(idx.i)(idx.j).get
+    getMatrix(idx.i)(idx.j).get
   }
 
   /**
@@ -134,7 +136,7 @@ class Alignment(val s1: StringBuilder, val s2: StringBuilder,
     }
   }
 
-  def alignedStrings(): Tuple2[AlignedString, AlignedString]
+  def alignedStrings: Tuple2[AlignedString, AlignedString]
   = alignedStrings(solution)
 
   /**

@@ -47,7 +47,10 @@ class Viterbi(val s: StringBuilder, val alphabet: Array[Char],
 
   override val backpropagationStart = MAXIMUM_VALUE_LAST_ROW
 
-  override def updateXY(newS: String, __ : String){s.append(newS)}
+  override def updateXY(newS: String, __ : String){
+    s.clear
+    s.append(newS)
+  }
   def updateS(newS: String){updateXY(newS, "")}
 
 

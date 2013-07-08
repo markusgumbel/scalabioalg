@@ -1,8 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import scala.actors.{OutputChannel, Actor}
-import net.gumbix.dynpro.concurrency.{Messages, IMaster}
-import scala.collection.mutable.ListBuffer
+import scala.actors.Actor
+import net.gumbix.dynpro.concurrency.IMaster
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -11,8 +10,14 @@ import scala.collection.mutable.ListBuffer
  * Date: 5/11/13
  * Time: 11:24 PM
  * @author Patrick Meppe (tapmeppe@gmail.com)
+ *
+ * This class is a part of each master actor in this prototype.
+ * It simplifies the implementation of each specific slave actor
+ * by increasing the abstraction level set in IMatrix.scala and adapting
+ * it to the "actor" API.
+ * @param _getDim the dimensions of the matrix =: n*m
  */
-protected[actors] abstract class AbsMasterActor(val getMatrix:() => Array[Array[Option[Double]]])
+protected[actors] abstract class AbsMasterActor(_getDim:() => (Int, Int))
   extends IMaster with Actor{
 
   //TO OVERRIDE - START
@@ -30,8 +35,9 @@ protected[actors] abstract class AbsMasterActor(val getMatrix:() => Array[Array[
 
 
   /**
-   * This method should be used to create a block that will come
+   * This method should be used to insert a block that will come
    * right after between the "startSlMods" method and the "loopWhile" loop.
+   * So far it is overridden by the MyUpActor class.
    *
    * It isn't an abstract method but should be considered as one.
    * This way in contrast to the "actReact" method it will be
@@ -54,26 +60,19 @@ protected[actors] abstract class AbsMasterActor(val getMatrix:() => Array[Array[
   */
   //TO OVERRIDE - END
 
-
+  //OVERRIDDEN - START
   override final def act{
-    matrix = getMatrix()
+    setLoopCond
     react{
-      case Messages.start => //this is an synchronous message
+      case net.gumbix.dynpro.concurrency.Messages.START => //this is a synchronous message
         val to = sender
-        /**
-        def afterLoopWhile{
-          to ! ackStart
-          exit
-        }
-        */
         /*
         create and start all the necessary slave actors
         This method is implemented in the IMaster trait.
         */
         startSlMods
-
         beforeLoopWhile
-        setLoopCond
+
         loopWhile(keepConLoopAlive){
           actReact //This is an abstract method.
         }andThen to ! ackStart //afterLoopWhile
@@ -84,4 +83,9 @@ protected[actors] abstract class AbsMasterActor(val getMatrix:() => Array[Array[
   override final def exceptionHandler = {
     case e: Exception => println(e + "\n")
   }
+  //OVERRIDDEN - END
+
+  //THE REST - START
+  protected[actors] def getDim = _getDim()
+  //THE REST - END
 }

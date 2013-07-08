@@ -22,17 +22,17 @@ protected[analysis] class SeqCreator[SeqDT](elements: List[SeqDT]){
   protected val (alphabet, states, transP: Array[Array[Double]], emmP: Array[Array[Double]], map) =
     ("", "", Array(Array(.0)), Array(Array(.0)), Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1))
 
-  private val (recordTime, default) = (true, new StringBuilder(""))
-  private object SeqAlignment extends Alignment(default, default, AlignmentMode.GLOBAL){
+  private val recordTime = true
+  private object SeqAlignment extends Alignment(new StringBuilder(""), new StringBuilder(""), AlignmentMode.GLOBAL){
     override val (values, config) = (map, setConfig(NO_CON, __, recordTime))
   }
-  private object ConAlignment extends Alignment(default, default, AlignmentMode.GLOBAL){
+  private object ConAlignment extends Alignment(new StringBuilder(""), new StringBuilder(""), AlignmentMode.GLOBAL){
     override val (values, config) = (map, setConfig(LEFT_UP, EVENT, recordTime))
   }
-  private object SeqViterbi extends Viterbi(default, alphabet.toArray, states.toArray, transP, emmP){
+  private object SeqViterbi extends Viterbi(new StringBuilder(""), alphabet.toArray, states.toArray, transP, emmP){
     override val config = setConfig(NO_CON, __, recordTime)
   }
-  private object ConViterbi extends Viterbi(default, alphabet.toArray, states.toArray, transP, emmP){
+  private object ConViterbi extends Viterbi(new StringBuilder(""), alphabet.toArray, states.toArray, transP, emmP){
     override val config = setConfig(UP, EVENT, recordTime)
   }
 
