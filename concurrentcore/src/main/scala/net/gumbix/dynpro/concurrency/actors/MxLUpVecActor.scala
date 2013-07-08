@@ -2,6 +2,7 @@ package net.gumbix.dynpro.concurrency.actors
 
 import net.gumbix.dynpro.concurrency.Messages._
 import net.gumbix.dynpro.Idx
+import net.gumbix.dynpro.concurrency.Debugger
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -60,7 +61,7 @@ extends MxVecActor(mxActor){
         //this would work just as well. An example is provided in MxUpVecActor.scala
         val accValues = getAccValues(idx)
 
-        if(accValues._1){ifDebugg("["+j+"]")//nullStateInvoked
+        if(accValues._1){//ifDebugg("["+j+"]")//nullStateInvoked
           /*one or more "Null states" have encounter ergo
           this actor will have to sleep for a while.*/
           registerTo(accValues._2)//channels
@@ -68,7 +69,7 @@ extends MxVecActor(mxActor){
           react{//exclusively react on broadcasts
             case WAKEUP => //I am up now
           }
-        }else{ ifDebugg("{"+j+"}")
+        }else{//ifDebugg("{"+j+"}")
           mxActor.calcCellCost(idx, accValues._3)//values
           j += 1
           if(j % mxActor.bcFreq == 0 && loopEnd - j >= mxActor.bcFreq/2) broadcast

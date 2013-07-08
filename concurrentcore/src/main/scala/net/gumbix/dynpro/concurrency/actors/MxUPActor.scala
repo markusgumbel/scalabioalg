@@ -37,7 +37,9 @@ protected[concurrency] final class MxUpActor(
           val channel = slModules(ch % slAm).asInstanceOf[MxUpVecActor]
           channel.getState match{
             case scala.actors.Actor.State.Terminated => reply(WAKEUP)
-            //the actor is no longer computing
+            /*The actor is no longer computing, the cost it has computed should
+            therefore be found in the matrix indirectly accessible to all slave actors.
+            However the likelihood of this case to happen is very very low.*/
 
             case _ => channel.registerListener(sender.asInstanceOf[MxUpVecActor])
           }

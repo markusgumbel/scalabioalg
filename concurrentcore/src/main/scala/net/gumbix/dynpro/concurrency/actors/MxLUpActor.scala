@@ -41,15 +41,16 @@ protected[concurrency] final class MxLUpActor(
           val channel = slModules(ch).asInstanceOf[MxLUpVecActor]
           channel.getState match{
             case scala.actors.Actor.State.Terminated => reply(WAKEUP)
-              //the actor is no longer computing
-              //the likelihood of this case to happen is very very low
+              /*The actor is no longer computing, the cost it has computed should
+              therefore be found in the matrix indirectly accessible to all slave actors.
+              Its occurrence likelihood is a bit higher than that of the MxUpActor.*/
 
             case _ => channel.registerListener(sender.asInstanceOf[MxLUpVecActor])
           }
         }
 
       case DONE => congestionControl
-        //this broadcast is received once a slave actor is done computing
+        //this broadcast is received once a slave actor is done computing.
 
       case MsgException(e, constI, loopPointer) => handleException(e, constI, loopPointer)
     }

@@ -107,7 +107,7 @@ class MultipleAlignment(val strings: Array[String], val mode: AlignmentMode)
     alignments
   }
 
-  def matrix: Array[Array[Option[Double]]] = {
+  def getMatrix: Array[Array[Option[Double]]] = {
     val m = Array.ofDim[Option[Double]](alignments.size, alignments.size)
     for (i <- 0 until alignments.size; j <- 0 until alignments.size) {
       m(i)(j) = Some(alignments(i)(j).similarity)
@@ -158,7 +158,7 @@ class MultipleAlignment(val strings: Array[String], val mode: AlignmentMode)
      * compatible. The principle is: once a gap, always a gap.
      * @param s1 First aligned string
      * @param s2 Second aligned string
-     * @retrun a tuple of two lists containing the insert-positions
+     * @return a tuple of two lists containing the insert-positions
      * for string s1 and s2.
      */
     def getInsertions(s1: AlignedString, s2: AlignedString):

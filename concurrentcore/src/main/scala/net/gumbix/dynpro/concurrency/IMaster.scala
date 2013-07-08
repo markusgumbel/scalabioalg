@@ -115,8 +115,9 @@ protected[concurrency] trait IMaster{
    */
   protected final def handleException(e: Exception, key: Int, pos: Int){
     val terms = eTerms
-    var crashReport = e + "\nStage: " + terms.stage + "\n"+ terms.key +": " + key
-    if(!eTerms.pointer.isEmpty) crashReport += " - "+ terms.pointer +": " + pos
+    val sp = " - "
+    var crashReport = e + "\nStage: " + terms.stage + sp + terms.key +": " + key
+    if(!eTerms.pointer.isEmpty) crashReport += sp + terms.pointer +": " + pos
 
     throw new Exception(crashReport)
     //Debugger.print(crashReport) //print and kill all the other modules

@@ -188,7 +188,7 @@ abstract class DynPro[Decision] extends DynProBasic{
     problem. Many versions go from top to bottom and left to right.
     However, any other order may also work. */
     if(newRound){
-      lazyMatlabMatrix = Array.ofDim(n, m)
+      lazyMatrix = Array.ofDim(n, m)
 
       val mxStart = System.nanoTime
       config.clazz match {
