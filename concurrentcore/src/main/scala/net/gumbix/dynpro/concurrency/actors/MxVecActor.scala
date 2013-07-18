@@ -20,7 +20,7 @@ protected[actors] abstract class MxVecActor(mxActor: MxActor)
 extends AbsSlaveActor(mxActor){
 
 
-  protected val (channelList, listenerList) = (new ListBuffer[Int](), new ListBuffer[MxVecActor]())
+  private val (channelList, listenerList) = (new ListBuffer[Int](), new ListBuffer[MxVecActor]())
 
   protected def registerTo(channels: ListBuffer[Int]) {
     if(channels.nonEmpty){
@@ -49,6 +49,17 @@ extends AbsSlaveActor(mxActor){
     }
   }
 
+  //only for debugging purposes
+  def broadcast(i: Int, debugI: Int){
+    for(listener <- listenerList) listener.getState match{
+      /*this matching is made to avoid unnecessary mails, by only waking up
+        actors waiting in a react.*/
+      case scala.actors.Actor.State.Suspended =>
+        if(i == debugI-1) print("SENT("+WAKEUP+")") else if(i == debugI+1) print("==>" + WAKEUP)
+        listener ! WAKEUP
+      case _ => //do nothing
+    }
+  }
 
   /**
    *

@@ -71,17 +71,17 @@ abstract class DynPro[Decision] extends DynProBasic{
   concurrency mode setting - START
   ********************************************************/
   //default values
-  private val (minRange, defaultBcSize) = (10, 10)
+  private val (minRange, wuFreq) = (10, 10)
 
   private var timeMap: Map[Stage, Long] = Map()
-  def getRecordedTimes = timeMap
+  def getDurations = timeMap
 
   //methods used to configure the "DynPro" computation
   protected final def setConfig(clazz: ConClass, mode: ConMode): DynProConfig[Decision] =
-    setConfig(clazz, mode, 0, defaultBcSize, 0, false)
+    setConfig(clazz, mode, 0, wuFreq, 0, false)
 
   protected final def setConfig(clazz: ConClass, mode: ConMode, recordTime: Boolean): DynProConfig[Decision] =
-    setConfig(clazz, mode, 0, defaultBcSize, 0, recordTime)
+    setConfig(clazz, mode, 0, wuFreq, 0, recordTime)
 
   protected final def setConfig(clazz: ConClass, mode: ConMode, _mxRange: Int, _bcSize: Int, solRange: Int, recordTime: Boolean)
   : DynProConfig[Decision] = {
@@ -97,7 +97,7 @@ abstract class DynPro[Decision] extends DynProBasic{
       clazz, mode, recordTime,
       bcSize, () => (n, m), getAccValues, calcCellCost,
       mxRange, convert,
-      getIdx, getPathList, solRange
+      getExtremeIdx, getPath, solRange
     )
   }
 
@@ -172,13 +172,13 @@ abstract class DynPro[Decision] extends DynProBasic{
   ********************************************************/
   //this block solely concerns the "matrix" method
   //private val inf = Double.NegativeInfinity
-  private var lazyMatrix: Array[Array[Option[Double]]] = Array.ofDim(1, 1)
+  private var hiddenMatrix: Array[Array[Option[Double]]] = Array.ofDim(1, 1)
   /**
    * STAGE i of ii: costs evaluation
    * 25.06.2013 The prefix had to be changed from "lazy val" to "def"
    * because as from now the same object can apply a dynamic programming algorithm
    * on more than one case.
-   * The addition of the private attribute "lazyMatrix" helps to preserve the properties
+   * The addition of the private attribute "hiddenMatrix" helps to preserve the properties
    * provided by the "lazy val" prefix for a given case.
    * Meaning the new matrix will be seemly evaluated once and only once
    * for each case
@@ -188,11 +188,11 @@ abstract class DynPro[Decision] extends DynProBasic{
     problem. Many versions go from top to bottom and left to right.
     However, any other order may also work. */
     if(newRound){
-      lazyMatrix = Array.ofDim(n, m)
+      hiddenMatrix = Array.ofDim(n, m)
 
       val mxStart = System.nanoTime
       config.clazz match {
-        case NO_CON | NO_DEP | LESS_CON =>
+        case NO_CON | NO_DEP =>
           for (k <- 0 until cellsSize){
             val idx = getCellIndex(k)
             //(idx) => Unit =: def handleNullState(idx: Idx){}//do nothing
@@ -206,14 +206,14 @@ abstract class DynPro[Decision] extends DynProBasic{
       if(config.recordTime) timeMap += (MATRIX -> (mxEnd - mxStart))
       newRound = false
     }
-    lazyMatrix
+    hiddenMatrix
   }
 
 
   //matlab matrix block
-  private var lazyMatlabMatrix = Array.ofDim[Double](1, 1)
-  def convert(idx: Idx){
-    lazyMatlabMatrix(idx.i)(idx.j) = lazyMatrix(idx.i)(idx.j) match {
+  private var hiddenMatlabMatrix = Array.ofDim[Double](1, 1)
+  private def convert(idx: Idx){
+    hiddenMatlabMatrix(idx.i)(idx.j) = hiddenMatrix(idx.i)(idx.j) match {
       case value: Some[Double] => value.get
       case _ => 0.0
     }
@@ -223,8 +223,8 @@ abstract class DynPro[Decision] extends DynProBasic{
    * Concerning the concurrency this stage has a very low priority.
    * Imporant: lazy, otherwise we get null pointer exceptions.
    */
-  lazy val matlabMatrix: Array[Array[Double]] = {
-    lazyMatlabMatrix = Array.ofDim(n, m)
+  def getMatlabMatrix: Array[Array[Double]] = {
+    hiddenMatlabMatrix = Array.ofDim(n, m)
     getMatrix
 
     val start = System.nanoTime
@@ -235,7 +235,7 @@ abstract class DynPro[Decision] extends DynProBasic{
     }
     val end = System.nanoTime
     if(config.recordTime) timeMap += (MATLABMX -> (end - start))
-    lazyMatlabMatrix
+    hiddenMatlabMatrix
   }
 
 
@@ -245,7 +245,7 @@ abstract class DynPro[Decision] extends DynProBasic{
    * This method is used to always have an accurate index value.
    * @return
    */
-  private def getIdx = _idx
+  private def getExtremeIdx = _idx
   /**
    * STAGE iv of iv
    * Trace back the path starting from cell (i, j)
@@ -259,13 +259,13 @@ abstract class DynPro[Decision] extends DynProBasic{
 
     val start = System.nanoTime
     val sol = (config.clazz match {
-      case LEFT_UP | UP | NO_DEP =>
+      case NO_CON => getPath(idx, (a:Idx, b:Idx) => false)
+
+      case _ =>
         if(config.solRange < minRange || idx.MAX - config.solRange < minRange)
         //seemly concurrent, in reality sequential when the range hasn't been set adequately
-          getPathList(idx, (a:Idx, b:Idx) => false)
+          getPath(idx, (a:Idx, b:Idx) => false)
         else config.calculateSolution
-
-      case _ => getPathList(idx, (a:Idx, b:Idx) => false)
       //(a:Idx, b:Idx) => false =: def break(startIdx: Idx, cIdx: Idx) = false
     }).toList
     val end = System.nanoTime
@@ -295,7 +295,7 @@ abstract class DynPro[Decision] extends DynProBasic{
    * @param break limit (end of the solution path)
    * @return
    */
-  private def getPathList(idx: Idx, break:(Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
+  private def getPath(idx: Idx, break:(Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
     getMatrix
 
     val (eps, pathList) = (0.001, new ListBuffer[PathEntry[Decision]]())
@@ -313,11 +313,11 @@ abstract class DynPro[Decision] extends DynProBasic{
         // when decision u was made:
         val v = prevIdx match {
           // Empty array:
-          case Array() => calcFBack(lazyMatrix(innerIdx.i)(innerIdx.j).get, initValues, calcG)
+          case Array() => calcFBack(hiddenMatrix(innerIdx.i)(innerIdx.j).get, initValues, calcG)
           // Non-empty array:
           case indices: Array[Idx] => {
             val args: Array[Double] = for (pidx <- indices) yield {
-              lazyMatrix(pidx.i)(pidx.j) match {
+              hiddenMatrix(pidx.i)(pidx.j) match {
                 /*
                case None => throw new RuntimeException("Internal error: " +
                        "Illegal previous state " + pidx + " at " + idx.toString)
@@ -326,7 +326,7 @@ abstract class DynPro[Decision] extends DynProBasic{
                 case _ => initValues(0)
               }
             }
-            calcFBack(lazyMatrix(innerIdx.i)(innerIdx.j).get, args, calcG)
+            calcFBack(hiddenMatrix(innerIdx.i)(innerIdx.j).get, args, calcG)
           }
         }
         // If v (the difference) is the current value then
@@ -334,7 +334,7 @@ abstract class DynPro[Decision] extends DynProBasic{
         // so we use an epsilon. Also, if we have already found a
         // solution we skip any further solutions:
         if (abs(v - value(innerIdx, u)) < eps) {
-          pathList += PathEntry(u, lazyMatrix(innerIdx.i)(innerIdx.j).get, innerIdx, prevIdx)
+          pathList += PathEntry(u, hiddenMatrix(innerIdx.i)(innerIdx.j).get, innerIdx, prevIdx)
           //count += 1
           solutionFound = true
           for (nidx <- prevIdx if !break(idx, innerIdx)) calcSI(nidx)
@@ -364,7 +364,7 @@ abstract class DynPro[Decision] extends DynProBasic{
           /*
           Status (july 2013): This state is now known as the "null state
           */
-          lazyMatrix(pidx.i)(pidx.j) match {
+          hiddenMatrix(pidx.i)(pidx.j) match {
             case Some(value) => value
             case _ => handleNullState(pidx); initValues(0)
           }
@@ -382,7 +382,7 @@ abstract class DynPro[Decision] extends DynProBasic{
    */
   private def calcCellCost(idx: Idx, values: Array[Double]){
     // Calculate the new value (min. or max.):
-    lazyMatrix(idx.i)(idx.j) = Some(reviseMax(values match {
+    hiddenMatrix(idx.i)(idx.j) = Some(reviseMax(values match {
       case Array() => initValues(0)
       /*a double value, while overriding the initValues method, the dev should keep in mind that
       * the extreme value comes first*/

@@ -15,19 +15,19 @@ import scala.collection.mutable.{ListBuffer, Map}
  *
  * This class represents the master actor during the path finding stage
  * @param getIdx see DynProConfig.scala
- * @param getPathList see DynProConfig.scala
+ * @param getPath see DynProConfig.scala
  * @param range ...
  * @tparam Decision see DynProConfig.scala
  */
 protected[concurrency] final class SolutionActor[Decision](
   getIdx: => Idx,
-  getPathList:(Idx, (Idx, Idx)=> Boolean) => ListBuffer[PathEntry[Decision]],
+  getPath:(Idx, (Idx, Idx)=> Boolean) => ListBuffer[PathEntry[Decision]],
   range: Int
 )extends AbsMasterActor(() => (0,0)){
 
-  private val pathListsListMap = Map[Int, ListBuffer[ListBuffer[PathEntry[Decision]]]]()
-  protected[actors] def updatePathListsListMap(key: Int, list: ListBuffer[ListBuffer[PathEntry[Decision]]]){
-    pathListsListMap  += key -> list
+  private val pathListMap = Map[Int, ListBuffer[ListBuffer[PathEntry[Decision]]]]()
+  protected[actors] def updatePathListMap(key: Int, list: ListBuffer[ListBuffer[PathEntry[Decision]]]){
+    pathListMap  += key -> list
   }
 
   /**
@@ -42,7 +42,7 @@ protected[concurrency] final class SolutionActor[Decision](
    *  it would be unwise to use "lazy val" instead of "def"
    * @return
    */
-  private def pinPointIdxMap: Map[Int, Idx] = {
+  private def pinPointIdxs: Map[Int, Idx] = {
     if(ppiMap.isEmpty){
       val idx = getIdx
       //SPLIT the matrix
@@ -67,7 +67,7 @@ protected[concurrency] final class SolutionActor[Decision](
    * @return
    */
   protected[actors] def getIdxList(key: Int): ListBuffer[Idx] = {
-    val o = pinPointIdxMap(key)
+    val o = pinPointIdxs(key)
     val (idx, idxList) = (getIdx, ListBuffer(o))
 
     if(o.MIN > 0){
@@ -91,7 +91,7 @@ protected[concurrency] final class SolutionActor[Decision](
   /**
    * @see
    */
-  protected[actors] def getPathList(idx: Idx): ListBuffer[PathEntry[Decision]] = {
+  protected[actors] def getPath(idx: Idx): ListBuffer[PathEntry[Decision]] = {
     /**
      *
      * @param startIdx
@@ -106,7 +106,7 @@ protected[concurrency] final class SolutionActor[Decision](
       else false
     }
 
-    getPathList(idx, break)
+    getPath(idx, break)
   }
 
 
@@ -122,7 +122,7 @@ protected[concurrency] final class SolutionActor[Decision](
   override protected def eTerms = ETerms("Path identification", "Range", "")
 
   override protected def getPoolSize = {
-    val size = pinPointIdxMap.size
+    val size = pinPointIdxs.size
     PoolSize(size, size * (1 + (size - 1) * range))
   }
 
@@ -143,14 +143,14 @@ protected[concurrency] final class SolutionActor[Decision](
   override protected def ackStart: ListBuffer[PathEntry[Decision]] = {
     //MERGE the results (the relative path lists)
     val (pathList, sortedKeys) = //sort the keys before the iteration
-    (new ListBuffer[PathEntry[Decision]](), pathListsListMap.keys.toList.sorted)
+    (new ListBuffer[PathEntry[Decision]](), pathListMap.keys.toList.sorted)
 
     for(key <- sortedKeys){
-      if(key == 0) pathList ++= pathListsListMap(key).head
+      if(key == 0) pathList ++= pathListMap(key).head
       else{
         //both for-loops can't be merged because of the "break" attribute
         var break = false
-        for(innerList <- pathListsListMap(key) if !break)
+        for(innerList <- pathListMap(key) if !break)
           if(pathList.last.currCell == innerList.head.currCell){//the method "==" is defined in the case class "Idx"
             pathList ++= innerList.drop(1)//the first element of the "list" must be dropped to avoid a redundancy
             break = true
@@ -160,7 +160,7 @@ protected[concurrency] final class SolutionActor[Decision](
 
     //reset the current object to its initial configuration
     ppiMap.clear
-    pathListsListMap.clear
+    pathListMap.clear
 
     //all the relative path lists have been merged to ONE absolute path list
     pathList

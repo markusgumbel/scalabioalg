@@ -26,9 +26,10 @@ import scala.actors.Actor
  * @param getIdx
  * @param getAccValues The first method used to compute the value of each cells.
  * @param calcCellCost The second method used to compute the value of each cells.
- * @param getPathList
+ * @param getPath
  * @param mxRange
- * @param bcSize
+ * @param wuFreq wake up frequency =: the number of costs that have to be calculated
+ *               before the next wake up broadcast is made.
  * @param solRange
  * @param recordTime Although this isn't used here. Setting it this way makes
  *                   the attribute immutable.
@@ -37,23 +38,23 @@ import scala.actors.Actor
  */
 protected[dynpro] final class DynProConfig[Decision](
   val clazz: ConClass, mode: ConMode, val recordTime: Boolean,
-  bcSize: Int, getDim:() => (Int, Int),
+  wuFreq: Int, getDim:() => (Int, Int),
   getAccValues:(Idx, Idx => Unit) => Array[Double],
   calcCellCost:(Idx, Array[Double]) => Unit,
   mxRange: Int, convert:(Idx) => Unit,
   getIdx: => Idx,
-  getPathList:(Idx, (Idx, Idx)=>Boolean) => ListBuffer[PathEntry[Decision]],
+  getPath:(Idx, (Idx, Idx)=>Boolean) => ListBuffer[PathEntry[Decision]],
   val solRange: Int
 ){
 
   private val maModules: Map[Stage, Actor] = Map(
     MATRIX -> (clazz match{
-      case LEFT_UP => new MxLUpActor(getDim, bcSize, getAccValues, calcCellCost)
-      case UP => new MxUpActor(getDim, bcSize, getAccValues, calcCellCost)
+      case LEFT_UP => new MxLUpActor(getDim, wuFreq, getAccValues, calcCellCost)
+      case UP => new MxUpActor(getDim, wuFreq, getAccValues, calcCellCost)
       case _ => null
     }),
     MATLABMX -> new MatlabActor(getDim, convert, mxRange),
-    SOLUTION -> new SolutionActor[Decision](getIdx, getPathList, solRange)
+    SOLUTION -> new SolutionActor[Decision](getIdx, getPath, solRange)
   )
 
   /**

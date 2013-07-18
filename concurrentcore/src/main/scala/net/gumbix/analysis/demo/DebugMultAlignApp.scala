@@ -20,7 +20,7 @@ Alignment(new StringBuilder(s1), new StringBuilder(s2), AlignmentMode.GLOBAL){
   override val values = Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1)
 }
 
-object DebugMultAlignApp {
+object DebugMultAlignApp{
   def main(args: Array[String]) {
     val (lim, s1, s11, s2) = //
       (100, "wiesengrund",
@@ -33,6 +33,7 @@ object DebugMultAlignApp {
         print("Round " + (i+1) + "/" + lim)
         Debugger.printMemories
         alignment.solution
+        print("\n")
       }
     }
     println("Done")

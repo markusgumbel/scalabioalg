@@ -14,12 +14,12 @@ import net.gumbix.dynpro.Idx
  * This class increases the abstraction level for the master actor
  * used during the cost calculation stage.
  * @param _getDim see AbsMasterActor.scala
- * @param bcFreq the number of calculated cost after which a broadcast should be sent
+ * @param wuFreq see DynProConfig.scala
  * @param getAccValues see DynProConfig.scala
  * @param calcCellCost see DynProConfig.scala
  */
 protected[actors] abstract class MxActor(
-  _getDim:() => (Int, Int), val bcFreq: Int,
+  _getDim:() => (Int, Int), val wuFreq: Int,
   val getAccValues:(Idx, Idx => Unit) => Array[Double] ,
   val calcCellCost:(Idx, Array[Double]) => Unit
 )extends AbsMasterActor(_getDim){

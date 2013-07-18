@@ -55,8 +55,8 @@ protected[actors] abstract class AbsMasterActor(_getDim:() => (Int, Int))
 
   /* from concurrency.IMaster
   protected def amPair: AmPair
-  protected def startNewSlave(key: Int)
-  protected def startNewSlave(key:Int, pos: Int) ##if necessary##
+  protected def startNewSlMod(key: Int)
+  protected def restartSlMod(key:Int) ##if necessary##
   */
   //TO OVERRIDE - END
 
@@ -81,7 +81,7 @@ protected[actors] abstract class AbsMasterActor(_getDim:() => (Int, Int))
 
 
   override final def exceptionHandler = {
-    case e: Exception => println(e + "\n")
+    case e: Exception => System.err.println(e + "\n"); System.exit(-1)
   }
   //OVERRIDDEN - END
 

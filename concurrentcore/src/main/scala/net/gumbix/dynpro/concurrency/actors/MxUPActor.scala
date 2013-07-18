@@ -15,10 +15,10 @@ import net.gumbix.dynpro.Idx
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 protected[concurrency] final class MxUpActor(
-  _getDim:() => (Int, Int), bcSize: Int,
+  _getDim:() => (Int, Int), wuFreq: Int,
   getAccValues:(Idx, Idx => Unit) => Array[Double] ,
   calcCellCost:(Idx, Array[Double]) => Unit
-)extends MxActor(_getDim, bcSize, getAccValues, calcCellCost){
+)extends MxActor(_getDim, wuFreq, getAccValues, calcCellCost){
   //trapExit = true; //receive all the exceptions from the cellActors in form of messages
   //val loopEnd = matrix.length
   //amount of slaves actors

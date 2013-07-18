@@ -29,7 +29,7 @@ protected[actors] final class SolutionSubActor[Decision]
       class SubSlAc(slAc: Actor) extends Actor{
         //sub slave actor
         override def act{
-          slAc ! solActor.getPathList(idx)
+          slAc ! solActor.getPath(idx)
         }
       }
 
@@ -42,7 +42,7 @@ protected[actors] final class SolutionSubActor[Decision]
 
   override def act{
     startInternalActors
-    val pathListsList = ListBuffer[ListBuffer[PathEntry[Decision]]]()
+    val pathList = ListBuffer[ListBuffer[PathEntry[Decision]]]()
     /**
     def afterLoopWhile{
       solActor ! MsgRelSolListDone(key, pathListsList)
@@ -50,14 +50,14 @@ protected[actors] final class SolutionSubActor[Decision]
     }
     */
     def afterLoopWhile{
-      solActor.updatePathListsListMap(key, pathListsList)
+      solActor.updatePathListMap(key, pathList)
       solActor ! DONE
     }
 
     loopWhile(keepLoopAlive){
       react{
-        case pathList: ListBuffer[PathEntry[Decision]] =>
-          pathListsList += pathList
+        case path: ListBuffer[PathEntry[Decision]] =>
+          pathList += path
           reduceCounter //-> counter -= 1
       }
     }andThen afterLoopWhile

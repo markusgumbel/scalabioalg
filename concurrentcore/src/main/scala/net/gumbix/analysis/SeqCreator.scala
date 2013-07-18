@@ -57,8 +57,8 @@ protected[analysis] class SeqCreator[SeqDT](elements: List[SeqDT]){
     ConAlignment.updateXY(s1, s2)
     SeqAlignment.solution
     ConAlignment.solution
-    //println(seq.getRecordedTimes + " / " + con.getRecordedTimes)
-    (SeqAlignment.getRecordedTimes, ConAlignment.getRecordedTimes)
+    //println(seq.getDurations + " / " + con.getDurations)
+    (SeqAlignment.getDurations, ConAlignment.getDurations)
   }
 
 
@@ -67,8 +67,8 @@ protected[analysis] class SeqCreator[SeqDT](elements: List[SeqDT]){
     ConViterbi.updateS(s)
     SeqViterbi.solution
     ConViterbi.solution
-    //println(seq.getRecordedTimes + " / " + con.getRecordedTimes)
-    (SeqViterbi.getRecordedTimes, ConViterbi.getRecordedTimes)
+    //println(seq.getDurations + " / " + con.getDurations)
+    (SeqViterbi.getDurations, ConViterbi.getDurations)
   }
 
 }

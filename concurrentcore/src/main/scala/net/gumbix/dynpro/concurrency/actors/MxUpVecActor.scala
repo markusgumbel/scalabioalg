@@ -46,7 +46,7 @@ extends MxVecActor(mxActor){
       if however in the future new algorithms are implemented
       accepting a frequency higher than one,
       use the following block instead of the block above.
-      if(i % mxActor.bcSize == 0 && loopEnd1 - i >= mxActor.bcSize/2) broadcast
+      if(i % mxActor.wuFreq == 0 && loopEnd1 - i >= mxActor.wuFreq/2) broadcast
       */
       i += 1
     }

@@ -17,15 +17,15 @@ import net.gumbix.dynpro.Idx
  * This class represents the master actor during the concurrent computation
  * with the row by row approach
  * @param _getDim see MxActor.scala
- * @param bcFreq see MxActor.scala
+ * @param wuFreq see MxActor.scala
  * @param getAccValues see MxActor.scala
  * @param calcCellCost see MxActor.scala
  */
 protected[concurrency] final class MxLUpActor(
-  _getDim:() => (Int, Int), bcFreq: Int,
+  _getDim:() => (Int, Int), wuFreq: Int,
   getAccValues:(Idx, Idx => Unit) => Array[Double] ,
   calcCellCost:(Idx, Array[Double]) => Unit
-)extends MxActor(_getDim, bcFreq, getAccValues, calcCellCost){
+)extends MxActor(_getDim, wuFreq, getAccValues, calcCellCost){
   //trapExit = true; //receive all the exceptions from the cellActors in form of messages
   //val loopEnd = matrix(0).length
 
@@ -81,7 +81,7 @@ protected[concurrency] final class MxLUpActor(
    * overridden if only there's a need.
    * @param I
    */
-  override protected def restartSlMod(I: Int){ slModules(I).restart }
+  override protected def restartSlMod(I: Int){slModules(I).restart}
 
 
 }

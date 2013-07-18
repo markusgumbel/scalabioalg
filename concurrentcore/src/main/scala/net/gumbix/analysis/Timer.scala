@@ -4,9 +4,8 @@ import scala.collection.mutable.{Map, ListBuffer}
 import net.gumbix.dynpro.concurrency.Stage._
 import DynPro._
 import FactoringMode._
-import AnaVal._
-import scala.collection.mutable
-import net.gumbix.dynpro.concurrency.Debugger
+import java.text.SimpleDateFormat
+import java.io.{PrintWriter, File}
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -17,34 +16,48 @@ import net.gumbix.dynpro.concurrency.Debugger
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 
-protected[analysis] case class GraphValues(lens: ListBuffer[Long], seqs: ListBuffer[Long], cons: ListBuffer[Long])
+protected[analysis] case class GraphValues(
+  lens: ListBuffer[Long],
+  seqMin: ListBuffer[Long],
+  seqMax: ListBuffer[Long],
+  seqMed: ListBuffer[Long],
+  seqAvg: ListBuffer[Long],
+  conMin: ListBuffer[Long],
+  conMax: ListBuffer[Long],
+  conMed: ListBuffer[Long],
+  conAvg: ListBuffer[Long]
+){
+  def getText = {
+    val (s, text) = (" ", new StringBuilder())
+    for(i <- 0 until lens.length){
+      if(i != 0) text.append("\n")
+      text.append(lens(i)+s+seqMin(i)+s+seqMax(i)+s+seqMed(i)+s+seqAvg(i)+s+conMin(i)+s+conMax(i)+s+conMed(i)+s+conAvg(i))
+    }
+    text.toString
+  }
+}
 
 /**
  *
- * @param _minLen
- * @param maxLen
- * @param factor
- * @param mode
  * @param nrOfCom number of computations per round
  */
-protected[analysis] class Timer(_minLen: Int, maxLen: Long, factor: Int, mode: FactoringMode, nrOfCom: Int){
-
-  private val minLen = if(_minLen < 10) 10 else _minLen
-
-  private def raiseCurLen(curLen: Int) = mode match{
-    case ARI => curLen + factor
-    case GEO => curLen * factor
-    case EXP => math.pow(curLen, factor).asInstanceOf[Int]
-  }
-
-
-  def runAnalysis(dynpro: DynPro): Map[Stage, Map[AnaVal, GraphValues]] = {
-    var (curLen, round) = (minLen, 0)
+protected[analysis] class Timer(nrOfCom: Int){
+  /**
+   *
+   * @param minLen
+   * @param maxLen
+   * @param factor sequence length expansion factor
+   * @param mode sequence length expansion mode
+   * @param dynpro
+   * @return
+   */
+  def runAnalysis(minLen: Int, maxLen: Long, factor: Int, mode: FactoringMode, dynpro: DynPro){
+    var (curLen, round) = (if(minLen < 10) 10 else minLen, 0)
     val (map, curLens,
     seqMxMins, conMxMins, seqMxMaxs, conMxMaxs, seqMxAvgs, conMxAvgs, seqMxMeds, conMxMeds,
     seqTtMins, conTtMins, seqTtMaxs, conTtMaxs, seqTtAvgs, conTtAvgs, seqTtMeds, conTtMeds,
     med, med_1, nrOfSeqs) =
-      (Map[Stage, Map[AnaVal, GraphValues]](), ListBuffer[Long](),
+      (Map[Stage, GraphValues](), ListBuffer[Long](),
         ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](),
         ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](),
         ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](),
@@ -66,6 +79,34 @@ protected[analysis] class Timer(_minLen: Int, maxLen: Long, factor: Int, mode: F
       println(status)
       round += 1
     }
+    /**
+     *
+     * @return
+     */
+    def raiseCurLen = mode match{
+      case ARI => curLen + factor
+      case GEO => curLen * factor
+      case EXP => math.pow(curLen, factor).asInstanceOf[Int]
+    }
+    /**
+     *
+     * @return
+     */
+    def saveMap: Boolean = {
+      val core = Runtime.getRuntime().availableProcessors + "cores"
+      val date = new SimpleDateFormat("yyyyMMddHHmmss").format(new java.util.Date())
+      val s = "_"
+      def filename(stage: Stage) = "matlab/results/"+dynpro+s+stage+s+core+s+date
+
+      try{
+        val writer1 = new PrintWriter(new File(filename(MATRIX)))
+        writer1.write(map(MATRIX).getText)
+        val writer2 = new PrintWriter(new File(filename(TOTAL)))
+        writer2.write(map(TOTAL).getText)
+        true
+      }catch{ case e: Exception => false }
+    }
+
 
     printStatus
     while(curLen <= maxLen){
@@ -96,13 +137,14 @@ protected[analysis] class Timer(_minLen: Int, maxLen: Long, factor: Int, mode: F
 
       val (sSeqMx, sSeqTt, sConMx, sConTt) = (seqMx.sorted, seqTt.sorted, conMx.sorted, conTt.sorted)
 
-      val (seqMxMed, seqTtMed, conMxMed, conTtMed) = if(nrOfCom % 2 == 0)
-        ((sSeqMx(med_1) + sSeqMx(med))/2,
+      val (seqMxMed, seqTtMed, conMxMed, conTtMed) = if(nrOfCom % 2 == 0)(
+         (sSeqMx(med_1) + sSeqMx(med))/2,
          (sSeqTt(med_1) + sSeqTt(med))/2,
          (sConMx(med_1) + sConMx(med))/2,
-         (sConTt(med_1) + sConTt(med))/2)
-      else (sSeqMx(med), sSeqTt(med), sConMx(med), sConTt(med))
+         (sConTt(med_1) + sConTt(med))/2
+      )else (sSeqMx(med), sSeqTt(med), sConMx(med), sConTt(med))
 
+      //x-coordinate
       curLens += curLen
       //matrix
       seqMxMins += sSeqMx.head
@@ -123,20 +165,22 @@ protected[analysis] class Timer(_minLen: Int, maxLen: Long, factor: Int, mode: F
       seqTtMeds += seqTtMed
       conTtMeds += conTtMed
 
-      curLen = raiseCurLen(curLen)
+      curLen = raiseCurLen
     }
     printStatus
 
-    map(MATRIX)(MIN) = GraphValues(curLens, seqMxMins, conMxMins)
-    map(MATRIX)(MAX) = GraphValues(curLens, seqMxMaxs, conMxMaxs)
-    map(MATRIX)(AVG) = GraphValues(curLens, seqMxAvgs, conMxAvgs)
-    map(MATRIX)(MED) = GraphValues(curLens, seqMxMeds, conMxMeds)
-    map(TOTAL)(MIN) = GraphValues(curLens, seqTtMins, conTtMins)
-    map(TOTAL)(MAX) = GraphValues(curLens, seqTtMaxs, conTtMaxs)
-    map(TOTAL)(AVG) = GraphValues(curLens, seqTtAvgs, conTtAvgs)
-    map(TOTAL)(MED) = GraphValues(curLens, seqTtMeds, conTtMeds)
-
-    map
+    map(MATRIX) = GraphValues(curLens, seqMxMins, seqMxMaxs, seqMxMeds, seqMxAvgs, conMxMins, conMxMaxs, conMxMeds, conMxAvgs)
+    map(TOTAL) = GraphValues(curLens, seqTtMins, seqTtMaxs, seqTtMeds, seqTtAvgs, conTtMins, conTtMaxs, conTtMeds, conTtAvgs)
+    saveMap
   }
 
+
+}
+
+
+object Timer extends Timer(100){
+  def main(args: Array[String]) {
+    runAnalysis(100, 1E20.asInstanceOf[Long], 10, GEO, GLOBALG)
+    runAnalysis(100, 1E20.asInstanceOf[Long], 10, GEO, VITERBI)
+  }
 }

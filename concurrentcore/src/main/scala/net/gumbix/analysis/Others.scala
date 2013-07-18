@@ -18,14 +18,6 @@ object FactoringMode extends Enumeration{
 
 object DynPro extends Enumeration{
   type DynPro = Value
-  val GLOBALG = Value("global alignment")
+  val GLOBALG = Value("globalAlignment")
   val VITERBI = Value("viterbi")
-}
-
-object AnaVal extends Enumeration{
-  type AnaVal = Value
-  val MIN = Value("minimum")
-  val MAX = Value("maximum")
-  val AVG = Value("average")
-  val MED = Value("median")
 }

@@ -22,11 +22,11 @@ protected[concurrency] final class MatlabActor(
   _getDim:() => (Int, Int), val convert: Idx => Unit, val range: Int)
   extends AbsMasterActor(_getDim){
 
+  override protected def eTerms = ETerms("Matrix conversion", "Row", "")
+
   override protected def getPoolSize =
     PoolSize(getDim._1, getDim._1 * (getDim._2/range + 1))
 
-  override def eTerms = ETerms("Matrix conversion", "Row", "")
-  //private val matrix: Array[Array[Double]] = Array.ofDim(getMatrix.length, getMatrix(0).length)
 
   override protected def restartSlMod(row: Int){slModules(row).restart}
 
