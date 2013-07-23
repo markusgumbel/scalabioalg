@@ -124,6 +124,11 @@ protected[concurrency] trait IMaster{
   }
 
 
+	private def runStartSlModsLoopIt(activateActor: Int => Unit, i: Int){
+		compSlCounter += 1 //update
+		activateActor(i)
+		pointer = i //update the pointer
+	}
   /**
    * This method is used to start the first wave of slave modules.
    */
@@ -134,18 +139,13 @@ protected[concurrency] trait IMaster{
       (math.min(dMaxPoolSize - getPoolSize.subSlMod, getPoolSize.slMod),
        slModules.length)
 
-    for(i <- 0 until len){
+    for(i <- 0 until len){//the first wave
       if(i == realPoolSize) return
-      compSlCounter += 1 //update
-      restartSlMod(i)
-      pointer = i //update the pointer
+      runStartSlModsLoopIt(restartSlMod, i)
     }
 
-    for(i <- len until realPoolSize.asInstanceOf[Int]){
-      compSlCounter += 1 //update
-      startNewSlMod(i)
-      pointer = i //update the pointer
-    }
+    for(i <- len until realPoolSize.asInstanceOf[Int]) runStartSlModsLoopIt(startNewSlMod, i) //the second wave
+
   }
 
 

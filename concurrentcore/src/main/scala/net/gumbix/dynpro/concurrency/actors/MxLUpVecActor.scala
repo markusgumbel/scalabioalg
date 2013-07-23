@@ -56,7 +56,7 @@ extends MxVecActor(mxActor){
 
     To test the developer should run
     - net.gumbix.analysis.demo.MyDistanceApp.main for a manual repetition
-    - net.gumbix.analysis.demo.DebugMultAlignApp.main for a automatic repetition
+    - net.gumbix.analysis.demo.DebugMultAlignApp.main for an automatic repetition
     */
     //debug block
     val debug = 5

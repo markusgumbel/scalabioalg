@@ -12,10 +12,9 @@ import net.gumbix.analysis.DynPro._
  * Time: 7:58 PM
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
-object TimerApp {
-
+object TimerApp extends Timer(100){
   def main(args: Array[String]) {
-    val timer = new Timer(50, 1E5.asInstanceOf[Long], 10, ARI, 2)
-    timer.runAnalysis(GLOBALG)
+    runAnalysis(100, 1E20.asInstanceOf[Long], 10, GEO, GLOBALG)
+    runAnalysis(100, 1E20.asInstanceOf[Long], 10, GEO, VITERBI)
   }
 }

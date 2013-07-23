@@ -1,0 +1,17 @@
+<schema><!--saving protocol-->
+    <rows>
+        <row>
+            <sequence_length/>
+            <sequential_minimum/>
+            <sequential_maximum/>
+            <sequential_median/>
+            <sequential_average/>
+            <concurrent_minimum/>
+            <concurrent_maximum/>
+            <concurrent_median/>
+            <concurrent_average/>
+        </row>
+        <row></row>
+        <!-- and so on -->
+    </rows>
+</schema>

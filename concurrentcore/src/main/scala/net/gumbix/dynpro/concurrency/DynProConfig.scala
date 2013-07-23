@@ -19,7 +19,12 @@ import scala.collection.mutable.{Map, ListBuffer}
 import scala.actors.Actor
 
 /**
- *
+ * This object takes care of running the concurrency by create an abstraction level on
+ * 2 essential aspects.:
+ * - The actors aren't accessible/visible from outside of this package.
+ *   Making a remodelling of this package much easier.
+ * - The matrix object itself isn't directly accessible to the actors.
+ *   Reducing the effort and time during its relocation or outsourcing (in a cloud environment for e.g.).
  * @param clazz =: ConClass. One of the 3 possible dependency classes.
  * @param mode =: ConMode (EVENT or THREAD)
  * @param getDim
@@ -48,7 +53,7 @@ protected[dynpro] final class DynProConfig[Decision](
 ){
 
   private val maModules: Map[Stage, Actor] = Map(
-    MATRIX -> (clazz match{
+    MATRIX -> (clazz match{//the alternative would be to create to create singelton classes
       case LEFT_UP => new MxLUpActor(getDim, wuFreq, getAccValues, calcCellCost)
       case UP => new MxUpActor(getDim, wuFreq, getAccValues, calcCellCost)
       case _ => null

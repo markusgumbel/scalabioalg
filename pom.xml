@@ -20,6 +20,13 @@
                 <role>Administrator</role>
             </roles>
         </developer>
+        <developer>
+            <name>Patrick Meppe</name>
+            <email>tapmeppe@gmail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
     </developers>
     <inceptionYear>2011</inceptionYear>
 

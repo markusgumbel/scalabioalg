@@ -104,7 +104,7 @@ protected[analysis] class Timer(nrOfCom: Int){
         val writer2 = new PrintWriter(new File(filename(TOTAL)))
         writer2.write(map(TOTAL).getText)
         true
-      }catch{ case e: Exception => false }
+      }catch{case e: Exception => false}
     }
 
 
@@ -178,9 +178,3 @@ protected[analysis] class Timer(nrOfCom: Int){
 }
 
 
-object Timer extends Timer(100){
-  def main(args: Array[String]) {
-    runAnalysis(100, 1E20.asInstanceOf[Long], 10, GEO, GLOBALG)
-    runAnalysis(100, 1E20.asInstanceOf[Long], 10, GEO, VITERBI)
-  }
-}
