@@ -1,3 +1,5 @@
+package net.gumbix.string.alignment
+
 /*
 Copyright 2011 the original author or authors.
 
@@ -12,21 +14,26 @@ Copyright 2011 the original author or authors.
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
-package net.gumbix.string.alignment
 
-import net.gumbix.bioinf.string.alignment.AlignmentStep._
+   This script is based on the net.gumbix.string.alignment.EditDistanceApp.scala
+*/
+
 import net.gumbix.bioinf.string.alignment.{AlignmentMode, Alignment}
 import swing._
-import event.{SelectionChanged, ButtonClicked}
 import javax.swing.UIManager
 import java.awt.{Dimension, Color, Font}
+import net.gumbix.bioinf.string.alignment.AlignmentStep._
+import scala.swing.event.ButtonClicked
+import net.gumbix.dynpro.concurrency.ConClass._
+import scala.swing.event.ButtonClicked
+import net.gumbix.dynpro.concurrency.ConMode._
+import scala.swing.event.ButtonClicked
 
 /**
  * Demo for the edit distance. Was used for a open campus demo.
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-object EditDistanceApp {
+object MyDistanceApp {
   val text = new TextArea {
     text = "empty"
     editable = false
@@ -121,13 +128,13 @@ object EditDistanceApp {
     1
   }
 
-  def calc(s1: String, s2: String) {
-    val mode = AlignmentMode.GLOBAL
-    object dp extends Alignment(s1, s2, mode) {
+  object dp extends Alignment(new StringBuilder(""), new StringBuilder(""), AlignmentMode.GLOBAL) {
+    override val (config, values) = (setConfig(LEFT_UP, EVENT),
+      Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1))
+  }
 
-      override val values =
-      Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1)
-    }
+  def calc(s1: String, s2: String) {
+    dp.updateXY(s1, s2)
     val solution = dp.solution
     text.text = "Number of changes: " + -dp.similarity
     text.text += "\n\n" + dp.makeAlignmentString(solution)

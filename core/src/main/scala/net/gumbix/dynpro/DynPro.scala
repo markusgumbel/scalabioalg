@@ -16,33 +16,11 @@ Copyright 2011 the original author or authors.
 package net.gumbix.dynpro
 
 import collection.mutable.ListBuffer
-import math.{abs, min, max}
-import concurrency.DynProConfig
+import math.abs
+import net.gumbix.dynpro.concurrency.{DynProConfig}
 import concurrency.ConClass._
 import concurrency.ConMode._
 import concurrency.Stage._
-
-/**
- * Convenient class for a two-dimensional index pair (i, j).
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
- */
-case class Idx(i: Int, j: Int) {
-  def +(o: Idx) = Idx(i + o.i, j + o.j)
-  def -(o: Idx) = Idx(i - o.i, j - o.j)
-
-  def +(z: Int) = Idx(i + z, j + z)
-  def -(z: Int) = Idx(i - z, j - z)
-
-  def +(zi: Int, zj: Int) = Idx(i + zi, j + zj)
-  def -(zi: Int, zj: Int) = Idx(i - zi, j - zj)
-
-  def ==(o: Idx) = (i == o.i && j == o.j)
-
-  val MIN = min(i, j)
-  val MAX = max(i, j)
-
-  override def toString = "(" + i + ", " + j + ")"
-}
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional

@@ -18,9 +18,11 @@ package net.gumbix.bioinf.string.alignment
 import net.gumbix.bioinf.string.alignment.AlignmentMode._
 import net.gumbix.bioinf.string.alignment.AlignmentStep._
 import net.gumbix.dynpro.CellPosition._
-import net.gumbix.dynpro.Backpropagation
+import net.gumbix.dynpro._
 import net.gumbix.bioinf.string.alignment.GapType._
-import net.gumbix.dynpro.{PathEntry, MatrixPrinter, Idx, DynPro}
+import scala.Some
+import net.gumbix.dynpro.Idx
+import scala.Tuple2
 
 /**
  * s1 is supposed to be the search string whereas s2 is the (longer) original
