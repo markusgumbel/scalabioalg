@@ -159,7 +159,6 @@ protected[concurrency] trait IMaster{
    * if required start slave modules after the first wave.
    */
   protected final def congestionControl{
-    pointer += 1
     /*
     NOTE: not to worry, "pointer" is being SEEMLY concurrently updated.
     In fact the method (independently from the moment the event related to it will be fired)
