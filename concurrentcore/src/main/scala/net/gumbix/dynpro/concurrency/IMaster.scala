@@ -127,7 +127,7 @@ protected[concurrency] trait IMaster{
 	private def runStartSlModsLoopIt(activateActor: Int => Unit, i: Int){
 		compSlCounter += 1 //update
 		activateActor(i)
-		pointer = i //update the pointer
+		//pointer = i //update the pointer
 	}
   /**
    * This method is used to start the first wave of slave modules.
@@ -140,12 +140,17 @@ protected[concurrency] trait IMaster{
        slModules.length)
 
     for(i <- 0 until len){//the first wave
-      if(i == realPoolSize) return
+      if(i == realPoolSize.asInstanceOf[Int]){
+        pointer = realPoolSize.asInstanceOf[Int]
+        return
+      }
       runStartSlModsLoopIt(restartSlMod, i)
     }
 
-    for(i <- len until realPoolSize.asInstanceOf[Int]) runStartSlModsLoopIt(startNewSlMod, i) //the second wave
+    for(i <- len until realPoolSize.asInstanceOf[Int])
+      runStartSlModsLoopIt(startNewSlMod, i) //the second wave
 
+    pointer = realPoolSize.asInstanceOf[Int]
   }
 
 
@@ -161,9 +166,15 @@ protected[concurrency] trait IMaster{
     won't be proceeded before the for - loop in the "startSlaves" method is done iterating.
     */
 
+    /* pointer += 1
     if(pointer < slModules.length) restartSlMod(pointer)
-    else if(pointer < getPoolSize.slMod) startNewSlMod(pointer)
-    else{//One slave just finished and no new one will be (re)started at his place
+    else if(pointer < getPoolSize.slMod) startNewSlMod(pointer)*/
+
+    if(pointer < getPoolSize.slMod){
+      if(pointer < slModules.length) restartSlMod(pointer)
+      else startNewSlMod(pointer)
+      pointer += 1
+    }else{//One slave just finished and no new one will be (re)started at his place
       compSlCounter -= 1
       if(compSlCounter == 0) _keepConLoopAlive = false
     }
