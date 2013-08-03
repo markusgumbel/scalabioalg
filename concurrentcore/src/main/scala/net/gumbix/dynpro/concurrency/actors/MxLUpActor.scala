@@ -16,18 +16,20 @@ import net.gumbix.dynpro.Idx
 /**
  * This class represents the master actor during the concurrent computation
  * with the row by row approach
- * @param _getDim see MxActor.scala
  * @param wuFreq see MxActor.scala
  * @param getAccValues see MxActor.scala
  * @param calcCellCost see MxActor.scala
  */
 protected[concurrency] final class MxLUpActor(
-  _getDim:() => (Int, Int), wuFreq: Int,
+  slModAm: Int, val slModVecLen: Int, wuFreq: Int,
   getAccValues:(Idx, Idx => Unit) => Array[Double] ,
   calcCellCost:(Idx, Array[Double]) => Unit
-)extends MxActor(_getDim, wuFreq, getAccValues, calcCellCost){
+)extends MxActor(wuFreq, getAccValues, calcCellCost){
   //trapExit = true; //receive all the exceptions from the cellActors in form of messages
   //val loopEnd = matrix(0).length
+
+  private val actors = ListBuffer[MxLUpVecActor]()
+
 
   override protected def actReact{
     react{
@@ -37,17 +39,17 @@ protected[concurrency] final class MxLUpActor(
         all further communications will be been proceeded between the slave actors
         hence the peer to peer communication model
         */
-        for(ch <- channels){
-          val channel = slModules(ch).asInstanceOf[MxLUpVecActor]
+        channels.foreach(ch => {
+          val channel = actors(ch)
           channel.getState match{
             case scala.actors.Actor.State.Terminated => reply(WAKEUP)
-              /*The actor is no longer computing, the cost it has computed should
-              therefore be found in the matrix indirectly accessible to all slave actors.
-              Its occurrence likelihood is a bit higher than that of the MxUpActor.*/
+            /*The actor is no longer computing, the cost it has computed should
+            therefore be found in the matrix indirectly accessible to all slave actors.
+            Its occurrence likelihood is a bit higher than that of the MxUpActor.*/
 
             case _ => channel.registerListener(sender.asInstanceOf[MxLUpVecActor])
           }
-        }
+        })
 
       case DONE => congestionControl
         //this broadcast is received once a slave actor is done computing.
@@ -61,7 +63,7 @@ protected[concurrency] final class MxLUpActor(
   /**
    * @return
    */
-  override protected def getPoolSize = PoolSize(getDim._1, 0)
+  override protected val getPoolSize = PoolSize(slModAm, 0)
 
   /**
    * This method creates and starts one MatrixVectorActor.
@@ -71,17 +73,10 @@ protected[concurrency] final class MxLUpActor(
   override protected def startNewSlMod(I: Int){
     //start a column computation with the current version of the matrix.
     val actor = new MxLUpVecActor(this, I)
-    slModules += actor
+    actors += actor
     actor.start
   }
 
-  /**
-   * This isn't an abstract method but should be considered as one.
-   * This way in contrast to the "actReact" method it will be
-   * overridden if only there's a need.
-   * @param I
-   */
-  override protected def restartSlMod(I: Int){slModules(I).restart}
 
 
 }

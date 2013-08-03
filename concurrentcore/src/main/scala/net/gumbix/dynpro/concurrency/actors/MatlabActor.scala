@@ -14,26 +14,20 @@ import net.gumbix.dynpro.Idx
  *
  * This class represents the master actor used during the conversion of the matrix into an
  * array interpretable by the programming language "MatLab".
- * @param _getDim see AbsSlaveActor.scala
  * @param convert see DynProConfig.scala
  * @param range
  */
 protected[concurrency] final class MatlabActor(
-  _getDim:() => (Int, Int), val convert: Idx => Unit, val range: Int)
-  extends AbsMasterActor(_getDim){
+  slModAm: Int, val slModVecLen: Int, val convert: Idx => Unit, val range: Int)
+  extends AbsMasterActor{
 
   override protected def eTerms = ETerms("Matrix conversion", "Row", "")
 
-  override protected def getPoolSize =
-    PoolSize(getDim._1, getDim._1 * (getDim._2/range + 1))
+  override protected val getPoolSize = PoolSize(slModAm, slModAm * (slModVecLen/range + 1))
 
-
-  override protected def restartSlMod(row: Int){slModules(row).restart}
 
   override protected def startNewSlMod(row: Int) {
-    val actor = new MatlabVecActor(this, row)
-    actor.start
-    slModules += actor
+    new MatlabVecActor(this, row).start
   }
 
   override protected def actReact{

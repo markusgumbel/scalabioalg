@@ -50,7 +50,7 @@ trait MultipleAlignmentPrinter {
 
   def _mkAlignmentTable() {
     object o extends MatrixPrinter[Double] {
-      val getMatrix = {
+      val matrix = {
         val n = strings.size
         val matrix: Array[Array[Option[Double]]] = Array.ofDim(n, n)
         for (i <- 0 until n; j <- 0 until n) {

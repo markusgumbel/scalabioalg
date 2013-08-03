@@ -24,7 +24,7 @@ trait Backpropagation[Decision] extends DynProMatrix {
   def solution(idx: Idx): List[PathEntry[Decision]]
 
   /**
-   * By default, start at the end of the getMatrix.
+   * By default, start at the end of the matrix.
    */
   val backpropagationStart: CellPosition = MAXIMUM_INDICES
 
@@ -54,7 +54,7 @@ trait Backpropagation[Decision] extends DynProMatrix {
     var max = java.lang.Double.NEGATIVE_INFINITY
     var maxIdx = Idx(0, 0)
     for (i <- 0 until n; j <- 0 until m) {
-      getMatrix(i)(j) match {
+      matrix(i)(j) match {
         case Some(value) => {
           if (value > max) {
             max = value
@@ -71,7 +71,7 @@ trait Backpropagation[Decision] extends DynProMatrix {
    * @return The cell indices of the maximum value in the last row.
    */
   lazy val maxLastRowIdx = {
-    val row = for (e <- getMatrix(n - 1) if e.isInstanceOf[Some[Double]]) yield e.get
+    val row = for (e <- matrix(n - 1) if e.isInstanceOf[Some[Double]]) yield e.get
     val max = row reduceLeft (_ max _)
     val colIdx = row.indexOf(max)
     Idx(n - 1, colIdx)
@@ -81,7 +81,7 @@ trait Backpropagation[Decision] extends DynProMatrix {
    * @return The cell indices of the maximum value in the last column.
    */
   lazy val maxLastColumnIdx = {
-    val columnOptional = for (i <- 0 until n) yield getMatrix(i)(m - 1)
+    val columnOptional = for (i <- 0 until n) yield matrix(i)(m - 1)
     val column = for (e <- columnOptional if e.isInstanceOf[Some[Double]]) yield e.get
     val max = column reduceLeft (_ max _)
     val rowIdx = column.indexOf(max)

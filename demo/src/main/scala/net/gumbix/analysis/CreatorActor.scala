@@ -29,7 +29,7 @@ extends Actor{
       }
     }
 
-    for(j <- 0 until nrOfSeq) new SubCreatorActor(this).start
+    (0 until nrOfSeq).foreach(_ => new SubCreatorActor(this).start)
   }
 
 

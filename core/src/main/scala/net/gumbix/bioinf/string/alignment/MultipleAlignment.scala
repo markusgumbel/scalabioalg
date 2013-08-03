@@ -98,16 +98,14 @@ class MultipleAlignment(val strings: Array[String], val mode: AlignmentMode)
     val alignments = Array.ofDim[Alignment](n, n)
     for (i <- 0 until n; j <- i until n) {
       // Note that j starts with i (not i + 1)
-      val s1 = new StringBuilder(strings(i))
-      val s2 = new StringBuilder(strings(j))
-      val a = new Alignment(s1, s2, mode)
+      val a = new Alignment(strings(i),strings(j), mode)
       alignments(i)(j) = a
       alignments(j)(i) = a
     }
     alignments
   }
 
-  def getMatrix: Array[Array[Option[Double]]] = {
+  lazy val matrix: Array[Array[Option[Double]]] = {
     val m = Array.ofDim[Option[Double]](alignments.size, alignments.size)
     for (i <- 0 until alignments.size; j <- 0 until alignments.size) {
       m(i)(j) = Some(alignments(i)(j).similarity)

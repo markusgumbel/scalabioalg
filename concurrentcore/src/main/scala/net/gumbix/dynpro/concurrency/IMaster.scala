@@ -29,9 +29,6 @@ protected[concurrency] trait IMaster{
   */
   private var (pointer, _keepConLoopAlive, compSlCounter) = (-1, true, 0)
 
-  //all the slave modules
-  protected val slModules = ListBuffer[Actor]()
-
   /**********Exception handlers - START**********/
   /**
    * This case class represents the term instance that will be used to
@@ -64,7 +61,7 @@ protected[concurrency] trait IMaster{
    */
   protected case class PoolSize(slMod: Int, subSlMod: Int)
 
-  protected def getPoolSize: PoolSize
+  protected val getPoolSize: PoolSize
 
   protected val dMaxPoolSize = Runtime.getRuntime().availableProcessors() * 100E6
   /**********Pool size - END**********/
@@ -77,19 +74,6 @@ protected[concurrency] trait IMaster{
    */
   protected def startNewSlMod(key: Int)
 
-  /**
-   * This isn't an abstract method but should be considered as one.
-   * This way in contrast to the "actReact" method it will be
-   * overridden if only there's a need.
-   * @param key
-   */
-  protected def restartSlMod(key:Int)
-
-  /**
-   *
-   * @return
-   */
-  //protected[concurrency] def getMatrix: Array[Array[Option[Double]]]
   /**********Abstract methods - END**********/
 
 
@@ -100,10 +84,7 @@ protected[concurrency] trait IMaster{
    * @return
    */
   protected final def keepConLoopAlive = _keepConLoopAlive
-  protected final def setLoopCond{
-    _keepConLoopAlive = true
-    pointer = -1
-  }
+
 
   /**
    * This method is invoked if an exception is fired by a slave module.
@@ -124,33 +105,18 @@ protected[concurrency] trait IMaster{
   }
 
 
-	private def runStartSlModsLoopIt(activateActor: Int => Unit, i: Int){
-		compSlCounter += 1 //update
-		activateActor(i)
-		//pointer = i //update the pointer
-	}
   /**
    * This method is used to start the first wave of slave modules.
    */
   protected final def startSlMods{
     /*The pool size value 100E6 is an experimental value
     * To get the value appropriate to your os run: Debugger.getMaxPoolSize*/
-    val (realPoolSize, len) =
-      (math.min(dMaxPoolSize - getPoolSize.subSlMod, getPoolSize.slMod),
-       slModules.length)
+    val realPoolSize =
+      math.min(dMaxPoolSize - getPoolSize.subSlMod, getPoolSize.slMod).asInstanceOf[Int]
 
-    for(i <- 0 until len){//the first wave
-      if(i == realPoolSize.asInstanceOf[Int]){
-        pointer = realPoolSize.asInstanceOf[Int]
-        return
-      }
-      runStartSlModsLoopIt(restartSlMod, i)
-    }
-
-    for(i <- len until realPoolSize.asInstanceOf[Int])
-      runStartSlModsLoopIt(startNewSlMod, i) //the second wave
-
-    pointer = realPoolSize.asInstanceOf[Int]
+    (0 until realPoolSize).foreach(i => startNewSlMod(i))
+    compSlCounter = realPoolSize
+    pointer = realPoolSize
   }
 
 
@@ -164,14 +130,8 @@ protected[concurrency] trait IMaster{
     In fact the method (independently from the moment the event related to it will be fired)
     won't be proceeded before the for - loop in the "startSlaves" method is done iterating.
     */
-
-    /* pointer += 1
-    if(pointer < slModules.length) restartSlMod(pointer)
-    else if(pointer < getPoolSize.slMod) startNewSlMod(pointer)*/
-
     if(pointer < getPoolSize.slMod){
-      if(pointer < slModules.length) restartSlMod(pointer)
-      else startNewSlMod(pointer)
+      startNewSlMod(pointer)
       pointer += 1
     }else{//One slave just finished and no new one will be (re)started at his place
       compSlCounter -= 1

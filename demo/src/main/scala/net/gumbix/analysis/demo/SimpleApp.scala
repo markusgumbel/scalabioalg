@@ -41,9 +41,9 @@ object SimpleApp {
   )
 
   private val (s, s1, s2) =
-    (new StringBuilder("ACTCTCTCCTCCTCCTCACCTCATTGTCTCCCCGACTTATCCTAATGCGAAATTGGATTCTGAGCATTTT"),
-      new StringBuilder("wiesengrund lampe bringen Meier Messer Ziele Straßburg"),
-      new StringBuilder("schweinehund ampel trinken Maier Metzger Zeile Strassbourg"))
+    ("ACTCTCTCCTCCTCCTCACCTCATTGTCTCCCCGACTTATCCTAATGCGAAATTGGATTCTGAGCATTTT",
+      "wiesengrund lampe bringen Meier Messer Ziele Straßburg",
+      "schweinehund ampel trinken Maier Metzger Zeile Strassbourg")
 
   private object ConAlignment extends Alignment(s1, s2, AlignmentMode.GLOBAL){
     override val config = setConfig(LEFT_UP, EVENT, true)

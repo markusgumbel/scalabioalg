@@ -23,8 +23,8 @@ protected[actors] final class SolutionSubActor[Decision]
   (solActor: SolutionActor[Decision], key: Int)
   extends AbsSlaveActor(solActor){
 
-  override protected def startInternalActors =
-    for(idx <- solActor.getIdxList(key)){
+  override protected def startInternalActors{
+    solActor.getIdxList(key).foreach(idx => {
       raiseCounter //-> counter += 1
       class SubSlAc(slAc: Actor) extends Actor{
         //sub slave actor
@@ -34,6 +34,7 @@ protected[actors] final class SolutionSubActor[Decision]
       }
 
       new SubSlAc(this).start
+    })
   }
 
 

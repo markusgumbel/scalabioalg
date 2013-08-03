@@ -23,7 +23,7 @@ extends AbsSlaveActor(mxActor){
 
   override protected def startInternalActors{
     case class LoopPair(loopStart: Int, loopEnd: Int)
-    val (loopEnd, loopPairs) = (mxActor.getDim._2, new ListBuffer[LoopPair]())
+    val (loopEnd, loopPairs) = (mxActor.slModVecLen, new ListBuffer[LoopPair]())
     var (start, end) = (0, 0)
 
     while(end < loopEnd){
@@ -35,7 +35,7 @@ extends AbsSlaveActor(mxActor){
       loopPairs += LoopPair(start, end)
     }
 
-    for(pair <- loopPairs){
+    loopPairs.foreach(pair => {
       class SubSlAc(slAc: Actor) extends Actor{
         //sub slave actor
         override def act{
@@ -45,8 +45,7 @@ extends AbsSlaveActor(mxActor){
         }
       }
       new SubSlAc(this).start
-    }
-
+    })
   }
 
 

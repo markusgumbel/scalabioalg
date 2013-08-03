@@ -27,92 +27,79 @@ import scala.actors.Actor
  *   Reducing the effort and time during its relocation or outsourcing (in a cloud environment for e.g.).
  * @param clazz =: ConClass. One of the 3 possible dependency classes.
  * @param mode =: ConMode (EVENT or THREAD)
- * @param getDim
- * @param getIdx
- * @param getAccValues The first method used to compute the value of each cells.
- * @param calcCellCost The second method used to compute the value of each cells.
- * @param getPath
- * @param mxRange
- * @param wuFreq wake up frequency =: the number of costs that have to be calculated
- *               before the next wake up broadcast is made.
- * @param solRange
  * @param recordTime Although this isn't used here. Setting it this way makes
  *                   the attribute immutable.
- *
+ * @param wuFreq wake up frequency =: the number of costs that have to be calculated
+ *               before the next wake up broadcast is made.
+ * @param mxRange
+ * @param solRange
  * @tparam Decision
  */
 protected[dynpro] final class DynProConfig[Decision](
   val clazz: ConClass, mode: ConMode, val recordTime: Boolean,
-  wuFreq: Int, getDim:() => (Int, Int),
-  getAccValues:(Idx, Idx => Unit) => Array[Double],
-  calcCellCost:(Idx, Array[Double]) => Unit,
-  mxRange: Int, convert:(Idx) => Unit,
-  getIdx: => Idx,
-  getPath:(Idx, (Idx, Idx)=>Boolean) => ListBuffer[PathEntry[Decision]],
-  val solRange: Int
+  wuFreq: Int, mxRange: Int, val solRange: Int
 ){
 
-  private val maModules: Map[Stage, Actor] = Map(
-    MATRIX -> (clazz match{//the alternative would be to create to create singelton classes
-      case LEFT_UP => new MxLUpActor(getDim, wuFreq, getAccValues, calcCellCost)
-      case UP => new MxUpActor(getDim, wuFreq, getAccValues, calcCellCost)
-      case _ => null
-    }),
-    MATLABMX -> new MatlabActor(getDim, convert, mxRange),
-    SOLUTION -> new SolutionActor[Decision](getIdx, getPath, solRange)
-  )
-
-  /**
-   * This method (re)STARTs the actor whose key corresponds
-   * to the given "stage" value, before returning it.
-   * @param stage
-   * @return
-   */
-  private def getActor(stage: Stage) = {
-    val actor = maModules(stage)
-    try{actor.restart}
-    catch{case e: IllegalStateException => actor.start}
-    actor
-  }
 
   /**
    * This method creates a master instance (MatrixActor or MatrixThread) depending on the given
    * ConMode, which then computes the cell values of the given matrix.
+   * @param n
+   * @param m
+   * @param getAccValues The first method used to compute the value of each cells.
+   * @param calcCellCost The second method used to compute the value of each cells.
    * @return
    */
-  def evaluateMatrix{
+  def evaluateMatrix(
+    n: Int, m: Int,
+    getAccValues:(Idx, Idx => Unit) => Array[Double],
+    calcCellCost:(Idx, Array[Double]) => Unit
+  ): Boolean = {
+    val actor = clazz match{
+      case LEFT_UP => new MxLUpActor(n, m, wuFreq, getAccValues, calcCellCost)
+      case UP => new MxUpActor(m, n, wuFreq, getAccValues, calcCellCost)
+    }
+
     mode match{
       case EVENT =>
-        getActor(MATRIX) !? START match{
-          case DONE => //the matrix evaluation is done
+        actor.start
+        actor !? START match{
+          case DONE => true //the matrix evaluation is done
         }
 
-      case THREAD => //do nothing for now
+      case THREAD => false //do nothing for now
     }
   }
+
 
   /**
    *
    * @return
    */
-  def convertMatrix{
-    mode match {
-      case EVENT =>
-        getActor(MATLABMX) !? START match{
-          case DONE => //the matrix convertion is done
-        }
-
-      case THREAD => //do nothing for now
-    }
-  }
-
-  /**
-   *
-   * @return
-   */
-  def calculateSolution: ListBuffer[PathEntry[Decision]] = mode match{
+  def convertMatrix(n: Int, m: Int, convert:(Idx) => Unit) = mode match {
     case EVENT =>
-      getActor(SOLUTION) !? START match{
+      val actor = new MatlabActor(n, m, convert, mxRange)
+      actor.start
+      actor !? START match{
+        case DONE => true //the matrix convertion is done
+      }
+
+    case THREAD => false //do nothing for now
+  }
+
+
+  /**
+   *
+   * @return
+   */
+  def calculateSolution(
+    idx: Idx,
+    getPath:(Idx, (Idx, Idx)=>Boolean) => ListBuffer[PathEntry[Decision]]
+  ): ListBuffer[PathEntry[Decision]] = mode match{
+    case EVENT =>
+      val actor = new SolutionActor[Decision](idx, getPath, solRange)
+      actor.start
+      actor !? START match{
         case pathList: ListBuffer[PathEntry[Decision]] => pathList
       }
 

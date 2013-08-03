@@ -15,12 +15,15 @@ import net.gumbix.dynpro.Idx
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 protected[concurrency] final class MxUpActor(
-  _getDim:() => (Int, Int), wuFreq: Int,
+  val slModAm: Int, val slModVecLen: Int, wuFreq: Int,
   getAccValues:(Idx, Idx => Unit) => Array[Double] ,
   calcCellCost:(Idx, Array[Double]) => Unit
-)extends MxActor(_getDim, wuFreq, getAccValues, calcCellCost){
+)extends MxActor(wuFreq, getAccValues, calcCellCost){
   //trapExit = true; //receive all the exceptions from the cellActors in form of messages
   //val loopEnd = matrix.length
+  private val actors = ListBuffer[MxUpVecActor]()
+
+
   //amount of slaves actors
   protected[actors] def slAm = getPoolSize.slMod
 
@@ -33,8 +36,8 @@ protected[concurrency] final class MxUpActor(
         all further communications will be been proceeded between the slave actors
         hence the peer to peer communication model
         */
-        for(ch <- channels){
-          val channel = slModules(ch % slAm).asInstanceOf[MxUpVecActor]
+        channels.foreach(ch => {
+          val channel = actors(ch % slAm)
           channel.getState match{
             case scala.actors.Actor.State.Terminated => reply(WAKEUP)
             /*The actor is no longer computing, the cost it has computed should
@@ -43,7 +46,7 @@ protected[concurrency] final class MxUpActor(
 
             case _ => channel.registerListener(sender.asInstanceOf[MxUpVecActor])
           }
-        }
+        })
 
       case DONE => congestionControl
         //this broadcast is received once a slave actor is done computing
@@ -60,8 +63,8 @@ protected[concurrency] final class MxUpActor(
    * Slave module =: vector actor
    * @return
    */
-  override protected def getPoolSize = {
-    var slAm = getDim._2
+  override protected val getPoolSize = {
+    var slAm = slModAm
     while(slAm > dMaxPoolSize) slAm /= 2
 
     PoolSize(slAm, 0)
@@ -74,20 +77,11 @@ protected[concurrency] final class MxUpActor(
    *                 the new MatrixVectorActor will compute @ first.
    */
   override protected def startNewSlMod(firstJ: Int){
-    slModules += new MxUpVecActor(this, firstJ)
+    actors += new MxUpVecActor(this, firstJ)
+
     //no start
   }
 
-
-  /**
-   * This isn't an abstract method but should be considered as one.
-   * This way in contrast to the "actReact" method it will be
-   * overridden if only there's a need.
-   * @param j
-   */
-  override protected def restartSlMod(j: Int){//j ~= firstJ
-    //no restart
-  }
 
   /**
    * In this dependency case the actor objects can't be started directly.
@@ -99,9 +93,7 @@ protected[concurrency] final class MxUpActor(
      adequate because it is possible that the required amount of actors is less than the number of actors
      allocated in the "slModules" list.
     */
-    for(j <- 0 until slAm) try{ slModules(j).restart
-    }catch{ case e: IllegalStateException => slModules(j).start
-    }
+    actors.foreach(actor => actor.start)
   }
 
 }

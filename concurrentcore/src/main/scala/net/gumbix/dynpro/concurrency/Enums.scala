@@ -29,7 +29,6 @@ object ConClass extends Enumeration{
 }
 
 
-
 object ConMode extends Enumeration{
   type ConMode = Value
 
@@ -53,5 +52,3 @@ object Stage extends Enumeration{
   val MATLABMX = Value("matlabMatrix")
   val SOLUTION = Value("stageII")
 }
-
-

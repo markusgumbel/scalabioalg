@@ -26,16 +26,9 @@ extends MxVecActor(mxActor){
 
   override protected def ePair = new EPair(I, j)
 
-  override protected def reset = {
-    j = 0
-    super.reset
-  }
-
 
   override def act{
-    //This block resets the current object to its initial state
-    reset
-    val loopEnd = mxActor.getDim._2
+    val loopEnd = mxActor.slModVecLen
 
     /*DEBUG PROTOCOL
     from mr. P. Meppe to Prof. M. Gumbel on the 10.juli.2013
@@ -55,8 +48,8 @@ extends MxVecActor(mxActor){
     These steps should be repeated until the computation of the vector is done.
 
     To test the developer should run
-    - net.gumbix.analysis.demo.MyDistanceApp.main for a manual repetition
-    - net.gumbix.analysis.demo.DebugMultAlignApp.main for an automatic repetition
+    - net.gumbix.string.alignment.MyDistanceApp.main for a manual repetition
+    - net.gumbix.string.alignment.DebugMultAlignApp.main for an automatic repetition
     */
     //debug block
     val debug = 5
@@ -66,14 +59,9 @@ extends MxVecActor(mxActor){
 
     loop{ //loopWhile(j < loopEnd){
       if(j == loopEnd){
-        if(this.mailboxSize == 0){
-          broadcast
-          mxActor ! DONE
-          exit
-        }else react{
-          case _ => //do nothing
-          //all the messages have to be handled before the exit exception is thrown
-        }
+        broadcast
+        mxActor ! DONE
+        exit
       }else{
         val idx = Idx(I, j)//in this case I is constant
         //val (noneStateInvoked, channels, values) = getAccValues(idx, (idx: Idx) => idx.i)

@@ -32,7 +32,7 @@ import scala.math.log
  * the character c when being in state q. 
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class Viterbi(val s: StringBuilder, val alphabet: Array[Char],
+class Viterbi(val s: String, val alphabet: Array[Char],
               val states: Array[Char],
               val transP: Array[Array[Double]],
               val emmP: Array[Array[Double]])
@@ -46,12 +46,6 @@ class Viterbi(val s: StringBuilder, val alphabet: Array[Char],
   formatter = ENGINEER
 
   override val backpropagationStart = MAXIMUM_VALUE_LAST_ROW
-
-  override def updateXY(newS: String, __ : String){
-    s.clear
-    s.append(newS)
-  }
-  def updateS(newS: String){updateXY(newS, "")}
 
 
   /**

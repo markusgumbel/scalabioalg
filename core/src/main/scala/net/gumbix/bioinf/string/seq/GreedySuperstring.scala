@@ -118,7 +118,7 @@ class GreedySuperstringFct(s: Array[String]) extends GreedySuperstring(s)
 
 trait Overlap {
   /**
-   * Overlap in O(n^2) in functional style.
+   * Overlap in O(n&#94;2) in functional style.
    */
   def overlap(s1: String, s2: String): String = {
 

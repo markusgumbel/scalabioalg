@@ -36,7 +36,7 @@ import scala.Tuple2
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 
-class Alignment(val s1: StringBuilder, val s2: StringBuilder,
+class Alignment(val s1: String, val s2: String,
                 val mode: AlignmentMode,
                 override val substMatrix: Option[String])
         extends DynPro[AlignmentStep]
@@ -45,17 +45,9 @@ class Alignment(val s1: StringBuilder, val s2: StringBuilder,
                 with AlignmentPrinter[AlignmentStep]
                 with Score {
   // Helper constructor if no substitution matrix is used:
-  def this(s1: StringBuilder, s2: StringBuilder, mode: AlignmentMode) = this (s1, s2, mode, None)
+  def this(s1: String, s2: String, mode: AlignmentMode) = this (s1, s2, mode, None)
 
   formatter = INT
-
-
-  def updateXY(newS1: String, newS2: String){
-    s1.clear
-    s1.append(newS1)
-    s2.clear
-    s2.append(newS2)
-  }
 
   def n = s1.length + 1
 
@@ -74,7 +66,7 @@ class Alignment(val s1: StringBuilder, val s2: StringBuilder,
    */
   def similarity = {
     val idx = cellIndices(backpropagationStart)
-    getMatrix(idx.i)(idx.j).get
+    matrix(idx.i)(idx.j).get
   }
 
   /**

@@ -52,11 +52,6 @@ protected[actors] abstract class AbsSlaveActor(maAc: AbsMasterActor)
    */
   protected def startInternalActors{}
 
-  /**
-   *
-   */
-  protected def reset{}
-
 
   /**********Exception handlers - START**********/
   /**

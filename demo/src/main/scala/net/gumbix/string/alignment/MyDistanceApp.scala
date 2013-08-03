@@ -128,13 +128,13 @@ object MyDistanceApp {
     1
   }
 
-  object dp extends Alignment(new StringBuilder(""), new StringBuilder(""), AlignmentMode.GLOBAL) {
+  class ConAlign(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL) {
     override val (config, values) = (setConfig(LEFT_UP, EVENT),
       Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1))
   }
 
   def calc(s1: String, s2: String) {
-    dp.updateXY(s1, s2)
+    val dp = new ConAlign(s1, s2)
     val solution = dp.solution
     text.text = "Number of changes: " + -dp.similarity
     text.text += "\n\n" + dp.makeAlignmentString(solution)

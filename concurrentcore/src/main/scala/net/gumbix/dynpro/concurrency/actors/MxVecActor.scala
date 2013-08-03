@@ -41,24 +41,24 @@ extends AbsSlaveActor(mxActor){
 
 
   protected final def broadcast{
-    for(listener <- listenerList) listener.getState match{
+    listenerList.foreach(listener => listener.getState match{
       /*this matching is made to avoid unnecessary mails, by only waking up
         actors waiting in a react.*/
       case scala.actors.Actor.State.Suspended => listener ! WAKEUP
       case _ => //do nothing
-    }
+    })
   }
 
   //only for debugging purposes
   def broadcast(i: Int, debugI: Int){
-    for(listener <- listenerList) listener.getState match{
+    listenerList.foreach(listener => listener.getState match{
       /*this matching is made to avoid unnecessary mails, by only waking up
         actors waiting in a react.*/
       case scala.actors.Actor.State.Suspended =>
         if(i == debugI-1) print("SENT("+WAKEUP+")") else if(i == debugI+1) print("==>" + WAKEUP)
         listener ! WAKEUP
       case _ => //do nothing
-    }
+    })
   }
 
   /**
@@ -81,12 +81,6 @@ extends AbsSlaveActor(mxActor){
     val values = mxActor.getAccValues(idx, handleNullState)
 
     (noneStateInvoked, channels, values)
-  }
-
-
-  override protected def reset = {
-    channelList.clear
-    listenerList.clear
   }
 
 

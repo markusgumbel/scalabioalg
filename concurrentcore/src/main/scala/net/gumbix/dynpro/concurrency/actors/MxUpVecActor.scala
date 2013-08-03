@@ -29,15 +29,9 @@ extends MxVecActor(mxActor){
    */
   protected def ePair = new EPair(J, i)
 
-  override protected def reset{
-    i = 0
-    super.reset
-  }
 
   override def act{
-    //This block resets the current object to it's initial state
-    reset
-    val loopEnd = mxActor.getDim._1
+    val loopEnd = mxActor.slModVecLen
 
     def afterLoopWhile{
       broadcast
@@ -53,17 +47,12 @@ extends MxVecActor(mxActor){
 
     loop{ //loopWhile(i < loopEnd){
       if(i == loopEnd){
-        if(mailboxSize == 0){
-          broadcast
-          mxActor ! DONE
-          exit
-        }else react{
-          case _ => //do nothing
-          //all the messages have to be handled before the exit exception is thrown
-        }
+        broadcast
+        mxActor ! DONE
+        exit
       }else{
         var _J = J //unlike J, _J is seemly constant
-        loopWhile(_J < mxActor.getDim._2){//innerLoopEnd = matrix(0).length
+        loopWhile(_J < mxActor.slModAm){//innerLoopEnd = matrix(0).length
           val idx = Idx(i, _J)
           //val accValues = getAccValues(idx, (idx: Idx) => idx.i)
           //this would work just as well. An example is provided in MxLUpVecActorala

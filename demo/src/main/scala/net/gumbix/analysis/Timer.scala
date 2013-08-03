@@ -14,30 +14,7 @@ import java.io.{PrintWriter, File}
  * Date: 6/14/13
  * Time: 7:11 PM
  * @author Patrick Meppe (tapmeppe@gmail.com)
- */
-
-protected[analysis] case class GraphValues(
-  lens: ListBuffer[Long],
-  seqMin: ListBuffer[Long],
-  seqMax: ListBuffer[Long],
-  seqMed: ListBuffer[Long],
-  seqAvg: ListBuffer[Long],
-  conMin: ListBuffer[Long],
-  conMax: ListBuffer[Long],
-  conMed: ListBuffer[Long],
-  conAvg: ListBuffer[Long]
-){
-  def getText = {
-    val (s, text) = (" ", new StringBuilder())
-    for(i <- 0 until lens.length){
-      if(i != 0) text.append("\n")
-      text.append(lens(i)+s+seqMin(i)+s+seqMax(i)+s+seqMed(i)+s+seqAvg(i)+s+conMin(i)+s+conMax(i)+s+conMed(i)+s+conAvg(i))
-    }
-    text.toString
-  }
-}
-
-/**
+ *
  *
  * @param nrOfCom number of computations per round
  */

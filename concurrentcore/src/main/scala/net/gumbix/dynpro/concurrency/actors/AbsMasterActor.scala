@@ -15,10 +15,8 @@ import net.gumbix.dynpro.concurrency.IMaster
  * It simplifies the implementation of each specific slave actor
  * by increasing the abstraction level set in IMatrix.scala and adapting
  * it to the "actor" API.
- * @param _getDim the dimensions of the matrix =: n*m
  */
-protected[actors] abstract class AbsMasterActor(_getDim:() => (Int, Int))
-  extends IMaster with Actor{
+protected[actors] abstract class AbsMasterActor extends IMaster with Actor{
 
   //TO OVERRIDE - START
   /**
@@ -62,7 +60,6 @@ protected[actors] abstract class AbsMasterActor(_getDim:() => (Int, Int))
 
   //OVERRIDDEN - START
   override final def act{
-    setLoopCond
     react{
       case net.gumbix.dynpro.concurrency.Messages.START => //this is a synchronous message
         val to = sender
@@ -85,7 +82,4 @@ protected[actors] abstract class AbsMasterActor(_getDim:() => (Int, Int))
   }
   //OVERRIDDEN - END
 
-  //THE REST - START
-  protected[actors] def getDim = _getDim()
-  //THE REST - END
 }

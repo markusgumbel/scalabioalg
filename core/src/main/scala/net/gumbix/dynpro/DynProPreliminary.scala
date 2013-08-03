@@ -34,7 +34,7 @@ trait DynProMatrix {
    * Matrix containing the accumulated values (costs).
    * A cell may be empty (=None).
    */
-  def getMatrix: Array[Array[Option[Double]]]
+  val matrix: Array[Array[Option[Double]]]
 
 }
 

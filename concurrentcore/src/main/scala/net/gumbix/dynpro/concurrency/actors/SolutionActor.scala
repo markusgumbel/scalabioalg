@@ -14,16 +14,16 @@ import scala.collection.mutable.{ListBuffer, Map}
  * @author Patrick Meppe (tapmeppe@gmail.com)
  *
  * This class represents the master actor during the path finding stage
- * @param getIdx see DynProConfig.scala
+ * @param idx see DynProConfig.scala
  * @param getPath see DynProConfig.scala
  * @param range ...
  * @tparam Decision see DynProConfig.scala
  */
 protected[concurrency] final class SolutionActor[Decision](
-  getIdx: => Idx,
+  idx: Idx,
   getPath:(Idx, (Idx, Idx)=> Boolean) => ListBuffer[PathEntry[Decision]],
   range: Int
-)extends AbsMasterActor(() => (0,0)){
+)extends AbsMasterActor{
 
   private val pathListMap = Map[Int, ListBuffer[ListBuffer[PathEntry[Decision]]]]()
   protected[actors] def updatePathListMap(key: Int, list: ListBuffer[ListBuffer[PathEntry[Decision]]]){
@@ -44,7 +44,6 @@ protected[concurrency] final class SolutionActor[Decision](
    */
   private def pinPointIdxs: Map[Int, Idx] = {
     if(ppiMap.isEmpty){
-      val idx = getIdx
       //SPLIT the matrix
       //pin point all the start indexes within the matrix and store them in the map
       ppiMap += 0 -> idx
@@ -68,7 +67,7 @@ protected[concurrency] final class SolutionActor[Decision](
    */
   protected[actors] def getIdxList(key: Int): ListBuffer[Idx] = {
     val o = pinPointIdxs(key)
-    val (idx, idxList) = (getIdx, ListBuffer(o))
+    val idxList = ListBuffer(o)
 
     if(o.MIN > 0){
       val loopEnd = 1 + idx.i - o.i
@@ -89,26 +88,22 @@ protected[concurrency] final class SolutionActor[Decision](
 
 
   /**
+   *
+   * @param startIdx
+   * @param cIdx
+   * @return
+   */
+  private def break(startIdx: Idx, cIdx: Idx): Boolean = {
+    val limIdx = startIdx - cIdx
+
+    if(cIdx.i == 0 || cIdx.j == 0) true
+    else if(limIdx.i == range || limIdx.j == range) true
+    else false
+  }
+  /**
    * @see
    */
-  protected[actors] def getPath(idx: Idx): ListBuffer[PathEntry[Decision]] = {
-    /**
-     *
-     * @param startIdx
-     * @param cIdx
-     * @return
-     */
-    def break(startIdx: Idx, cIdx: Idx): Boolean = {
-      val limIdx = startIdx - cIdx
-
-      if(cIdx.i == 0 || cIdx.j == 0) true
-      else if(limIdx.i == range || limIdx.j == range) true
-      else false
-    }
-
-    getPath(idx, break)
-  }
-
+  protected[actors] def getPath(idx: Idx): ListBuffer[PathEntry[Decision]] =  getPath(idx, break)
 
 
   override def actReact{
@@ -121,7 +116,7 @@ protected[concurrency] final class SolutionActor[Decision](
 
   override protected def eTerms = ETerms("Path identification", "Range", "")
 
-  override protected def getPoolSize = {
+  override protected val getPoolSize = {
     val size = pinPointIdxs.size
     PoolSize(size, size * (1 + (size - 1) * range))
   }
@@ -131,13 +126,8 @@ protected[concurrency] final class SolutionActor[Decision](
   override protected def startNewSlMod(key: Int){
     //the key value doesn't depend on the matrix dimensions.
     //Once set it is fix for the given slave actor.
-    val actor = new SolutionSubActor[Decision](this, key)
-    slModules += actor
-    actor.start
+    new SolutionSubActor[Decision](this, key).start
   }
-
-
-  override protected def restartSlMod(key: Int){slModules(key).restart}
 
 
   override protected def ackStart: ListBuffer[PathEntry[Decision]] = {
@@ -145,7 +135,7 @@ protected[concurrency] final class SolutionActor[Decision](
     val (pathList, sortedKeys) = //sort the keys before the iteration
     (new ListBuffer[PathEntry[Decision]](), pathListMap.keys.toList.sorted)
 
-    for(key <- sortedKeys){
+    sortedKeys.foreach(key =>
       if(key == 0) pathList ++= pathListMap(key).head
       else{
         //both for-loops can't be merged because of the "break" attribute
@@ -155,7 +145,10 @@ protected[concurrency] final class SolutionActor[Decision](
             pathList ++= innerList.drop(1)//the first element of the "list" must be dropped to avoid a redundancy
             break = true
           }
-      }
+    })
+
+    for(key <- sortedKeys){
+
     }
 
     //reset the current object to its initial configuration

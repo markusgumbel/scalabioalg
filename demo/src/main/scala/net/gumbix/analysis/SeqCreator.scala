@@ -5,7 +5,6 @@ import net.gumbix.bioinf.string.alignment.{Alignment, AlignmentMode}
 import net.gumbix.bioinf.string.alignment.AlignmentStep._
 import net.gumbix.dynpro.concurrency.ConClass._
 import net.gumbix.dynpro.concurrency.ConMode._
-import net.gumbix.dynpro.concurrency.Stage._
 import net.gumbix.bioinf.hmm.Viterbi
 import net.gumbix.dynpro.concurrency.Debugger
 
@@ -23,16 +22,16 @@ protected[analysis] class SeqCreator[SeqDT](elements: List[SeqDT]){
     ("", "", Array(Array(.0)), Array(Array(.0)), Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1))
 
   private val recordTime = true
-  private object SeqAlignment extends Alignment(new StringBuilder(""), new StringBuilder(""), AlignmentMode.GLOBAL){
+  private class SeqAlignment(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL){
     override val (values, config) = (map, setConfig(NO_CON, __, recordTime))
   }
-  private object ConAlignment extends Alignment(new StringBuilder(""), new StringBuilder(""), AlignmentMode.GLOBAL){
+  private class ConAlignment(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL){
     override val (values, config) = (map, setConfig(LEFT_UP, EVENT, recordTime))
   }
-  private object SeqViterbi extends Viterbi(new StringBuilder(""), alphabet.toArray, states.toArray, transP, emmP){
+  private class SeqViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP){
     override val config = setConfig(NO_CON, __, recordTime)
   }
-  private object ConViterbi extends Viterbi(new StringBuilder(""), alphabet.toArray, states.toArray, transP, emmP){
+  private class ConViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP){
     override val config = setConfig(UP, EVENT, recordTime)
   }
 
@@ -53,29 +52,28 @@ protected[analysis] class SeqCreator[SeqDT](elements: List[SeqDT]){
 
 
   def runGlobalAlignment(s1: String, s2: String) = {
-    SeqAlignment.updateXY(s1, s2)
-    ConAlignment.updateXY(s1, s2)
-    SeqAlignment.solution
-    ConAlignment.solution
+    val seq = new SeqAlignment(s1, s2)
+    val con = new ConAlignment(s1, s2)
+    seq.solution
+    con.solution
     //println(seq.getDurations + " / " + con.getDurations)
-    (SeqAlignment.getDurations, ConAlignment.getDurations)
+    (seq.getDurations, con.getDurations)
   }
 
 
   def runViterbi(s: String) = {
-    SeqViterbi.updateS(s)
-    ConViterbi.updateS(s)
-    SeqViterbi.solution
-    ConViterbi.solution
+    val seq = new SeqViterbi(s)
+    val con = new ConViterbi(s)
+    seq.solution
+    con.solution
     //println(seq.getDurations + " / " + con.getDurations)
-    (SeqViterbi.getDurations, ConViterbi.getDurations)
+    (seq.getDurations, con.getDurations)
   }
 
 }
 
 
-protected[analysis] object DNASeqCreator
-  extends SeqCreator[Char](List('A', 'C', 'G', 'T')){
+protected[analysis] object DNASeqCreator extends SeqCreator[Char](List('A', 'C', 'G', 'T')){
   override protected val (alphabet, states) = ("AGCT", "AGCTagct")//AGCTagct =: A+ G+ C+ T+ A- G- C- T-
   override protected val transP = Array(
     Array[Double](0, 1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f),//fair cases
@@ -102,7 +100,6 @@ protected[analysis] object DNASeqCreator
 }
 
 
-protected[analysis] object RNASeqCreator
-  extends SeqCreator[Char](List('A', 'C', 'G', 'U')){
+protected[analysis] object RNASeqCreator extends SeqCreator[Char](List('A', 'C', 'G', 'U')){
   //the override block is missing
 }
