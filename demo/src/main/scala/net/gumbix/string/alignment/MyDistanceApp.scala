@@ -18,128 +18,160 @@ Copyright 2011 the original author or authors.
    This script is based on the net.gumbix.string.alignment.EditDistanceApp.scala
 */
 
-import net.gumbix.bioinf.string.alignment.{AlignmentMode, Alignment}
-import swing._
+import scala.swing._
+import scala.swing.event.ButtonClicked
+import BorderPanel.Position._
+import Orientation.{Horizontal, Vertical}
+
 import javax.swing.UIManager
 import java.awt.{Dimension, Color, Font}
-import net.gumbix.bioinf.string.alignment.AlignmentStep._
-import scala.swing.event.ButtonClicked
-import net.gumbix.dynpro.concurrency.ConClass._
-import scala.swing.event.ButtonClicked
-import net.gumbix.dynpro.concurrency.ConMode._
-import scala.swing.event.ButtonClicked
+
+import net.gumbix.bioinf.string.alignment.{AlignmentMode, Alignment, AlignmentStep}
+import AlignmentStep._
+import net.gumbix.dynpro.concurrency.{ConClass, ConMode}
+import ConClass._
+import ConMode._
 
 /**
  * Demo for the edit distance. Was used for a open campus demo.
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-object MyDistanceApp {
-  val text = new TextArea {
-    text = "empty"
+object MyDistanceApp extends SimpleSwingApplication{
+  private val (w, h) = (1100, 700)
+
+  private val modelLabel = new Label("Sequential mode"){
+    foreground = java.awt.Color.BLUE
+    horizontalAlignment = Alignment.Left
+    verticalAlignment = Alignment.Top
+  }
+
+  class MyTextArea(text: String) extends TextArea(text + " ..."){
     editable = false
     font = Font.decode(Font.MONOSPACED + "-18")
     background = new Color(240, 240, 240)
   }
+  private val matrix = new MyTextArea("MATRIX")
+  private val result = new MyTextArea("RESULT")
 
-  val items = "wiesengrund lampe bringen" :: "schweinehund ampel trinken" :: Nil
+  /********** MODULE - START **********/
+  private val (map, _seq, _con, br) = (
+    Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1),
+    "SEQ", "CON", "\n"
+  )
 
-  def main(args: Array[String]) {
-
-    // Install the look and feel
-    try {
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
-    } catch {
-      case e: Exception =>
-    }
-
-    val top = new MainFrame {
-      preferredSize = new Dimension(700, 500)
-      val textFrom = new TextField {
-        text = "wiesengrund lampe bringen Meier Messer Ziele Straßburg"
-        font = Font.decode(Font.MONOSPACED + "-18")
-      }
-      val textTo = new TextField {
-        text = "schweinehund ampel trinken Maier Metzger Zeile Strassbourg"
-        font = Font.decode(Font.MONOSPACED + "-18")
-      }
-      title = "Edit Distance"
-      contents = new BorderPanel {
-        val editPart = new BorderPanel {
-          val stringPart = new BorderPanel {
-            val labelPart = new BorderPanel {
-              val from = new Label {
-                text = "from:"
-              }
-              layout(from) = BorderPanel.Position.North
-              val to = new Label {
-                text = "to:"
-              }
-              layout(to) = BorderPanel.Position.South
-            }
-            layout(labelPart) = BorderPanel.Position.West
-            val textfieldPart = new BorderPanel {
-              layout(textFrom) = BorderPanel.Position.North
-              layout(textTo) = BorderPanel.Position.South
-            }
-            layout(textfieldPart) = BorderPanel.Position.Center
-            /*
-            val menuPart = new BorderPanel {
-              val menuFrom = new ComboBox(items) {
-              }
-              layout(menuFrom) = BorderPanel.Position.North
-              val menuTo = new ComboBox(items) {
-                reactions += {
-                  case ButtonClicked(menuTo) => textFrom.text = selection.item
-                }
-              }
-              layout(menuTo) = BorderPanel.Position.South
-            }
-            layout(menuPart) = BorderPanel.Position.East
-            */
-          }
-          layout(stringPart) = BorderPanel.Position.Center
-          val paramPart = new BorderPanel {
-            val calcButton = new Button {
-              text = "Calc."
-              reactions += {
-                case ButtonClicked(calcButton) => {
-                  calc(textFrom.text, textTo.text)
-                }
-              }
-            }
-            layout(calcButton) = BorderPanel.Position.Center
-          }
-          layout(paramPart) = BorderPanel.Position.East
-        }
-        layout(editPart) = BorderPanel.Position.North
-        // Info part:
-        val infoPart = new BorderPanel {
-          val scrollpane = new ScrollPane {
-            contents = text
-          }
-          layout(scrollpane) = BorderPanel.Position.Center
-        }
-        layout(infoPart) = BorderPanel.Position.Center
-      }
-    }
-
-    top.pack()
-    top.visible = true
-    1
+  private class ConAlign(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL) {
+    override val (config, values) = (setConfig(LEFT_UP, EVENT), map)
   }
 
-  class ConAlign(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL) {
-    override val (config, values) = (setConfig(LEFT_UP, EVENT),
-      Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1))
-  }
+  private class SeqAlign(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL)
 
-  def calc(s1: String, s2: String) {
-    val dp = new ConAlign(s1, s2)
+  private def calc(s1: String, s2: String, mode: String) {
+    val dp = if(mode == _con) new ConAlign(s1, s2) else new SeqAlign(s1, s2)
     val solution = dp.solution
-    text.text = "Number of changes: " + -dp.similarity
-    text.text += "\n\n" + dp.makeAlignmentString(solution)
-    text.text += "\n\n" + dp.mkMatrixString(solution)
-    text.text += "\n\n"
-    solution.foreach(e => text.text += e.decision)
+
+    val (sim, align, _matrix, decision) = (
+      "Number of changes: " + -dp.similarity + br,
+      dp.makeAlignmentString(solution) + br,
+      br+br + dp.mkMatrixString(solution) + br,
+      solution.map(e => e.decision.toString).reduceLeft((s1, s2) => s1 + s2)
+    )
+    //text.text = "RESULTS: \n\n" + _matrix + sim + align + decision
+    matrix.text = "MATRIX:" + _matrix
+    result.text = sim + align + decision
+
+    print("\n") //for debug purposes
   }
+
+  /********** MODULE - END **********/
+
+
+  /********** VIEW - START **********/
+  // Install the look and feel
+  try {
+    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+  } catch {
+    case e: Exception =>
+  }
+
+  val top = new MainFrame {
+    preferredSize = new Dimension(w, h)
+    val textFrom = new TextField {
+      text = "wiesengrund lampe bringen Meier Messer Ziele Straßburg"
+      font = Font.decode(Font.MONOSPACED + "-18")
+    }
+    val textTo = new TextField {
+      text = "schweinehund ampel trinken Maier Metzger Zeile Strassbourg"
+      font = Font.decode(Font.MONOSPACED + "-18")
+    }
+    title = "Edit Distance 2.0"
+
+    contents = new BorderPanel {
+      layout(new BorderPanel {
+        layout(new BorderPanel{
+          layout(new BorderPanel {
+            layout(new Label("from:")) = North
+            layout(new Label("to:")) = South
+          }) = West
+
+          layout(new BorderPanel {
+            layout(textFrom) = North
+            layout(textTo) = South
+          }) = Center
+        }) = Center
+
+        class MyRadioButton(label: String, modeLabel: String) extends RadioButton(label){
+          listenTo(this)
+          reactions += {
+            case e: ButtonClicked => modelLabel.text = modeLabel
+          }
+        }
+
+        layout(new BorderPanel{ /***** THIS PART HAS BEEN REMODELED *****/
+          val seq = new MyRadioButton(_seq, "Sequential mode")
+          val (group, radios) = (
+            new ButtonGroup,
+            List(seq, new MyRadioButton(_con, "Concurrent mode"))
+          )
+          group.buttons ++= radios
+          group.select(seq)
+
+          layout(new BoxPanel(Horizontal){
+            contents ++= radios
+          }) = North
+
+          layout(new Button("Calc.") {
+            reactions += {
+              case ButtonClicked(calcButton) => {
+                calc(textFrom.text, textTo.text, group.selected.get.text)
+              }
+            }
+          }) = Center
+        }) = East
+      }) = North
+
+      // Info part:
+      layout(new BorderPanel{
+        layout(new BoxPanel(Vertical){
+          contents += Swing.VStrut(20)
+          contents += modelLabel
+        }) = North
+
+        layout(new SplitPane(Horizontal){
+          continuousLayout = true
+          oneTouchExpandable = true
+          resizeWeight = 0.80
+
+          topComponent = new ScrollPane {
+            contents = matrix
+          }
+          bottomComponent = new ScrollPane {
+            contents = result
+          }
+        }) = Center
+      }) = Center
+    }
+  }
+
+  /********** VIEW - END **********/
+
 }

@@ -46,12 +46,12 @@ object SimpleApp {
       "schweinehund ampel trinken Maier Metzger Zeile Strassbourg")
 
   private object ConAlignment extends Alignment(s1, s2, AlignmentMode.GLOBAL){
-    override val config = setConfig(LEFT_UP, EVENT, true)
+    override val config = setConfig(LEFT_UP, EVENT)
     override val values = Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1)
   }
 
   private object ConViterbi extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP){
-    override val config = setConfig(UP, EVENT, true)
+    override val config = setConfig(UP, EVENT)
   }
 
   def main(args: Array[String]) {

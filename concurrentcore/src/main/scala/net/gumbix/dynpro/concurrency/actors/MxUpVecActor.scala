@@ -48,27 +48,29 @@ extends MxVecActor(mxActor){
     loop{ //loopWhile(i < loopEnd){
       if(i == loopEnd){
         broadcast
-        mxActor ! DONE
+        mxActor ! J //this message is sent once this actor is done evaluating its vector
         exit
       }else{
         var _J = J //unlike J, _J is seemly constant
         loopWhile(_J < mxActor.slModAm){//innerLoopEnd = matrix(0).length
           val idx = Idx(i, _J)
           //val accValues = getAccValues(idx, (idx: Idx) => idx.i)
-          //this would work just as well. An example is provided in MxLUpVecActorala
+          //this would work just as well. An example is provided in MxLUpVecActor
           val (nullStateInvoked, channels, values) = getAccValues(idx)
 
           if(nullStateInvoked){
             /*one or more "Null states" have encounter ergo
-            this actor will have to sleep for a while.*/
+            this actor will have to be SUSPENDED for a while.*/
             registerTo(channels)
 
             react{//exclusively react on broadcasts
-              case WAKEUP => //simply wake up
+              case WAKEUP => //end of the SUSPENDED state
             }
           }else{
-            /*All required costs are available ergo the evaluation of the current
-            can be proceeded.*/
+            /*
+            All required costs are available ergo the evaluation of the current
+            can be proceeded.
+             */
             mxActor.calcCellCost(idx, values)
             _J += mxActor.slAm
           }

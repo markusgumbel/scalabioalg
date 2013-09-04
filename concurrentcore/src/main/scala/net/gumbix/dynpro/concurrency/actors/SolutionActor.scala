@@ -1,6 +1,5 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import scala.actors.Actor
 import net.gumbix.dynpro.concurrency.{Messages, MsgException}
 import net.gumbix.dynpro.{Idx, PathEntry}
 import scala.collection.mutable.{ListBuffer, Map}

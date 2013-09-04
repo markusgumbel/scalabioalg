@@ -15,7 +15,7 @@ import net.gumbix.dynpro.concurrency.Debugger
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 class ConAlignment(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL){
-  override val config = setConfig(LEFT_UP, EVENT, true)
+  override val config = setConfig(LEFT_UP, EVENT)
   override val values = Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1)
 }
 
@@ -23,13 +23,14 @@ object DebugMultAlignApp{
   def main(args: Array[String]) {
     val (lim, s1, s11, s2) = //
       (100, "wiesengrund",
-        "wiesengrund lampe bringen Meier Messer Ziele Straßburgwiesengrund lampe bringen Meier Messer Ziele Straßburgwiesengrund lampe bringen Meier Messer Ziele Straßburgwiesengrund lampe bringen Meier Messer Ziele Straßburg",
-        "schweinehund ampel trinken Maier Metzger Zeile Strassbourg")
+        "wengrund ", //"wiesengrund lampe bringen Meier Messer Ziele Straßburg"
+        "inehund ") //"schweinehund ampel trinken Maier Metzger Zeile Strassbourg"
 
     (0 until lim).foreach {i =>
       print("Round " + (i+1) + "/" + lim)
-      Debugger.printMemories
+      Debugger.printMemories //memory usage
       new ConAlignment(s11, s2).solution
+      synchronized{wait(500)}//to give enough time ot the garbage collector to take care of the junk
       print("\n")
     }
     println("Done")

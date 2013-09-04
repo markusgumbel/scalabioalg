@@ -49,37 +49,33 @@ abstract class DynPro[Decision] extends DynProBasic{
   concurrency mode setting - START
   ********************************************************/
   //default values
-  private val (minRange, wuFreq) = (10, 10)
+  private val (minRange, bcMailSize) = (10, 10)
 
   private var timeMap: Map[Stage, Long] = Map()
   def getDurations = timeMap
 
   //methods used to configure the "DynPro" computation
   protected final def setConfig(clazz: ConClass, mode: ConMode): DynProConfig[Decision] =
-    setConfig(clazz, mode, false, wuFreq, 0, 0)
+    setConfig(clazz, mode, bcMailSize, 0, 0)
 
-  protected final def setConfig(clazz: ConClass, mode: ConMode, recordTime: Boolean): DynProConfig[Decision] =
-    setConfig(clazz, mode, recordTime, wuFreq, 0, 0)
-
-  protected final def setConfig(clazz: ConClass, mode: ConMode, recordTime: Boolean, _wuFreq: Int, _mxRange: Int, solRange: Int)
+  protected final def setConfig(clazz: ConClass, mode: ConMode, _bcMailSize: Int, _mxRange: Int, solRange: Int)
   : DynProConfig[Decision] = {
-    val (mxRange, wuFreq) =
+    val (mxRange, bcMailSize) =
       (if(_mxRange < minRange || m - _mxRange < minRange) m else _mxRange,
        clazz match{
-         case LEFT_UP => abs(_wuFreq)
+         case LEFT_UP => abs(_bcMailSize)
          case UP => 1 //for now.
          case _ => 0
        })
 
-    new DynProConfig[Decision](clazz, mode, recordTime, wuFreq, mxRange, solRange)
+    new DynProConfig[Decision](clazz, mode, bcMailSize, mxRange, solRange)
   }
 
 
   //default setting =: sequential mode, OVERRIDE IF NECESSARY
   //protected val config: DynProConfig[Decision] = setConfig(LEFT_UP, EVENT)
 
-  //debug setting
-  protected val config: DynProConfig[Decision] = setConfig(NO_CON, __)
+  protected val config: DynProConfig[Decision] = null //setConfig(NO_CON, __)
 
   /********************************************************
   concurrency mode setting - END
@@ -159,6 +155,22 @@ abstract class DynPro[Decision] extends DynProBasic{
     However, any other order may also work. */
 
     val mxStart = System.nanoTime
+    config match {
+      case null => for (k <- 0 until cellsSize){
+        val idx = getCellIndex(k)
+        //(idx) => Unit =: def handleNullState(idx: Idx){}//do nothing
+        calcCellCost(idx, getAccValues(idx,(idx) => Unit))
+      }
+      case _ => config.clazz match {
+        case NO_DEP => for (k <- 0 until cellsSize){
+          val idx = getCellIndex(k)
+          //(idx) => Unit =: def handleNullState(idx: Idx){}//do nothing
+          calcCellCost(idx, getAccValues(idx,(idx) => Unit))
+        }
+        case _ => config.evaluateMatrix(n, m, getAccValues, calcCellCost) //LEFT_UP | UP
+      }
+    }
+    /*
     config.clazz match {
       case NO_CON | NO_DEP =>
         for (k <- 0 until cellsSize){
@@ -168,9 +180,8 @@ abstract class DynPro[Decision] extends DynProBasic{
         }
 
       case _ => config.evaluateMatrix(n, m, getAccValues, calcCellCost) //LEFT_UP | UP
-    }
-    val mxEnd = System.nanoTime
-    if(config.recordTime) timeMap += (MATRIX -> (mxEnd - mxStart))
+    }*/
+    timeMap += (MATRIX -> (System.nanoTime - mxStart))
 
     hiddenMatrix
   }
@@ -191,13 +202,18 @@ abstract class DynPro[Decision] extends DynProBasic{
    */
   lazy val matlabMatrix: Array[Array[Double]] = {
     val start = System.nanoTime
+    /*
     config.clazz match {
       case NO_CON => for (i <- 0 until n; j <- 0 until m) convert(Idx(i,j))
 
       case _ => config.convertMatrix(n, m, convert)
+    } */
+    config match {
+      case null => for (i <- 0 until n; j <- 0 until m) convert(Idx(i,j))
+      case _ => config.convertMatrix(n, m, convert)
     }
-    val end = System.nanoTime
-    if(config.recordTime) timeMap += (MATLABMX -> (end - start))
+
+    timeMap += (MATLABMX -> (System.nanoTime - start))
     hiddenMatlabMatrix
   }
 
@@ -210,8 +226,8 @@ abstract class DynPro[Decision] extends DynProBasic{
    */
   def solution(idx: Idx): List[PathEntry[Decision]] = {
     val start = System.nanoTime
-    val sol = (config.clazz match {
-      case NO_CON => getPath(idx, (a:Idx, b:Idx) => false)
+    val sol = (config match {
+      case null => getPath(idx, (a:Idx, b:Idx) => false)
 
       case _ =>
         if(config.solRange < minRange || idx.MAX - config.solRange < minRange)
@@ -220,13 +236,10 @@ abstract class DynPro[Decision] extends DynProBasic{
         else config.calculateSolution(idx, getPath)
       //(_, _) => false =: (a:Idx, b:Idx) => false =: def break(startIdx: Idx, cIdx: Idx) = false
     }).toList
-    val end = System.nanoTime
 
-    if(config.recordTime){
-      val time = end - start
-      timeMap += SOLUTION -> (time - timeMap(MATRIX))
-      timeMap += TOTAL -> time
-    }
+    val time = System.nanoTime - start
+    timeMap += SOLUTION -> (time - timeMap(MATRIX))
+    timeMap += TOTAL -> time
 
     if (matrixForwardPathBackward) sol.reverse else sol
 

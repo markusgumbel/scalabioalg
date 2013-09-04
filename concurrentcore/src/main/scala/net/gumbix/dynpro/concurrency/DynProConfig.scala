@@ -27,17 +27,14 @@ import scala.actors.Actor
  *   Reducing the effort and time during its relocation or outsourcing (in a cloud environment for e.g.).
  * @param clazz =: ConClass. One of the 3 possible dependency classes.
  * @param mode =: ConMode (EVENT or THREAD)
- * @param recordTime Although this isn't used here. Setting it this way makes
- *                   the attribute immutable.
- * @param wuFreq wake up frequency =: the number of costs that have to be calculated
+ * @param bcMailSize wake up frequency =: the number of costs that have to be calculated
  *               before the next wake up broadcast is made.
  * @param mxRange
  * @param solRange
  * @tparam Decision
  */
 protected[dynpro] final class DynProConfig[Decision](
-  val clazz: ConClass, mode: ConMode, val recordTime: Boolean,
-  wuFreq: Int, mxRange: Int, val solRange: Int
+  val clazz: ConClass, mode: ConMode, bcMailSize: Int, mxRange: Int, val solRange: Int
 ){
 
 
@@ -56,8 +53,8 @@ protected[dynpro] final class DynProConfig[Decision](
     calcCellCost:(Idx, Array[Double]) => Unit
   ): Boolean = {
     val actor = clazz match{
-      case LEFT_UP => new MxLUpActor(n, m, wuFreq, getAccValues, calcCellCost)
-      case UP => new MxUpActor(m, n, wuFreq, getAccValues, calcCellCost)
+      case LEFT_UP => new MxLUpActor(n, m, bcMailSize, getAccValues, calcCellCost)
+      case UP => new MxUpActor(m, n, bcMailSize, getAccValues, calcCellCost)
     }
 
     mode match{

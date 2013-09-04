@@ -15,13 +15,13 @@ import net.gumbix.dynpro.Idx
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
 protected[concurrency] final class MxUpActor(
-  val slModAm: Int, val slModVecLen: Int, wuFreq: Int,
+  val slModAm: Int, val slModVecLen: Int, bcMailSize: Int,
   getAccValues:(Idx, Idx => Unit) => Array[Double] ,
   calcCellCost:(Idx, Array[Double]) => Unit
-)extends MxActor(wuFreq, getAccValues, calcCellCost){
+)extends MxActor(bcMailSize, getAccValues, calcCellCost){
   //trapExit = true; //receive all the exceptions from the cellActors in form of messages
   //val loopEnd = matrix.length
-  private val actors = ListBuffer[MxUpVecActor]()
+  //private val actors = ListBuffer[MxUpVecActor]()
 
 
   //amount of slaves actors
@@ -36,7 +36,7 @@ protected[concurrency] final class MxUpActor(
         all further communications will be been proceeded between the slave actors
         hence the peer to peer communication model
         */
-        channels.foreach(ch => {
+        channels.foreach(ch => try{
           val channel = actors(ch % slAm)
           channel.getState match{
             case scala.actors.Actor.State.Terminated => reply(WAKEUP)
@@ -46,9 +46,11 @@ protected[concurrency] final class MxUpActor(
 
             case _ => channel.registerListener(sender.asInstanceOf[MxUpVecActor])
           }
-        })
+        }catch{case e: NoSuchElementException => reply(WAKEUP)})
 
-      case DONE => congestionControl
+      case firstJ: Int =>
+        actors - firstJ
+        congestionControl
         //this broadcast is received once a slave actor is done computing
 
       case MsgException(e, firstJ, loopPointer) => handleException(e, firstJ, loopPointer)
@@ -77,7 +79,7 @@ protected[concurrency] final class MxUpActor(
    *                 the new MatrixVectorActor will compute @ first.
    */
   override protected def startNewSlMod(firstJ: Int){
-    actors += new MxUpVecActor(this, firstJ)
+    actors += firstJ -> new MxUpVecActor(this, firstJ)
 
     //no start
   }
@@ -93,7 +95,7 @@ protected[concurrency] final class MxUpActor(
      adequate because it is possible that the required amount of actors is less than the number of actors
      allocated in the "slModules" list.
     */
-    actors.foreach(actor => actor.start)
+    actors.foreach(actor => actor._2.start)
   }
 
 }

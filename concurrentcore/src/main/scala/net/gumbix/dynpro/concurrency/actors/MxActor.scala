@@ -1,6 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import net.gumbix.dynpro.Idx
+import scala.collection.mutable.Map
 
 
 /**
@@ -13,12 +14,12 @@ import net.gumbix.dynpro.Idx
  *
  * This class increases the abstraction level for the master actor
  * used during the cost calculation stage.
- * @param wuFreq see DynProConfig.scala
+ * @param bcMailSize see DynProConfig.scala
  * @param getAccValues see DynProConfig.scala
  * @param calcCellCost see DynProConfig.scala
  */
 protected[actors] abstract class MxActor(
-  val wuFreq: Int,
+  val bcMailSize: Int,
   val getAccValues:(Idx, Idx => Unit) => Array[Double] ,
   val calcCellCost:(Idx, Array[Double]) => Unit
 )extends AbsMasterActor{
@@ -41,6 +42,10 @@ protected[actors] abstract class MxActor(
   protected[actors] def getRound = roundCounter
   override protected def beforeReact{ roundCounter += 1 }
   */
+
+  //protected val actors = ListBuffer[MxVecActor]()
+  protected val actors = Map[Int, MxVecActor]()
+
 
   override protected def eTerms = ETerms("Cell evaluation", eTermKey, "Cell")
 

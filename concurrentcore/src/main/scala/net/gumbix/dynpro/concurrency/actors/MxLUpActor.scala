@@ -16,19 +16,19 @@ import net.gumbix.dynpro.Idx
 /**
  * This class represents the master actor during the concurrent computation
  * with the row by row approach
- * @param wuFreq see MxActor.scala
+ * @param bcMailSize see MxActor.scala
  * @param getAccValues see MxActor.scala
  * @param calcCellCost see MxActor.scala
  */
 protected[concurrency] final class MxLUpActor(
-  slModAm: Int, val slModVecLen: Int, wuFreq: Int,
+  slModAm: Int, val slModVecLen: Int, bcMailSize: Int,
   getAccValues:(Idx, Idx => Unit) => Array[Double] ,
   calcCellCost:(Idx, Array[Double]) => Unit
-)extends MxActor(wuFreq, getAccValues, calcCellCost){
+)extends MxActor(bcMailSize, getAccValues, calcCellCost){
   //trapExit = true; //receive all the exceptions from the cellActors in form of messages
   //val loopEnd = matrix(0).length
 
-  private val actors = ListBuffer[MxLUpVecActor]()
+  //private val actors = ListBuffer[MxLUpVecActor]()
 
 
   override protected def actReact{
@@ -39,7 +39,7 @@ protected[concurrency] final class MxLUpActor(
         all further communications will be been proceeded between the slave actors
         hence the peer to peer communication model
         */
-        channels.foreach(ch => {
+        channels.foreach(ch => try{
           val channel = actors(ch)
           channel.getState match{
             case scala.actors.Actor.State.Terminated => reply(WAKEUP)
@@ -49,9 +49,12 @@ protected[concurrency] final class MxLUpActor(
 
             case _ => channel.registerListener(sender.asInstanceOf[MxLUpVecActor])
           }
-        })
+        }catch{case e: NoSuchElementException => reply(WAKEUP)})
 
-      case DONE => congestionControl
+      case i: Int =>
+        print("[%s] ".format(i))
+        actors - i //sender.asInstanceOf[MxLUpVecActor]
+        congestionControl
         //this broadcast is received once a slave actor is done computing.
 
       case MsgException(e, constI, loopPointer) => handleException(e, constI, loopPointer)
@@ -73,7 +76,8 @@ protected[concurrency] final class MxLUpActor(
   override protected def startNewSlMod(I: Int){
     //start a column computation with the current version of the matrix.
     val actor = new MxLUpVecActor(this, I)
-    actors += actor
+    actors(I) = actor
+
     actor.start
   }
 

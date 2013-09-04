@@ -19,9 +19,9 @@ import scala.actors.Actor
  * @param key map(key) =: pin point index used to find the paths
  * @tparam Decision see DynProConfig.scala
  */
-protected[actors] final class SolutionSubActor[Decision]
-  (solActor: SolutionActor[Decision], key: Int)
-  extends AbsSlaveActor(solActor){
+protected[actors] final class SolutionSubActor[Decision](
+  solActor: SolutionActor[Decision], key: Int
+)extends AbsSlaveActor(solActor){
 
   override protected def startInternalActors{
     solActor.getIdxList(key).foreach(idx => {

@@ -29,38 +29,10 @@ extends MxVecActor(mxActor){
 
   override def act{
     val loopEnd = mxActor.slModVecLen
-
-    /*DEBUG PROTOCOL
-    from mr. P. Meppe to Prof. M. Gumbel on the 10.juli.2013
-    - the "debug" attribute represents the vector the developer is willing examine.
-    - the "ifDebug" method is used to print out anything concerning the current "debug" value.
-    - the "ifDebug" method is used to print out anything concerning the direct follower of the "debug" value.
-
-    1- So far if the j index (see Idx(i, j)) appears in brackets e.g.: [3], it means the actor
-    is about to be suspended.
-    2- Right after that the following should appear "SENT('wakeSlaveModuleUp)RECEIVED('wakeSlaveModuleUp)". It means
-    that the actor handling the vector prior to the current vector (debug value) (aka the chanel) sent a broadcast and
-    the current actor received it and woke up.
-    3- Once up the actor should print each j index appear in parenthesis e.g.: {3} until it encounters the next
-    empty dependency value, causing him to print the j index in brackets and yield.
-      In between (after 10 parenthesis) it sends a broadcasts to its listeners represented by "==>'wakeSlaveModuleUp".
-
-    These steps should be repeated until the computation of the vector is done.
-
-    To test the developer should run
-    - net.gumbix.string.alignment.MyDistanceApp.main for a manual repetition
-    - net.gumbix.string.alignment.DebugMultAlignApp.main for an automatic repetition
-    */
-    //debug block
-    val debug = 5
-    def debugToStr(str:Any) = str.toString.substring(37)
-    def ifDebug(str: Any) = if(I == debug) print(str)
-    def ifDebugg(str: Any) = if(I == debug + 1) print(str)
-
     loop{ //loopWhile(j < loopEnd){
       if(j == loopEnd){
         broadcast
-        mxActor ! DONE
+        mxActor ! I //this message is sent once this actor is done evaluating its vector
         exit
       }else{
         val idx = Idx(I, j)//in this case I is constant
@@ -68,18 +40,22 @@ extends MxVecActor(mxActor){
         //this would work just as well. An example is provided in MxUpVecActor.scala
         val accValues = getAccValues(idx)
 
-        if(accValues._1){ifDebugg("["+j+"]")//nullStateInvoked
+        if(accValues._1){//nullStateInvoked
           /*one or more "Null states" have encounter ergo
-          this actor will have to sleep for a while.*/
-          registerTo(accValues._2)//channels
+          this actor will have to be SUSPENDED for a while.*/
+          registerTo(accValues._2)//channels: the registering is only proceeded as long as the accValues._2 != empty
 
           react{//exclusively react on broadcasts
-            case WAKEUP => ifDebugg("RECEIVED("+WAKEUP+")")//I am up now
+            case WAKEUP => //I am no longer in a "SUSPENDED" state.
           }
-        }else{ifDebugg("{"+j+"}")
+        }else{
+          /*
+          All required costs are available ergo the evaluation of the current
+          can be proceeded.
+           */
           mxActor.calcCellCost(idx, accValues._3)//values
           j += 1
-          if(j % mxActor.wuFreq == 0 && loopEnd - j >= mxActor.wuFreq/2) broadcast(I, debug)
+          if(j % mxActor.bcMailSize == 0 && loopEnd - j >= mxActor.bcMailSize/2) broadcast
             /*The last sequence before the end will not automatically be broadcast*/
         }
       }

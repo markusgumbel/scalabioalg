@@ -21,18 +21,17 @@ protected[analysis] class SeqCreator[SeqDT](elements: List[SeqDT]){
   protected val (alphabet, states, transP: Array[Array[Double]], emmP: Array[Array[Double]], map) =
     ("", "", Array(Array(.0)), Array(Array(.0)), Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1))
 
-  private val recordTime = true
   private class SeqAlignment(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL){
-    override val (values, config) = (map, setConfig(NO_CON, __, recordTime))
+    override val values = map
   }
   private class ConAlignment(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL){
-    override val (values, config) = (map, setConfig(LEFT_UP, EVENT, recordTime))
+    override val (values, config) = (map, setConfig(LEFT_UP, EVENT))
   }
   private class SeqViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP){
-    override val config = setConfig(NO_CON, __, recordTime)
+    //do nothing
   }
   private class ConViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP){
-    override val config = setConfig(UP, EVENT, recordTime)
+    override val config = setConfig(UP, EVENT)
   }
 
 
