@@ -27,9 +27,8 @@ protected[analysis] class SeqCreator[SeqDT](elements: List[SeqDT]){
   private class ConAlignment(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL){
     override val (values, config) = (map, setConfig(LEFT_UP, EVENT))
   }
-  private class SeqViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP){
-    //do nothing
-  }
+  private class SeqViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP)
+
   private class ConViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP){
     override val config = setConfig(UP, EVENT)
   }
@@ -63,6 +62,7 @@ protected[analysis] class SeqCreator[SeqDT](elements: List[SeqDT]){
   def runViterbi(s: String) = {
     val seq = new SeqViterbi(s)
     val con = new ConViterbi(s)
+
     seq.solution
     con.solution
     //println(seq.getDurations + " / " + con.getDurations)
@@ -73,28 +73,9 @@ protected[analysis] class SeqCreator[SeqDT](elements: List[SeqDT]){
 
 
 protected[analysis] object DNASeqCreator extends SeqCreator[Char](List('A', 'C', 'G', 'T')){
-  override protected val (alphabet, states) = ("AGCT", "AGCTagct")//AGCTagct =: A+ G+ C+ T+ A- G- C- T-
-  override protected val transP = Array(
-    Array[Double](0, 1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f, 1 / 8f),//fair cases
-  //q0, A+,  G+,  C+,  T+,  A-,  G-,  C-,  T-
-  Array(0, .20, .36, .25, .14, .01, .02, .01, .01),//A+
-  Array(0, .17, .35, .29, .14, .01, .02, .02, .01),//G+
-  Array(0, .19, .22, .34, .20, .01, .01, .02, .01),//C+
-  Array(0, .09, .35, .30, .20, .00, .02, .02, .01),//T+
-  Array(0, .01, .01, .01, .01, .28, .27, .20, .20),//A-
-  Array(0, .01, .02, .01, .01, .24, .31, .22, .18),//G-
-  Array(0, .02, .00, .02, .01, .31, .08, .29, .27),//C-
-  Array(0, .01, .02, .01, .01, .18, .29, .23, .25) //T-
-  )
-  override protected val emmP = Array(
-    Array(1.0, .0, .0, .0),//A+
-    Array(.0, 1.0, .0, .0),//G+
-    Array(.0, .0, 1.0, .0),//C+
-    Array(.0, .0, .0, 1.0),//T+
-    Array(1.0, .0, .0, .0),//A-
-    Array(.0, 1.0, .0, .0),//G-
-    Array(.0, .0, 1.0, .0),//C-
-    Array(.0, .0, .0, 1.0) //T-
+  override protected val (alphabet, states, transP, emmP) = (
+    ViterbiFigures.alphabet, ViterbiFigures.states,
+    ViterbiFigures.transP, ViterbiFigures.emmP
   )
 }
 

@@ -19,12 +19,12 @@ extends Actor{
   
   private def startCreators{
     //Anonymous actor
-    class SubCreatorActor(_actor: CreatorActor[SeqDT]) extends Actor{
+    class SubCreatorActor(actor: CreatorActor[SeqDT]) extends Actor{
       override def act{
         val seq = new mutable.StringBuilder
         for(i <- 0 until len) seq ++= Random.shuffle(elements).head.toString
 
-        _actor ! seq.toString
+        actor ! seq.toString
         //exit
       }
     }

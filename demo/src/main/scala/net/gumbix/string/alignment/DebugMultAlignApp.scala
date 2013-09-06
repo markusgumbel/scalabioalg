@@ -5,6 +5,7 @@ import net.gumbix.dynpro.concurrency.ConClass._
 import net.gumbix.dynpro.concurrency.ConMode._
 import net.gumbix.bioinf.string.alignment.AlignmentStep._
 import net.gumbix.dynpro.concurrency.Debugger
+import java.lang.management.{ManagementFactory, ThreadMXBean}
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -26,14 +27,29 @@ object DebugMultAlignApp{
         "wengrund ", //"wiesengrund lampe bringen Meier Messer Ziele Straßburg"
         "inehund ") //"schweinehund ampel trinken Maier Metzger Zeile Strassbourg"
 
+    val man = ManagementFactory.getThreadMXBean
+
     (0 until lim).foreach {i =>
       print("Round " + (i+1) + "/" + lim)
       Debugger.printMemories //memory usage
       new ConAlignment(s11, s2).solution
       synchronized{wait(500)}//to give enough time ot the garbage collector to take care of the junk
-      print("\n")
+
+      println("\nPeak thread Count = " + man.getPeakThreadCount)
+      print("\n") //for debug purposes
+
+
     }
     println("Done")
+
+    /*
+    var tGroup = Thread.currentThread().getThreadGroup
+    while(tGroup.getParent != null) tGroup = tGroup.getParent
+    val allGroups = Array.ofDim[ThreadGroup](1000)
+    val i = tGroup.enumerate(allGroups, true)
+    */
+
+
   }
 
   //Results so far: problem origin unknown

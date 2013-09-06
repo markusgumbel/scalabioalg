@@ -49,26 +49,29 @@ abstract class DynPro[Decision] extends DynProBasic{
   concurrency mode setting - START
   ********************************************************/
   //default values
-  private val (minRange, bcMailSize) = (10, 10)
+  private val (minRange, bcMailSize, nanoToSecFact) = (50, 10, 1e9)
 
-  private var timeMap: Map[Stage, Long] = Map()
+  private var timeMap: Map[Stage, Double] = Map()
   def getDurations = timeMap
 
   //methods used to configure the "DynPro" computation
   protected final def setConfig(clazz: ConClass, mode: ConMode): DynProConfig[Decision] =
-    setConfig(clazz, mode, bcMailSize, 0, 0)
+    setConfig(clazz, mode, 0, bcMailSize, 0)
 
-  protected final def setConfig(clazz: ConClass, mode: ConMode, _bcMailSize: Int, _mxRange: Int, solRange: Int)
+  protected final def setConfig(clazz: ConClass, mode: ConMode, solRange: Int): DynProConfig[Decision] =
+   setConfig(clazz, mode, solRange, bcMailSize, 0)
+
+  protected final def setConfig(clazz: ConClass, mode: ConMode, solRange: Int, _bcMailSize: Int, _mxRange: Int)
   : DynProConfig[Decision] = {
     val (mxRange, bcMailSize) =
-      (if(_mxRange < minRange || m - _mxRange < minRange) m else _mxRange,
+      (if(_mxRange < minRange || m - _mxRange < minRange) m else _mxRange, //m =: the matrix width
        clazz match{
          case LEFT_UP => abs(_bcMailSize)
          case UP => 1 //for now.
          case _ => 0
        })
 
-    new DynProConfig[Decision](clazz, mode, bcMailSize, mxRange, solRange)
+    new DynProConfig[Decision](clazz, mode, solRange, bcMailSize, mxRange)
   }
 
 
@@ -181,7 +184,7 @@ abstract class DynPro[Decision] extends DynProBasic{
 
       case _ => config.evaluateMatrix(n, m, getAccValues, calcCellCost) //LEFT_UP | UP
     }*/
-    timeMap += (MATRIX -> (System.nanoTime - mxStart))
+    timeMap += (MATRIX -> ((System.nanoTime - mxStart) / nanoToSecFact))
 
     hiddenMatrix
   }
@@ -213,7 +216,7 @@ abstract class DynPro[Decision] extends DynProBasic{
       case _ => config.convertMatrix(n, m, convert)
     }
 
-    timeMap += (MATLABMX -> (System.nanoTime - start))
+    timeMap += (MATLABMX -> ((System.nanoTime - start) / nanoToSecFact))
     hiddenMatlabMatrix
   }
 
@@ -238,8 +241,8 @@ abstract class DynPro[Decision] extends DynProBasic{
     }).toList
 
     val time = System.nanoTime - start
-    timeMap += SOLUTION -> (time - timeMap(MATRIX))
-    timeMap += TOTAL -> time
+    timeMap += SOLUTION -> (time / nanoToSecFact - timeMap(MATRIX))
+    timeMap += TOTAL -> time / nanoToSecFact
 
     if (matrixForwardPathBackward) sol.reverse else sol
 

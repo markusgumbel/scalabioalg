@@ -49,6 +49,7 @@ protected[concurrency] final class MxUpActor(
         }catch{case e: NoSuchElementException => reply(WAKEUP)})
 
       case firstJ: Int =>
+        print("[%s] ".format(firstJ))
         actors - firstJ
         congestionControl
         //this broadcast is received once a slave actor is done computing
@@ -80,7 +81,7 @@ protected[concurrency] final class MxUpActor(
    */
   override protected def startNewSlMod(firstJ: Int){
     actors += firstJ -> new MxUpVecActor(this, firstJ)
-
+    print(firstJ + ", ")
     //no start
   }
 

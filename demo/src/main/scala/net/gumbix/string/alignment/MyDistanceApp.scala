@@ -31,6 +31,7 @@ import AlignmentStep._
 import net.gumbix.dynpro.concurrency.{ConClass, ConMode}
 import ConClass._
 import ConMode._
+import javax.swing.border.TitledBorder
 
 /**
  * Demo for the edit distance. Was used for a open campus demo.
@@ -39,10 +40,18 @@ import ConMode._
 object MyDistanceApp extends SimpleSwingApplication{
   private val (w, h) = (1100, 700)
 
-  private val modelLabel = new Label("Sequential mode"){
-    foreground = java.awt.Color.BLUE
-    horizontalAlignment = Alignment.Left
-    verticalAlignment = Alignment.Top
+  private val splitPane = new SplitPane(Horizontal){
+    continuousLayout = true
+    oneTouchExpandable = true
+    resizeWeight = 0.80
+    border = new TitledBorder("Sequential")
+
+    topComponent = new ScrollPane {
+      contents = matrix
+    }
+    bottomComponent = new ScrollPane {
+      contents = result
+    }
   }
 
   class MyTextArea(text: String) extends TextArea(text + " ..."){
@@ -75,7 +84,7 @@ object MyDistanceApp extends SimpleSwingApplication{
       br+br + dp.mkMatrixString(solution) + br,
       solution.map(e => e.decision.toString).reduceLeft((s1, s2) => s1 + s2)
     )
-    //text.text = "RESULTS: \n\n" + _matrix + sim + align + decision
+
     matrix.text = "MATRIX:" + _matrix
     result.text = sim + align + decision
 
@@ -122,7 +131,7 @@ object MyDistanceApp extends SimpleSwingApplication{
         class MyRadioButton(label: String, modeLabel: String) extends RadioButton(label){
           listenTo(this)
           reactions += {
-            case e: ButtonClicked => modelLabel.text = modeLabel
+            case e: ButtonClicked => splitPane.border = new TitledBorder(modeLabel)
           }
         }
 
@@ -141,7 +150,7 @@ object MyDistanceApp extends SimpleSwingApplication{
 
           layout(new Button("Calc.") {
             reactions += {
-              case ButtonClicked(calcButton) => {
+              case e: ButtonClicked => {
                 calc(textFrom.text, textTo.text, group.selected.get.text)
               }
             }
@@ -150,24 +159,9 @@ object MyDistanceApp extends SimpleSwingApplication{
       }) = North
 
       // Info part:
-      layout(new BorderPanel{
-        layout(new BoxPanel(Vertical){
-          contents += Swing.VStrut(20)
-          contents += modelLabel
-        }) = North
-
-        layout(new SplitPane(Horizontal){
-          continuousLayout = true
-          oneTouchExpandable = true
-          resizeWeight = 0.80
-
-          topComponent = new ScrollPane {
-            contents = matrix
-          }
-          bottomComponent = new ScrollPane {
-            contents = result
-          }
-        }) = Center
+      layout(new BoxPanel(Vertical){
+        contents += Swing.VStrut(20)
+        contents += splitPane
       }) = Center
     }
   }

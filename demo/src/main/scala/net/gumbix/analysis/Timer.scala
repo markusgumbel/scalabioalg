@@ -34,11 +34,11 @@ protected[analysis] class Timer(nrOfCom: Int){
     seqMxMins, conMxMins, seqMxMaxs, conMxMaxs, seqMxAvgs, conMxAvgs, seqMxMeds, conMxMeds,
     seqTtMins, conTtMins, seqTtMaxs, conTtMaxs, seqTtAvgs, conTtAvgs, seqTtMeds, conTtMeds,
     med, med_1, nrOfSeqs) =
-      (Map[Stage, GraphValues](), ListBuffer[Long](),
-        ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](),
-        ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](),
-        ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](),
-        ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long](),
+      (Map[Stage, GraphValues](), ListBuffer[Double](),
+        ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](),
+        ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](),
+        ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](),
+        ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](),
         nrOfCom/2, nrOfCom/2 - 1, dynpro match{
           case GLOBALG => 2 * nrOfCom
           case VITERBI => nrOfCom
@@ -91,7 +91,7 @@ protected[analysis] class Timer(nrOfCom: Int){
 
       val (seqs, seqMx, seqTt, conMx, conTt) =
         (DNASeqCreator.getSeqs(nrOfSeqs, curLen),
-         new ListBuffer[Long](), new ListBuffer[Long](), new ListBuffer[Long](), new ListBuffer[Long]())
+         new ListBuffer[Double](), new ListBuffer[Double](), new ListBuffer[Double](), new ListBuffer[Double]())
 
       dynpro match{
         case GLOBALG =>

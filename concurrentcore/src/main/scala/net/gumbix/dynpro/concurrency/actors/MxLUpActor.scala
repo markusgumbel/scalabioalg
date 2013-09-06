@@ -52,7 +52,6 @@ protected[concurrency] final class MxLUpActor(
         }catch{case e: NoSuchElementException => reply(WAKEUP)})
 
       case i: Int =>
-        print("[%s] ".format(i))
         actors - i //sender.asInstanceOf[MxLUpVecActor]
         congestionControl
         //this broadcast is received once a slave actor is done computing.

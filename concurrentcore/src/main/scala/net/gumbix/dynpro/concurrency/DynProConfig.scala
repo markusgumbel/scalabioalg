@@ -25,16 +25,21 @@ import scala.actors.Actor
  *   Making a remodelling of this package much easier.
  * - The matrix object itself isn't directly accessible to the actors.
  *   Reducing the effort and time during its relocation or outsourcing (in a cloud environment for e.g.).
+ *
+ * The parameters are set in their order of importance.
  * @param clazz =: ConClass. One of the 3 possible dependency classes.
  * @param mode =: ConMode (EVENT or THREAD)
+ * @param solRange The purpose of this param is to avoid StackOverflowErrors while computing
+ *                 with very long sequences. It is used to set an adequate sequence length during
+ *                 the path finding stage (stage II).
  * @param bcMailSize wake up frequency =: the number of costs that have to be calculated
  *               before the next wake up broadcast is made.
- * @param mxRange
- * @param solRange
+ * @param mxRange This param has the same purpose as the "solRange" param. It is used during the invocation
+ *                of the "convertMatrix" method.
  * @tparam Decision
  */
 protected[dynpro] final class DynProConfig[Decision](
-  val clazz: ConClass, mode: ConMode, bcMailSize: Int, mxRange: Int, val solRange: Int
+  val clazz: ConClass, mode: ConMode, val solRange: Int, bcMailSize: Int, mxRange: Int
 ){
 
 
@@ -97,7 +102,7 @@ protected[dynpro] final class DynProConfig[Decision](
       val actor = new SolutionActor[Decision](idx, getPath, solRange)
       actor.start
       actor !? START match{
-        case pathList: ListBuffer[PathEntry[Decision]] => pathList
+        case pathList: ListBuffer[PathEntry[Decision]] => pathList //the path has been found.
       }
 
     case THREAD => new ListBuffer[PathEntry[Decision]]()//for now do nothing
@@ -106,6 +111,7 @@ protected[dynpro] final class DynProConfig[Decision](
 
   /**
    * 28.05.013 -> priority 50 :)
+   * Status: it has been test yet.
    * @param method
    * @param emptyVal
    * @tparam DataType
