@@ -263,7 +263,7 @@ abstract class DynPro[Decision] extends DynProBasic{
    * @param break limit (end of the solution path)
    * @return
    */
-  private def getPath(idx: Idx, break:(Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
+  private def _getPath(idx: Idx, break:(Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
     val (eps, pathList) = (0.001, new ListBuffer[PathEntry[Decision]]())
     /*
     * Inner function.
@@ -271,7 +271,7 @@ abstract class DynPro[Decision] extends DynProBasic{
     */
     def calcSI(innerIdx: Idx) {
       // Counter for all possible solutions (might be more than 1):
-      //var count = 0
+
       var solutionFound = false //it makes a lil bit more sense this way
       for (u <- decisions(innerIdx); if !solutionFound) {
         val prevIdx = prevStates(innerIdx, u)
@@ -301,7 +301,6 @@ abstract class DynPro[Decision] extends DynProBasic{
         // solution we skip any further solutions:
         if (abs(v - value(innerIdx, u)) < eps) {
           pathList += PathEntry(u, matrix(innerIdx.i)(innerIdx.j).get, innerIdx, prevIdx)
-          //count += 1
           solutionFound = true
           for (nidx <- prevIdx if !break(idx, innerIdx)) calcSI(nidx)
         }
@@ -309,6 +308,72 @@ abstract class DynPro[Decision] extends DynProBasic{
     }
 
     calcSI(idx)
+    pathList
+  }
+
+
+  private def getPath(idx: Idx, break:(Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
+    val (eps, pathList) = (0.001, new ListBuffer[PathEntry[Decision]]())
+    var _prevIdx = Array(idx)
+
+    /*
+    * Inner function.
+    * Note: Unlike its recursive equivalent it doesn't require a stack size of -Xss10m
+    *
+    * This methods sole purpose is to enable a clean break out of the inner loop
+    * since the "break" method/statement doesn't exist in scala.
+    */
+    def runInnerLoops {
+      for(innerIdx <- _prevIdx  if !break(idx, innerIdx)){ //outer for each loop
+        for (u <- decisions(innerIdx)) { //inner for each loop
+          val prevIdx = prevStates(innerIdx, u)
+          // v is difference of the current value and the previous values
+          // when decision u was made:
+          val v = prevIdx match {
+            // Empty array:
+            case Array() => calcFBack(matrix(innerIdx.i)(innerIdx.j).get, initValues, calcG)
+            // Non-empty array:
+            case indices: Array[Idx] => {
+              val args: Array[Double] = for (pidx <- indices) yield {
+                matrix(pidx.i)(pidx.j) match {
+                  /*
+                 case None => throw new RuntimeException("Internal error: " +
+                         "Illegal previous state " + pidx + " at " + idx.toString)
+                  */
+                  case Some(value) => value
+                  case _ => initValues(0)
+                }
+              }
+              calcFBack(matrix(innerIdx.i)(innerIdx.j).get, args, calcG)
+            }
+          }
+          // If v (the difference) is the current value then
+          // this decision was made. Note: We may get rounding errors,
+          // so we use an epsilon. Also, if we have already found a
+          // solution we skip any further solutions:
+          if (abs(v - value(innerIdx, u)) < eps) {
+            pathList += PathEntry(u, matrix(innerIdx.i)(innerIdx.j).get, innerIdx, prevIdx)
+            _prevIdx = prevIdx
+            return //to break out of the loops
+          }
+        }
+      }
+    }
+
+    var keepOuterForEachAlive = true
+    while(keepOuterForEachAlive){
+      val controlIdx = _prevIdx
+      runInnerLoops
+
+      // The path finding comes to an end ,
+      // if the for each loops haven't be terminated because one acceptable solution was found,
+      // or if the "break" method returns the value "true".
+      if(_prevIdx == controlIdx) keepOuterForEachAlive = false
+    }
+
+      //if the _prevId is still equal to the controlIdx after the inner for each loop ist means that
+      //the path reconstruction is done
+
     pathList
   }
 

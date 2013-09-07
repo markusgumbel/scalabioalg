@@ -64,10 +64,13 @@ protected[analysis] case class GraphValues(
   conAvg: ListBuffer[Double]
 ){
   def getText = {
-    val (s, text) = (" ", new StringBuilder())
+    val text = new StringBuilder
     for(i <- 0 until lens.length){
       if(i != 0) text.append("\n")
-      text.append(lens(i)+s+seqMin(i)+s+seqMax(i)+s+seqMed(i)+s+seqAvg(i)+s+conMin(i)+s+conMax(i)+s+conMed(i)+s+conAvg(i))
+      text ++= "%s %s %s %s %s %s %s %s %s".format(
+        lens(i), seqMin(i), seqMax(i), seqMed(i), seqAvg(i),
+        conMin(i), conMax(i), conMed(i), conAvg(i)
+      )
     }
     text.toString
   }

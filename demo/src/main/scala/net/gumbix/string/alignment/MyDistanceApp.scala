@@ -40,10 +40,18 @@ import javax.swing.border.TitledBorder
 object MyDistanceApp extends SimpleSwingApplication{
   private val (w, h) = (1100, 700)
 
+  class MyTextArea(text: String) extends TextArea(text + " ..."){
+    editable = false
+    font = Font.decode(Font.MONOSPACED + "-18")
+    background = new Color(240, 240, 240)
+  }
+  private val matrix = new MyTextArea("MATRIX")
+  private val result = new MyTextArea("RESULT")
+
   private val splitPane = new SplitPane(Horizontal){
     continuousLayout = true
     oneTouchExpandable = true
-    resizeWeight = 0.80
+    resizeWeight = 0.75
     border = new TitledBorder("Sequential")
 
     topComponent = new ScrollPane {
@@ -53,14 +61,6 @@ object MyDistanceApp extends SimpleSwingApplication{
       contents = result
     }
   }
-
-  class MyTextArea(text: String) extends TextArea(text + " ..."){
-    editable = false
-    font = Font.decode(Font.MONOSPACED + "-18")
-    background = new Color(240, 240, 240)
-  }
-  private val matrix = new MyTextArea("MATRIX")
-  private val result = new MyTextArea("RESULT")
 
   /********** MODULE - START **********/
   private val (map, _seq, _con, br) = (
@@ -72,7 +72,9 @@ object MyDistanceApp extends SimpleSwingApplication{
     override val (config, values) = (setConfig(LEFT_UP, EVENT), map)
   }
 
-  private class SeqAlign(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL)
+  private class SeqAlign(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL) {
+    override val values = map
+  }
 
   private def calc(s1: String, s2: String, mode: String) {
     val dp = if(mode == _con) new ConAlign(s1, s2) else new SeqAlign(s1, s2)

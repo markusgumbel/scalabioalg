@@ -26,7 +26,7 @@ protected[concurrency] final class SolutionActor[Decision](
 
   private val pathListMap = Map[Int, ListBuffer[ListBuffer[PathEntry[Decision]]]]()
   protected[actors] def updatePathListMap(key: Int, list: ListBuffer[ListBuffer[PathEntry[Decision]]]){
-    pathListMap  += key -> list
+    pathListMap += key -> list
   }
 
   /**
@@ -56,6 +56,7 @@ protected[concurrency] final class SolutionActor[Decision](
         newRange += range
       }
     }
+
     ppiMap
   }
 
@@ -145,14 +146,6 @@ protected[concurrency] final class SolutionActor[Decision](
             break = true
           }
     })
-
-    for(key <- sortedKeys){
-
-    }
-
-    //reset the current object to its initial configuration
-    ppiMap.clear
-    pathListMap.clear
 
     //all the relative path lists have been merged to ONE absolute path list
     pathList

@@ -23,7 +23,7 @@ class ConAlignment(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMo
 object DebugMultAlignApp{
   def main(args: Array[String]) {
     val (lim, s1, s11, s2) = //
-      (100, "wiesengrund",
+      (1000, "wiesengrund",
         "wengrund ", //"wiesengrund lampe bringen Meier Messer Ziele Straßburg"
         "inehund ") //"schweinehund ampel trinken Maier Metzger Zeile Strassbourg"
 
@@ -33,7 +33,7 @@ object DebugMultAlignApp{
       print("Round " + (i+1) + "/" + lim)
       Debugger.printMemories //memory usage
       new ConAlignment(s11, s2).solution
-      synchronized{wait(500)}//to give enough time ot the garbage collector to take care of the junk
+      //synchronized{wait(500)}//to give enough time ot the garbage collector to take care of the junk
 
       println("\nPeak thread Count = " + man.getPeakThreadCount)
       print("\n") //for debug purposes

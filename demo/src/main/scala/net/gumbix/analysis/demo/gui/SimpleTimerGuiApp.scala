@@ -23,13 +23,14 @@ object SimpleTimerGuiApp extends SimpleSwingApplication with Publisher{
 
 
   def top: Frame = new Frame{
-    title= "DYNAMIC PROGRAMMING"
+    title= "DYNAMIC PROGRAMMING (DNA)"
     preferredSize = new Dimension(1300, 750)
 
     contents = new BorderPanel{
       val (sTextField1, sTextField2, lenTextField, modeComboBox) = (new MyTextField, new MyTextField,
-        new TextField("100"){
+        new TextField("200"){
           font = Db.monoFont
+          tooltip = "Sequences length"
           listenTo(keys)
           reactions += {
             case e: KeyReleased =>
@@ -43,6 +44,7 @@ object SimpleTimerGuiApp extends SimpleSwingApplication with Publisher{
       )
 
       def calc{
+        print("START")
         val _len = lenTextField.text
 
         if(_len.matches("\\d+")){
@@ -59,7 +61,9 @@ object SimpleTimerGuiApp extends SimpleSwingApplication with Publisher{
           sTextField2.text = s2
 
           Db.calc(s1, s2)
-        }
+        }else print(" --> Invalid sequence length")
+
+        print("--> END\n")
       }
 
 

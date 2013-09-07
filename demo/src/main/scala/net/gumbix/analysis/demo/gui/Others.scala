@@ -76,12 +76,16 @@ object Db{
 
 
   def calc(s1: String, s2: String){
+    print(" --> calculating the solution...")
+    def p{print(" --> the solution is done --> creating the table...")}
+
     val (
       seqSim, seqAlign, seqMatrix, seqDecision, seqDur,
       conSim, conAlign, conMatrix, conDecision, conDur
     ) = if(s2.nonEmpty){
       val (seqDp, conDp) = (new SeqAlign(s1, s2), new ConAlign(s1, s2))
       val (seqSol, conSol) = (seqDp.solution, conDp.solution)
+      p
 
       (
         nbr + -seqDp.similarity + br,
@@ -99,6 +103,7 @@ object Db{
     }else{
       val (seqDp, conDp) = (new SeqViterbi(s1), new ConViterbi(s1))
       val (seqSol, conSol) = (seqDp.solution, conDp.solution)
+      p
 
       ( "", "",
         br+br + seqDp.mkMatrixString(seqSol) + br,
@@ -112,6 +117,7 @@ object Db{
         )
     }
 
+    println(" --> the creation is done.")
     seqMxTextArea.text = mx+":" + seqMatrix
     seqRsTextArea.text = seqSim + seqAlign + seqDecision + seqDur
     conMxTextArea.text = mx+":" + conMatrix

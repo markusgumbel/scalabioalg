@@ -19,30 +19,75 @@ import java.io.{PrintWriter, File}
  * @param nrOfCom number of computations per round
  */
 protected[analysis] class Timer(nrOfCom: Int){
+
+  /**
+   * The method raises the current sequence length.
+   * @param mode see the "runAnalysis" method
+   * @param curLen
+   * @param factor see the "runAnalysis" method
+   * @return
+   */
+  private def raiseCurLen(mode: FactoringMode, curLen: Int, factor: Int) = mode match{
+    case ARI => curLen + factor
+    case GEO => curLen * factor
+    case EXP => math.pow(curLen, factor).asInstanceOf[Int]
+  }
+
+
+  val cores = Runtime.getRuntime.availableProcessors
+  /**
+   * This method is used to save the values obtained during the analysis.
+   * @param dynpro see the "runAnalysis" method
+   * @param map
+   * @return true if both files have been successfully saved, false otherwise.
+   */
+  private def saveMap(dynpro: DynPro, map: Map[Stage, GraphValues]): Boolean = {
+    def filename(stage: Stage) = "matlab/results/%s_%s_%scores_%s".format(
+      dynpro, stage, cores,
+      new SimpleDateFormat("yyyyMMddHHmmss").format(new java.util.Date())
+    )
+
+    try{
+      val writer1 = new PrintWriter(new File(filename(MATRIX)))
+      writer1.write(map(MATRIX).getText)
+      writer1.close
+
+      val writer2 = new PrintWriter(new File(filename(TOTAL)))
+      writer2.write(map(TOTAL).getText)
+      writer2.close
+
+      true
+    }catch{case e: Exception => false}
+  }
+
+
   /**
    *
    * @param minLen
    * @param maxLen
    * @param factor sequence length expansion factor
    * @param mode sequence length expansion mode
-   * @param dynpro
-   * @return
+   * @param dynpro The dynamic programming algorithm used to run the analysis.
+   * @return true if the analysis is successful and all results have been successfully saved, false otherwise.
    */
   def runAnalysis(minLen: Int, maxLen: Long, factor: Int, mode: FactoringMode, dynpro: DynPro){
-    var (curLen, round) = (if(minLen < 10) 10 else minLen, 0)
-    val (map, curLens,
-    seqMxMins, conMxMins, seqMxMaxs, conMxMaxs, seqMxAvgs, conMxAvgs, seqMxMeds, conMxMeds,
-    seqTtMins, conTtMins, seqTtMaxs, conTtMaxs, seqTtAvgs, conTtAvgs, seqTtMeds, conTtMeds,
-    med, med_1, nrOfSeqs) =
-      (Map[Stage, GraphValues](), ListBuffer[Double](),
-        ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](),
-        ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](),
-        ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](),
-        ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](),
-        nrOfCom/2, nrOfCom/2 - 1, dynpro match{
-          case GLOBALG => 2 * nrOfCom
-          case VITERBI => nrOfCom
-      })
+    var (curLen, round) = (if(minLen < 100) 100 else minLen, 0)
+    val (
+      map, curLens,
+      seqMxMins, conMxMins, seqMxMaxs, conMxMaxs, seqMxAvgs, conMxAvgs, seqMxMeds, conMxMeds,
+      seqTtMins, conTtMins, seqTtMaxs, conTtMaxs, seqTtAvgs, conTtAvgs, seqTtMeds, conTtMeds,
+      med, med_1, nrOfSeqs
+    ) = (
+      Map[Stage, GraphValues](), ListBuffer[Double](),
+      ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](),
+      ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](),
+      ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](),
+      ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](), ListBuffer[Double](),
+      nrOfCom/2, nrOfCom/2 - 1, dynpro match{
+        case GLOBALG => 2 * nrOfCom
+        case VITERBI => nrOfCom
+      }
+    )
 
     /**
      *
@@ -55,33 +100,6 @@ protected[analysis] class Timer(nrOfCom: Int){
 
       println(status)
       round += 1
-    }
-    /**
-     *
-     * @return
-     */
-    def raiseCurLen = mode match{
-      case ARI => curLen + factor
-      case GEO => curLen * factor
-      case EXP => math.pow(curLen, factor).asInstanceOf[Int]
-    }
-    /**
-     *
-     * @return
-     */
-    def saveMap: Boolean = {
-      val core = Runtime.getRuntime().availableProcessors + "cores"
-      val date = new SimpleDateFormat("yyyyMMddHHmmss").format(new java.util.Date())
-      val s = "_"
-      def filename(stage: Stage) = "matlab/results/"+dynpro+s+stage+s+core+s+date
-
-      try{
-        val writer1 = new PrintWriter(new File(filename(MATRIX)))
-        writer1.write(map(MATRIX).getText)
-        val writer2 = new PrintWriter(new File(filename(TOTAL)))
-        writer2.write(map(TOTAL).getText)
-        true
-      }catch{case e: Exception => false}
     }
 
 
@@ -142,13 +160,14 @@ protected[analysis] class Timer(nrOfCom: Int){
       seqTtMeds += seqTtMed
       conTtMeds += conTtMed
 
-      curLen = raiseCurLen
+      curLen = raiseCurLen(mode, curLen, factor)
     }
     printStatus
 
     map(MATRIX) = GraphValues(curLens, seqMxMins, seqMxMaxs, seqMxMeds, seqMxAvgs, conMxMins, conMxMaxs, conMxMeds, conMxAvgs)
     map(TOTAL) = GraphValues(curLens, seqTtMins, seqTtMaxs, seqTtMeds, seqTtAvgs, conTtMins, conTtMaxs, conTtMeds, conTtAvgs)
-    saveMap
+
+    saveMap(dynpro, map)
   }
 
 

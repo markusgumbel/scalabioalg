@@ -34,6 +34,7 @@ protected[actors] final class SolutionSubActor[Decision](
       }
 
       new SubSlAc(this).start
+      //println(idx + " --> " + solActor.getPath(idx))
     })
   }
 
@@ -43,6 +44,7 @@ protected[actors] final class SolutionSubActor[Decision](
 
   override def act{
     startInternalActors
+
     val pathList = ListBuffer[ListBuffer[PathEntry[Decision]]]()
     /**
     def afterLoopWhile{
@@ -60,6 +62,7 @@ protected[actors] final class SolutionSubActor[Decision](
         case path: ListBuffer[PathEntry[Decision]] =>
           pathList += path
           reduceCounter //-> counter -= 1
+          //print(getCounter + " -> ")
       }
     }andThen afterLoopWhile
   }
