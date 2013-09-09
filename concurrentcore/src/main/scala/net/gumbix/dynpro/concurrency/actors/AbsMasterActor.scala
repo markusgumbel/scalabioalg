@@ -53,7 +53,7 @@ protected[actors] abstract class AbsMasterActor extends IMaster with Actor{
 
   /* from concurrency.IMaster
   protected def amPair: AmPair
-  protected def startNewSlMod(key: Int)
+  protected def iniNewSlMod(key: Int)
   protected def restartSlMod(key:Int) ##if necessary##
   */
   //TO OVERRIDE - END

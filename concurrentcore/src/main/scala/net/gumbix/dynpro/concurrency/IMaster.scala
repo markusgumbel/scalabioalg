@@ -72,7 +72,7 @@ protected[concurrency] trait IMaster{
    *
    * @param key
    */
-  protected def startNewSlMod(key: Int)
+  protected def iniNewSlMod(key: Int)
 
   /**********Abstract methods - END**********/
 
@@ -114,7 +114,7 @@ protected[concurrency] trait IMaster{
     val realPoolSize =
       math.min(dMaxPoolSize - getPoolSize.subSlMod, getPoolSize.slMod).asInstanceOf[Int]
 
-    (0 until realPoolSize).foreach(i => startNewSlMod(i))
+    (0 until realPoolSize).foreach(i => iniNewSlMod(i))
     compSlCounter = realPoolSize
     pointer = realPoolSize
   }
@@ -131,7 +131,7 @@ protected[concurrency] trait IMaster{
     won't be proceeded before the for - loop in the "startSlaves" method is done iterating.
     */
     if(pointer < getPoolSize.slMod){
-      startNewSlMod(pointer)
+      iniNewSlMod(pointer)
       pointer += 1
     }else{//One slave just finished and no new one will be (re)started at his place
       compSlCounter -= 1

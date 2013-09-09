@@ -1,8 +1,9 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import scala.collection.mutable.ListBuffer
-import net.gumbix.dynpro.concurrency.Messages.WAKEUP
+import scala.actors.Actor.State._
 import net.gumbix.dynpro.Idx
+import net.gumbix.dynpro.concurrency.Messages.WAKEUP
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -19,41 +20,35 @@ import net.gumbix.dynpro.Idx
 protected[actors] abstract class MxVecActor(mxActor: MxActor)
 extends AbsSlaveActor(mxActor){
 
-  /*
-  The channelList helps each a VecActor keep an overview of the channels it already listening.
-  The listenerList is used during the broadcast.
-   */
-  private val (channelList, listenerList) = (new ListBuffer[Int](), new ListBuffer[MxVecActor]())
+  //the listenerList is used during the broadcast.
+  private val listeners = new ListBuffer[MxVecActor]()
 
 
   /**
-   *
-   * @param channels
+   * This method is invoked other neighboring slave actors (MxLUpActor) to
+   * let their self register as listener of the current slave actor.
+   * If the registration is successful both slave actors become by definition
+   * peer actors.
+   * @param newListener
+   * @return True if the listener is up to the invocation of the method unknown to
+   *         the current slave actor, false otherwise.
    */
-  protected def registerTo(channels: ListBuffer[Int]) {
-    if(channels.nonEmpty){
-      mxActor ! channels //register listener to channels
-      channelList ++= channels
-    }
-  }
+  protected[actors] final def registerListener(newListener: MxVecActor) =
+    if(!listeners.contains(newListener)){
+      listeners += newListener
+      true
+    }else false
 
-  /**
-   * This method is invoked the master actor (MxLUpActor) to
-   * register a potential new listener to the channel of the current
-   * slave actor.
-   * @param listener
-   */
-  protected[actors] final def registerListener(listener: MxVecActor){
-    listenerList += listener
-  }
+
 
 
   protected final def broadcast{
-    listenerList.foreach(listener => listener.getState match{
-      /*this matching is made to avoid unnecessary mails, by only waking up
-        actors waiting in a react.*/
-      case scala.actors.Actor.State.Suspended => listener ! WAKEUP
-      case _ => //do nothing
+    /* This matching is made to avoid unnecessary mails, by only waking up
+     * actors waiting in a react.
+     */
+    listeners.foreach(listener => listener.getState match{
+      case New|Runnable|Terminated => //do nothing
+      case _ => listener ! WAKEUP
     })
   }
 
@@ -64,20 +59,31 @@ extends AbsSlaveActor(mxActor){
    * @return
    */
   protected def getAccValues(idx: Idx) = {
-    val channels = new ListBuffer[Int]()
     var noneStateInvoked = false
 
     //block =: inner method
+    /**
+     * This method is used to register and handle the null state,
+     * by registering the actor capable of solving the null state
+     * and force the current actor to wait.
+     * During one invocation of the mxActor.getAccValues(idx, handleNullState)
+     * method it can be called 0, once or more once.
+     * @param idx The index where the null state occured.
+     */
     def handleNullState(idx: Idx){
-      val channel = getIdxCoor(idx) //get the constant coordinate
-      noneStateInvoked = true
-      if(!(channelList.contains(channel) || channels.contains(channel)))
-        channels += channel
+      val channel = mxActor.getActor(getIdxCoor(idx))
+      if(channel != null){ //the actor is still computing
+        noneStateInvoked = true
+        //notify the current extender to wait for the next broadcast.
+        //The Actor.SUSPENDED state as been set as the "waiting" state.
+
+        channel.registerListener(this)
+      }
     }
 
     val values = mxActor.getAccValues(idx, handleNullState)
 
-    (noneStateInvoked, channels, values)
+    (noneStateInvoked, values)
   }
 
 

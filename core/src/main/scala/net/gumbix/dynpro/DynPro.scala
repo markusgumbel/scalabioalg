@@ -49,7 +49,7 @@ abstract class DynPro[Decision] extends DynProBasic{
   concurrency mode setting - START
   ********************************************************/
   //default values
-  private val (minRange, bcMailSize, nanoToSecFact) = (50, 10, 1e9)
+  private val (minRange, bcMailSize, nanoToSecFact) = (500, 10, 1e9)
 
   private var timeMap: Map[Stage, Double] = Map()
   def getDurations = timeMap
@@ -152,38 +152,26 @@ abstract class DynPro[Decision] extends DynProBasic{
    * Meaning the new matrix will be seemly evaluated once and only once
    * for each case
    */
-  lazy val matrix: Array[Array[Option[Double]]] = {
+  protected lazy val matrix: Array[Array[Option[Double]]] = {
     /* Iterate through all the cells. Note that the order depends on the
     problem. Many versions go from top to bottom and left to right.
     However, any other order may also work. */
 
+    def calcCellCost = for (k <- 0 until cellsSize){
+      val idx = getCellIndex(k)
+      //(idx) => Unit =: def handleNullState(idx: Idx){}//do nothing
+      this.calcCellCost(idx, getAccValues(idx,(idx) => Unit))
+    }
+
     val mxStart = System.nanoTime
     config match {
-      case null => for (k <- 0 until cellsSize){
-        val idx = getCellIndex(k)
-        //(idx) => Unit =: def handleNullState(idx: Idx){}//do nothing
-        calcCellCost(idx, getAccValues(idx,(idx) => Unit))
-      }
+      case null => calcCellCost
       case _ => config.clazz match {
-        case NO_DEP => for (k <- 0 until cellsSize){
-          val idx = getCellIndex(k)
-          //(idx) => Unit =: def handleNullState(idx: Idx){}//do nothing
-          calcCellCost(idx, getAccValues(idx,(idx) => Unit))
-        }
-        case _ => config.evaluateMatrix(n, m, getAccValues, calcCellCost) //LEFT_UP | UP
+        case NO_DEP => calcCellCost
+
+        case _ => config.evaluateMatrix(n, m, getAccValues, this.calcCellCost) //LEFT_UP | UP
       }
     }
-    /*
-    config.clazz match {
-      case NO_CON | NO_DEP =>
-        for (k <- 0 until cellsSize){
-          val idx = getCellIndex(k)
-          //(idx) => Unit =: def handleNullState(idx: Idx){}//do nothing
-          calcCellCost(idx, getAccValues(idx,(idx) => Unit))
-        }
-
-      case _ => config.evaluateMatrix(n, m, getAccValues, calcCellCost) //LEFT_UP | UP
-    }*/
     timeMap += (MATRIX -> ((System.nanoTime - mxStart) / nanoToSecFact))
 
     hiddenMatrix
@@ -205,12 +193,6 @@ abstract class DynPro[Decision] extends DynProBasic{
    */
   lazy val matlabMatrix: Array[Array[Double]] = {
     val start = System.nanoTime
-    /*
-    config.clazz match {
-      case NO_CON => for (i <- 0 until n; j <- 0 until m) convert(Idx(i,j))
-
-      case _ => config.convertMatrix(n, m, convert)
-    } */
     config match {
       case null => for (i <- 0 until n; j <- 0 until m) convert(Idx(i,j))
       case _ => config.convertMatrix(n, m, convert)
@@ -230,14 +212,15 @@ abstract class DynPro[Decision] extends DynProBasic{
   def solution(idx: Idx): List[PathEntry[Decision]] = {
     val start = System.nanoTime
     val sol = (config match {
-      case null => getPath(idx, (a:Idx, b:Idx) => false)
+      case null => getPath(idx, (_,_) => false)
+      //(_, _) => false =: (a:Idx, b:Idx) => false =: def break(startIdx: Idx, cIdx: Idx) = false
 
       case _ =>
         if(config.solRange < minRange || idx.MAX - config.solRange < minRange)
         //seemly concurrent, in reality sequential when the range hasn't been set adequately
-          getPath(idx, (_, _) => false)
+          getPath(idx, (_,_) => false)
+
         else config.calculateSolution(idx, getPath)
-      //(_, _) => false =: (a:Idx, b:Idx) => false =: def break(startIdx: Idx, cIdx: Idx) = false
     }).toList
 
     val time = System.nanoTime - start
@@ -257,10 +240,14 @@ abstract class DynPro[Decision] extends DynProBasic{
   Support methods (sequential & concurrent support) - START
     ********************************************************/
   /**
-   * This method builds the solution path within the given matrix,
-   * starting from the given idx
-   * @param idx cell within the given matrix
-   * @param break limit (end of the solution path)
+   * 06.09.2013
+   * This is the recursive equivalent of the "getPath" method.
+   * And as from today the OLD version of the "getPath" method.
+   * Due to stack overflow issues during the computation of long sequences
+   * (staring around a sequence length of 1000) i was forced to remodel it.
+   * The new "getPath" method has an iterative behavior unlike the recursive one of the old method.
+   * @param idx
+   * @param break
    * @return
    */
   private def _getPath(idx: Idx, break:(Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
@@ -311,7 +298,13 @@ abstract class DynPro[Decision] extends DynProBasic{
     pathList
   }
 
-
+  /**
+   * This method builds the solution path within the given matrix,
+   * starting from the given idx
+   * @param idx cell within the given matrix
+   * @param break limit (end of the solution path)
+   * @return
+   */
   private def getPath(idx: Idx, break:(Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
     val (eps, pathList) = (0.001, new ListBuffer[PathEntry[Decision]]())
     var _prevIdx = Array(idx)
@@ -392,9 +385,7 @@ abstract class DynPro[Decision] extends DynProBasic{
       // Non-empty array:
       case prevIndexes: Array[Idx] => {
         val prevValues: Array[Double] = for (pidx <- prevIndexes) yield {
-          /*
-          Status (july 2013): This state is now known as the "null state
-          */
+          /* Status (july 2013): This state is now known as the "null" state*/
           hiddenMatrix(pidx.i)(pidx.j) match {
             case Some(value) => value
             case _ => handleNullState(pidx); initValues(0)
@@ -414,9 +405,10 @@ abstract class DynPro[Decision] extends DynProBasic{
   private def calcCellCost(idx: Idx, values: Array[Double]){
     // Calculate the new value (min. or max.):
     hiddenMatrix(idx.i)(idx.j) = Some(reviseMax(values match {
+      /* A double value, while overriding the initValues method, the dev should keep in mind that
+       * the extreme value comes first
+       */
       case Array() => initValues(0)
-      /*a double value, while overriding the initValues method, the dev should keep in mind that
-      * the extreme value comes first*/
 
       case _ => values.toList.reduceLeft(extremeFunction(_, _)) //the maximum or min
     }))

@@ -63,7 +63,7 @@ object SimpleTimerGuiApp extends SimpleSwingApplication with Publisher{
           Db.calc(s1, s2)
         }else print(" --> Invalid sequence length")
 
-        print("--> END\n")
+        println("--> END")
       }
 
 

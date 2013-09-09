@@ -26,7 +26,7 @@ protected[concurrency] final class MatlabActor(
   override protected val getPoolSize = PoolSize(slModAm, slModAm * (slModVecLen/range + 1))
 
 
-  override protected def startNewSlMod(row: Int) {
+  override protected def iniNewSlMod(row: Int) {
     new MatlabVecActor(this, row).start
   }
 

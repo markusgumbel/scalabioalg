@@ -6,6 +6,7 @@ import net.gumbix.dynpro.concurrency.ConMode._
 import net.gumbix.bioinf.string.alignment.AlignmentStep._
 import net.gumbix.dynpro.concurrency.Debugger
 import java.lang.management.{ManagementFactory, ThreadMXBean}
+import scala.util.Random
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -22,23 +23,21 @@ class ConAlignment(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMo
 
 object DebugMultAlignApp{
   def main(args: Array[String]) {
-    val (lim, s1, s11, s2) = //
-      (1000, "wiesengrund",
-        "wengrund ", //"wiesengrund lampe bringen Meier Messer Ziele Straßburg"
-        "inehund ") //"schweinehund ampel trinken Maier Metzger Zeile Strassbourg"
-
+    val (len, lim, aas, s1, s2) = (
+      500, 500, List('A', 'C', 'G', 'T'), new StringBuilder, new StringBuilder
+      )
     val man = ManagementFactory.getThreadMXBean
 
+    (0 until len).foreach{i =>
+      s1 += Random.shuffle(aas).head
+      s2 += Random.shuffle(aas).head
+    }
+
     (0 until lim).foreach {i =>
-      print("Round " + (i+1) + "/" + lim)
+      print("Round %s/%s =>  Peak thread Count = %s,".format(i+1, lim, man.getPeakThreadCount))
+      new ConAlignment(s1.mkString , s2.mkString).solution
+
       Debugger.printMemories //memory usage
-      new ConAlignment(s11, s2).solution
-      //synchronized{wait(500)}//to give enough time ot the garbage collector to take care of the junk
-
-      println("\nPeak thread Count = " + man.getPeakThreadCount)
-      print("\n") //for debug purposes
-
-
     }
     println("Done")
 

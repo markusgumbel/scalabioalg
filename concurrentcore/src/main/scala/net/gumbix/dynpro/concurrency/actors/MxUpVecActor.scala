@@ -21,7 +21,7 @@ extends MxVecActor(mxActor){
 
   private var i = 0
 
-  override protected def getIdxCoor(idx: Idx) = idx.j
+  override protected def getIdxCoor(idx: Idx) = idx.j % mxActor.slAm
 
   /**
    * This method should be used to set the values of the EPair case class.
@@ -48,21 +48,19 @@ extends MxVecActor(mxActor){
     loop{ //loopWhile(i < loopEnd){
       if(i == loopEnd){
         broadcast
-        mxActor ! J //this message is sent once this actor is done evaluating its vector
+        mxActor ! DONE //this message is sent once this actor is done evaluating its vector
         exit
       }else{
         var _J = J //unlike J, _J is seemly constant
         loopWhile(_J < mxActor.slModAm){//innerLoopEnd = matrix(0).length
           val idx = Idx(i, _J)
           //val accValues = getAccValues(idx, (idx: Idx) => idx.i)
-          //this would work just as well. An example is provided in MxLUpVecActor
-          val (nullStateInvoked, channels, values) = getAccValues(idx)
+          //this works just as good. An example is provided in MxLUpVecActor
+          val (nullStateInvoked, values) = getAccValues(idx)
 
           if(nullStateInvoked){
             /*one or more "Null states" have encounter ergo
             this actor will have to be SUSPENDED for a while.*/
-            registerTo(channels)
-
             react{//exclusively react on broadcasts
               case WAKEUP => //end of the SUSPENDED state
             }

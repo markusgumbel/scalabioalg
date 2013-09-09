@@ -123,7 +123,7 @@ protected[concurrency] final class SolutionActor[Decision](
 
 
 
-  override protected def startNewSlMod(key: Int){
+  override protected def iniNewSlMod(key: Int){
     //the key value doesn't depend on the matrix dimensions.
     //Once set it is fix for the given slave actor.
     new SolutionSubActor[Decision](this, key).start

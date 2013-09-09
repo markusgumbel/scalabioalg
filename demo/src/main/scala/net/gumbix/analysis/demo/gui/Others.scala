@@ -77,7 +77,7 @@ object Db{
 
   def calc(s1: String, s2: String){
     print(" --> calculating the solution...")
-    def p{print(" --> the solution is done --> creating the table...")}
+    def _print{print(" --> creating the matrix table...")}
 
     val (
       seqSim, seqAlign, seqMatrix, seqDecision, seqDur,
@@ -85,7 +85,10 @@ object Db{
     ) = if(s2.nonEmpty){
       val (seqDp, conDp) = (new SeqAlign(s1, s2), new ConAlign(s1, s2))
       val (seqSol, conSol) = (seqDp.solution, conDp.solution)
-      p
+      _print
+
+      //TODO improve the mkMatrixString. 06.09.2013
+      // I just found out accidentally that its loops causes very high performance issues
 
       (
         nbr + -seqDp.similarity + br,
@@ -103,7 +106,7 @@ object Db{
     }else{
       val (seqDp, conDp) = (new SeqViterbi(s1), new ConViterbi(s1))
       val (seqSol, conSol) = (seqDp.solution, conDp.solution)
-      p
+      _print
 
       ( "", "",
         br+br + seqDp.mkMatrixString(seqSol) + br,
@@ -117,7 +120,7 @@ object Db{
         )
     }
 
-    println(" --> the creation is done.")
+    print(" --> the creation is done.")
     seqMxTextArea.text = mx+":" + seqMatrix
     seqRsTextArea.text = seqSim + seqAlign + seqDecision + seqDur
     conMxTextArea.text = mx+":" + conMatrix

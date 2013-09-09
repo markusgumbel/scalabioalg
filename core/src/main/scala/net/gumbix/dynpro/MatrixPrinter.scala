@@ -40,7 +40,7 @@ trait MatrixPrinter[Decision] {
    */
   var formatter = ENGINEER
 
-  val matrix: Array[Array[Option[Double]]]
+  protected val matrix: Array[Array[Option[Double]]]
 
   var innerColumnSeparator = ' '
 

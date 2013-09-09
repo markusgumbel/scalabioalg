@@ -34,7 +34,7 @@ trait DynProMatrix {
    * Matrix containing the accumulated values (costs).
    * A cell may be empty (=None).
    */
-  val matrix: Array[Array[Option[Double]]]
+  protected val matrix: Array[Array[Option[Double]]]
 
 }
 
