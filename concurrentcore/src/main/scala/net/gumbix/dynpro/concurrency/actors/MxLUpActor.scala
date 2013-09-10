@@ -24,27 +24,15 @@ protected[concurrency] final class MxLUpActor(
   getAccValues:(Idx, Idx => Unit) => Array[Double] ,
   calcCellCost:(Idx, Array[Double]) => Unit
 )extends MxActor(bcMailSize, getAccValues, calcCellCost){
-  //trapExit = true; //receive all the exceptions from the cellActors in form of messages
+
   //val loopEnd = matrix(0).length
 
-  override protected def actReact{
-    react{
-      case DONE => congestionControl
-        //this broadcast is received once a slave actor is done computing.
-
-      case MsgException(e, constI, loopPointer) => handleException(e, constI, loopPointer)
-    }
-  }
-
-
   override protected val eTermKey = "Row"
-
 
   /**
    * @return
    */
   override protected val getPoolSize = PoolSize(slModAm, 0)
-
 
   /**
    * @param I The coordinate

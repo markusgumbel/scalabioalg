@@ -1,11 +1,12 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import net.gumbix.dynpro.Idx
 import scala.collection.mutable.{ListBuffer, Map}
 import scala.actors.{Actor, TIMEOUT}
-import Actor.State.{Terminated, Suspended}
+import Actor.State._
+
 import net.gumbix.dynpro.concurrency.Messages._
 import net.gumbix.dynpro.Idx
+import net.gumbix.dynpro.concurrency.MsgException
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -26,24 +27,42 @@ protected[actors] abstract class MxActor(
   val getAccValues:(Idx, Idx => Unit) => Array[Double] ,
   val calcCellCost:(Idx, Array[Double]) => Unit
 )extends AbsMasterActor{
-  //trapExit = true; //receive all the exceptions from the cellActors in form of messages
   //actor states http://www.scala-lang.org/api/current/index.html#scala.actors.Actor$$State$
 
+  /**
+   * trapExit = true;
+   * This is used to receive all the exceptions from the MxVecActors in form of messages.
+   * But for some reason it cause an exception itself... I know right :)
+   * That's why i implemented the exception handler myself.
+   * @see <code>net.gumbix.dynpro.concurrency.actors.AbsSlaveActor.exceptionHandler</code>
+   */
+
+
   /***** ATTRIBUTES - START ******/
-  private val actors = new ListBuffer[MxVecActor]()
+  private val channels = Map[MxVecActor, ListBuffer[MxVecActor]]() //actors -> its listeners
 
   /**
-   *
+   * This attribute (actor) takes care of synchronising the MxVecActor's.
+   * It has an internal TIMEOUT. Once it expires right before resetting itself it "WAKES UP"
+   * all the currently suspended MxVecActor's.
+   * @note It has to use the "lazy" attribute avoid initializing itself when the "channels"
+   *       is still empty.
    */
-  private val syncActor = new Actor{
+  private lazy val syncActor = new Actor{
+    val len = channels.size
+
     def act{
       loop(
         reactWithin(100){ //0.1 sec
           case TIMEOUT =>
-            actors.foreach(actor => actor.getState match {
-              case Suspended => actor ! WAKEUP
-              case _ => //do nothing
-            })
+            val _channels = channels.toList
+            new SpeedUpActor(len, {i =>
+              val actor = _channels(i)._1
+              actor.getState match{
+                case Suspended => actor ! WAKEUP
+                case _ => //do nothing
+              }
+            }).start
 
           case DONE => exit
         }
@@ -53,34 +72,54 @@ protected[actors] abstract class MxActor(
   /***** ATTRIBUTES - END ******/
 
 
-  /***** CONSTRUCTOR - START *****/
-  syncActor.start
-  /***** CONSTRUCTOR - END *****/
-
-
-  /***** OVERRIDDEN FINAL METHODS - START *****/
-  protected[actors] final def getActor(ij: Int) = {
-    val actor = actors(ij)
-    actor.getState match{
-      case scala.actors.Actor.State.Terminated => null
+  /***** FINAL METHODS - START *****/
+  /**
+   *
+   * @param ij The channel coordinate
+   * @param listener The new listener
+   * @return
+   */
+  protected[actors] final def link(ij: Int, listener: MxVecActor): Boolean = {
+    val channel = channels.toList(ij)
+    channel._1.getState match{
+      case Terminated => false
       /* To avoid a dead lock.
        * The dead lock will occur if right before being set as "SUSPENDED"
        * a VecActor links itself to another VecActor, that already is in the
        * "TERMINATED" state.
        */
 
-      case _ => actor
+      case _ => //all other states will theoretically @ least send one broadcast after the linking (below)
+        val listeners = channel._2
+        if(!listeners.contains(listener)) listeners += listener
+        //there's no need to have the same actor more than once in the same list.
+        true
     }
   }
 
+  /**
+   *
+   * @param actor
+   */
+  protected[actors] final def broadcast(actor: MxVecActor) = channels(actor).foreach(
+    /* This matching is made to avoid unnecessary mails, by only waking up
+     * actors waiting in a react.
+     */
+    listener => listener.getState match{
+      case New|Runnable|Terminated => //do nothing
+      case _ => listener ! WAKEUP
+    }
+  )
+  /***** FINAL METHODS - END *****/
 
+
+  /***** OVERRIDDEN FINAL METHODS - START *****/
   override protected final def eTerms = ETerms("Cell evaluation", eTermKey, "Cell")
 
   override protected final def ackStart: Symbol = {
     syncActor ! DONE
     DONE
   }
-
 
   /**
    * This method creates one MxVectorActor with the current version of the matrix.
@@ -93,9 +132,7 @@ protected[actors] abstract class MxActor(
    *       Their startup is done in the method below called "beforeLoopWhile".
    */
   override protected final def iniNewSlMod(ij: Int) =
-    actors += getNewVecActor(ij)
-  //NO actor.start
-
+    channels(getNewVecActor(ij)) = new ListBuffer[MxVecActor]() //NO actor.start
 
   /**
    * This loop was intentionally chosen.
@@ -103,8 +140,22 @@ protected[actors] abstract class MxActor(
    * it is possible that the required amount of actors is less than the number of actors
    * allocated in the "slModules" list.
    */
-  override protected final def beforeLoopWhile = actors.foreach(actor => actor.start)
+  override protected final def beforeLoopWhile{
+    val _channels = channels.toList
+    new SpeedUpActor(channels.size, i => _channels(i)._1.start).start //start all the MxVecActor's
+    //channels.foreach(actor => actor._1.start)
 
+    syncActor.start
+  }
+
+  override protected final def actReact{
+    react{
+      case DONE => congestionControl
+      //this broadcast is received once a slave actor is done computing
+
+      case MsgException(e, ij, loopPointer) => handleException(e, ij, loopPointer)
+    }
+  }
   /***** OVERRIDDEN FINAL METHODS - END *****/
 
 
@@ -113,4 +164,45 @@ protected[actors] abstract class MxActor(
   protected def getNewVecActor(ij: Int): MxVecActor
   /***** METHODS TO OVERRIDE - END *****/
 
+}
+
+
+/**
+ * This class has been marginalized because it doesn't have a key role in the
+ * MxActor/MxVecActor communication process.
+ * Its purpose is to increase the iteration speed of an Iterator
+ * (Map, List, ListBuffer, Array, ArrayBuffer).
+ * @param len The length of the Iterator.
+ * @param block The block of instructions that should be proceed.
+ */
+private class SpeedUpActor(len: Int, block: Int => Unit) extends Actor{
+  val range = 200 //200*3/8 = 75
+  val loopEnd: Int = len / range
+
+  def runForeach(s: Int, e: Int) = {
+    new Actor{
+      def act{(s until e).foreach(i => block(i))}
+    }.start
+  }
+  //(0 to 2).foreach(i => print(i)) //-> 012
+  //(0 until 2).foreach(i => print(i)) //-> 01
+
+  def act{
+    if(loopEnd == 0) runForeach(0, len) //the only block
+    else (0 until loopEnd).foreach(i =>{
+      val rI = range*i
+      val rrI = rI + range
+
+      if(i == loopEnd - 1){
+        val rest = len % range
+
+        if(8*rest < 3*range) //=: rest < range*3/8 (i'm just avoiding doubles)
+          runForeach(rI, rrI+rest)//the 2 last blocks shall be merged.
+        else{
+          runForeach(rI, rrI) //the 2nd to the last block.
+          runForeach(rrI, rrI+rest) //the last block.
+        }
+      }else runForeach(rI, rrI) //one of the other blocks
+    })
+  }
 }

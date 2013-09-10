@@ -24,7 +24,7 @@ class ConAlignment(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMo
 object DebugMultAlignApp{
   def main(args: Array[String]) {
     val (len, lim, aas, s1, s2) = (
-      500, 500, List('A', 'C', 'G', 'T'), new StringBuilder, new StringBuilder
+      125, 500, List('A', 'C', 'G', 'T'), new StringBuilder, new StringBuilder
       )
     val man = ManagementFactory.getThreadMXBean
 
@@ -51,7 +51,5 @@ object DebugMultAlignApp{
 
   }
 
-  //Results so far: problem origin unknown
-  // Once it starts running, it runs till the end.
-  // Unfortunately much often than required the first iteration doesn't terminated.
+  //Results so far: running.
 }

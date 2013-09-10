@@ -18,27 +18,15 @@ protected[concurrency] final class MxUpActor(
   getAccValues:(Idx, Idx => Unit) => Array[Double] ,
   calcCellCost:(Idx, Array[Double]) => Unit
 )extends MxActor(bcMailSize, getAccValues, calcCellCost){
-  //trapExit = true; //receive all the exceptions from the cellActors in form of messages
-  //val loopEnd = matrix.length
-  //private val actors = ListBuffer[MxUpVecActor]()
 
+  //val loopEnd = matrix.length
 
   //amount of slaves actors
   protected[actors] lazy val slAm = getPoolSize.slMod
 
 
-  override protected def actReact{
-    react{
-      case DONE => congestionControl
-      //this broadcast is received once a slave actor is done computing
-
-      case MsgException(e, firstJ, loopPointer) => handleException(e, firstJ, loopPointer)
-    }
-  }
-
-
+  /***** OVERRIDDEN FINAL METHODS - START *****/
   override protected val eTermKey = "Column"
-
 
   /**
    * Slave module =: vector actor
@@ -51,11 +39,10 @@ protected[concurrency] final class MxUpActor(
     PoolSize(slAm, 0)
   }
 
-
   /**
    * @param firstJ The first coordinate.
    */
   override protected def getNewVecActor(firstJ: Int) = new MxUpVecActor(this, firstJ)
     //NO actor.start
-
+  /***** OVERRIDDEN FINAL METHODS - END *****/
 }

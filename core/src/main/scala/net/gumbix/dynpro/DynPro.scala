@@ -376,7 +376,7 @@ abstract class DynPro[Decision] extends DynProBasic{
    * @param idx the coordinates of the cell whose cost is about to be calculated.
    * @param handleNullState sort of protocol to follow in case a "None" value occurs in
    *                        concurrent mode.
-   * @return Array
+   * @return Array[Double]
    */
   private def getAccValues(idx: Idx, handleNullState:(Idx) => Unit): Array[Double] =
   for (u <- decisions(idx)) yield prevStates(idx, u) match {

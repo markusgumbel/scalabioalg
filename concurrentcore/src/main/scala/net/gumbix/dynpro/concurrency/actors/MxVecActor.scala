@@ -20,66 +20,33 @@ import net.gumbix.dynpro.concurrency.Messages.WAKEUP
 protected[actors] abstract class MxVecActor(mxActor: MxActor)
 extends AbsSlaveActor(mxActor){
 
-  //the listenerList is used during the broadcast.
-  private val listeners = new ListBuffer[MxVecActor]()
+  /**
+   * @see <code>MxActor.broadcast</code>
+   */
+  protected final def broadcast = mxActor.broadcast(this)
 
 
   /**
-   * This method is invoked other neighboring slave actors (MxLUpActor) to
-   * let their self register as listener of the current slave actor.
-   * If the registration is successful both slave actors become by definition
-   * peer actors.
-   * @param newListener
-   * @return True if the listener is up to the invocation of the method unknown to
-   *         the current slave actor, false otherwise.
+   * @see <code>net.gumbix.dynpro.DynPro.getAccValues</code>
+   * @return Boolean, Array[Double]
    */
-  protected[actors] final def registerListener(newListener: MxVecActor) =
-    if(!listeners.contains(newListener)){
-      listeners += newListener
-      true
-    }else false
-
-
-
-
-  protected final def broadcast{
-    /* This matching is made to avoid unnecessary mails, by only waking up
-     * actors waiting in a react.
-     */
-    listeners.foreach(listener => listener.getState match{
-      case New|Runnable|Terminated => //do nothing
-      case _ => listener ! WAKEUP
-    })
-  }
-
-
-  /**
-   *
-   * @param idx
-   * @return
-   */
-  protected def getAccValues(idx: Idx) = {
+  protected final def getAccValues(idx: Idx) = {
+    //this attribute notifies the current extender to wait for the next broadcast.
     var noneStateInvoked = false
 
-    //block =: inner method
     /**
-     * This method is used to register and handle the null state,
+     * This (functional) method is used to link and handle the null state,
      * by registering the actor capable of solving the null state
      * and force the current actor to wait.
+     * The Actor.SUSPENDED state as been set as the "waiting" state.
      * During one invocation of the mxActor.getAccValues(idx, handleNullState)
      * method it can be called 0, once or more once.
      * @param idx The index where the null state occured.
      */
-    def handleNullState(idx: Idx){
-      val channel = mxActor.getActor(getIdxCoor(idx))
-      if(channel != null){ //the actor is still computing
-        noneStateInvoked = true
-        //notify the current extender to wait for the next broadcast.
-        //The Actor.SUSPENDED state as been set as the "waiting" state.
+    def handleNullState(idx: Idx) =
+      if(mxActor.link(getIdxCoor(idx), this)) noneStateInvoked = true
+    //once the "noneStateInvoked" is set to true it won't change its value again
 
-        channel.registerListener(this)
-      }
-    }
 
     val values = mxActor.getAccValues(idx, handleNullState)
 
