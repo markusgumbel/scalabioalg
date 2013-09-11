@@ -16,10 +16,14 @@ import net.gumbix.dynpro.concurrency.Debugger
  * Time: 5:56 PM
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
-protected[analysis] class SeqCreator[SeqDT](elements: List[SeqDT]){
+protected[analysis] abstract class SeqCreator[SeqDT](elements: List[SeqDT]){
   //These values are to be overridden
-  protected val (alphabet, states, transP: Array[Array[Double]], emmP: Array[Array[Double]], map) =
-    ("", "", Array(Array(.0)), Array(Array(.0)), Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1))
+  protected val map = Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1)
+
+  protected val alphabet: String
+  protected val states: String
+  protected val transP: Array[Array[Double]]
+  protected val emmP: Array[Array[Double]]
 
   private class SeqAlignment(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL){
     override val values = map
@@ -30,7 +34,7 @@ protected[analysis] class SeqCreator[SeqDT](elements: List[SeqDT]){
   private class SeqViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP)
 
   private class ConViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP){
-    override val config = setConfig(UP, EVENT)
+    override val config = setConfig(UP, EVENT) //not to worry this isn't an error.
   }
 
 
@@ -40,7 +44,7 @@ protected[analysis] class SeqCreator[SeqDT](elements: List[SeqDT]){
    * @param len
    * @return
    */
-  def getSeqs(nrOfSeq: Int, len: Int): ListBuffer[String] = {
+  def getSeqs(nrOfSeq: Int, len: Long): ListBuffer[String] = {
     val actor = new CreatorActor[SeqDT](elements, nrOfSeq, len)
     actor.start
     actor !? Message.start match{
@@ -64,9 +68,9 @@ protected[analysis] class SeqCreator[SeqDT](elements: List[SeqDT]){
     val con = new ConViterbi(s)
 
     seq.solution
-    con.solution
+    con.solution //not to worry this isn't an error.
     //println(seq.getDurations + " / " + con.getDurations)
-    (seq.getDurations, con.getDurations)
+    (seq.getDurations, con.getDurations) //not to worry this isn't an error.
   }
 
 }
@@ -82,4 +86,8 @@ protected[analysis] object DNASeqCreator extends SeqCreator[Char](List('A', 'C',
 
 protected[analysis] object RNASeqCreator extends SeqCreator[Char](List('A', 'C', 'G', 'U')){
   //the override block is missing
+  protected val alphabet: String = ???
+  protected val states: String = ???
+  protected val transP: Array[Array[Double]] = ???
+  protected val emmP: Array[Array[Double]] = ???
 }

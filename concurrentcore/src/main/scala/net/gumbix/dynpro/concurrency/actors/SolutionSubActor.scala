@@ -24,23 +24,18 @@ protected[actors] final class SolutionSubActor[Decision](
 )extends AbsSlaveActor(solActor){
 
   override protected def startInternalActors{
-    solActor.getIdxList(key).foreach(idx => {
+    solActor.getIdxList(key).foreach{idx =>
       raiseCounter //-> counter += 1
-      class SubSlAc(slAc: Actor) extends Actor{
-        //sub slave actor
+      new Actor{ //anonymous sub slave actor
         override def act{
-          slAc ! solActor.getPath(idx)
+          SolutionSubActor.this ! solActor.getPath(idx)
         }
-      }
-
-      new SubSlAc(this).start
+      }.start
       //println(idx + " --> " + solActor.getPath(idx))
-    })
+    }
   }
 
-
   override def ePair = new EPair(key, 0)
-
 
   override def act{
     startInternalActors
@@ -52,7 +47,7 @@ protected[actors] final class SolutionSubActor[Decision](
       exit
     }
     */
-    def afterLoopWhile{
+    lazy val andThenBlock = { //instructions to be proceed after the loopWhile below
       solActor.updatePathListMap(key, pathList)
       solActor ! DONE
     }
@@ -64,7 +59,7 @@ protected[actors] final class SolutionSubActor[Decision](
           reduceCounter //-> counter -= 1
           //print(getCounter + " -> ")
       }
-    }andThen afterLoopWhile
+    }andThen andThenBlock
   }
 
 }

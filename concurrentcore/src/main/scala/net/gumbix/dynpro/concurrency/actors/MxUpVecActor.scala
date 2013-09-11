@@ -33,7 +33,7 @@ extends MxVecActor(mxActor){
   override def act{
     val loopEnd = mxActor.slModVecLen
 
-    def afterLoopWhile{
+    def afterLoopWhile{ //instructions to be proceed after the loopWhile below
       broadcast
       /**
       The broadcast frequency in this case can so far only be set to one

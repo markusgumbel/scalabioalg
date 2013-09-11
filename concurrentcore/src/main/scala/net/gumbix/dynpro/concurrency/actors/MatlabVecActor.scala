@@ -35,17 +35,13 @@ extends AbsSlaveActor(mxActor){
       loopPairs += LoopPair(start, end)
     }
 
-    loopPairs.foreach(pair => {
-      class SubSlAc(slAc: Actor) extends Actor{
-        //sub slave actor
-        override def act{
-          for(i <- pair.loopStart until pair.loopEnd) mxActor.convert(Idx(row, i))
+    loopPairs.foreach(pair => {new Actor{ //anonymous sub slave actor
+      override def act{
+        for(i <- pair.loopStart until pair.loopEnd) mxActor.convert(Idx(row, i)) //convert a part of the matrix
 
-          slAc ! DONE
-        }
+        MatlabVecActor.this ! DONE
       }
-      new SubSlAc(this).start
-    })
+    }.start })
   }
 
 

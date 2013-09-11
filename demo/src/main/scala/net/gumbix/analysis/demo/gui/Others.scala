@@ -51,8 +51,9 @@ class MyTextField extends TextField{
 }
 
 object Db{
-  val (br, mx, rs, seq, con, nbr, dur, monoFont, backGround, dps, aas, map) = (
-    "\n", "MATRIX", "RESULT", "SEQUENTIAL", "CONCURRENT", "Number of changes: ", "\n\nDurations:\n",
+  val (br, mx, rs, seq, con, s, nbr, dur, monoFont, backGround, dps, aas, map) = (
+    "\n", "MATRIX", "RESULT", "SEQUENTIAL", "CONCURRENT", " sec",
+    "Number of changes: ", "\n\nDurations:\n",
     Font.decode(Font.MONOSPACED + "-15"), new Color(240, 240, 240),
     List("GLOBAL ALIGNMENT", "HIDDEN MARKOV MODEL"),
     List('A', 'C', 'G', 'T'), Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1)
@@ -87,19 +88,16 @@ object Db{
       val (seqSol, conSol) = (seqDp.solution, conDp.solution)
       _print
 
-      //TODO improve the mkMatrixString. 06.09.2013
-      // I just found out accidentally that its loops causes very high performance issues
-
       (
         nbr + -seqDp.similarity + br,
         seqDp.makeAlignmentString(seqSol) + br,
-        br+br + seqDp.mkMatrixString(seqSol) + br,
+        br+br + seqDp._mkMatrixString(seqSol) + br,
         seqSol.map(e => e.decision.toString).reduceLeft((s1, s2) => s1 + s2),
         dur + seqDp.getDurations.mkString(br),
 
         nbr + -conDp.similarity + br,
         conDp.makeAlignmentString(conSol) + br,
-        br+br + conDp.mkMatrixString(conSol) + br,
+        br+br + conDp._mkMatrixString(conSol) + br,
         conSol.map(e => e.decision.toString).reduceLeft((s1, s2) => s1 + s2),
         dur + conDp.getDurations.mkString(br)
       )
@@ -109,12 +107,12 @@ object Db{
       _print
 
       ( "", "",
-        br+br + seqDp.mkMatrixString(seqSol) + br,
+        br+br + seqDp._mkMatrixString(seqSol) + br,
         seqSol.map(e => e.decision.toString).reduceLeft((s1, s2) => s1 + s2),
         dur + seqDp.getDurations.mkString(br),
 
         "", "",
-        br+br + conDp.mkMatrixString(conSol) + br,
+        br+br + conDp._mkMatrixString(conSol) + br,
         conSol.map(e => e.decision.toString).reduceLeft((s1, s2) => s1 + s2),
         dur + conDp.getDurations.mkString(br)
         )
@@ -122,9 +120,9 @@ object Db{
 
     print(" --> the creation is done.")
     seqMxTextArea.text = mx+":" + seqMatrix
-    seqRsTextArea.text = seqSim + seqAlign + seqDecision + seqDur
+    seqRsTextArea.text = seqSim + seqAlign + seqDecision + seqDur + s
     conMxTextArea.text = mx+":" + conMatrix
-    conRsTextArea.text = conSim + conAlign + conDecision + conDur
+    conRsTextArea.text = conSim + conAlign + conDecision + conDur + s
   }
 
 }

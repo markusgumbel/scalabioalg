@@ -63,15 +63,9 @@ protected[analysis] case class GraphValues(
   conMed: ListBuffer[Double],
   conAvg: ListBuffer[Double]
 ){
-  def getText = {
-    val text = new StringBuilder
-    for(i <- 0 until lens.length){
-      if(i != 0) text.append("\n")
-      text ++= "%s %s %s %s %s %s %s %s %s".format(
-        lens(i), seqMin(i), seqMax(i), seqMed(i), seqAvg(i),
-        conMin(i), conMax(i), conMed(i), conAvg(i)
-      )
-    }
-    text.toString
-  }
+  def getText: String = (0 until lens.length).map{i => "%s %s %s %s %s %s %s %s %s".format(
+    lens(i), seqMin(i), seqMax(i), seqMed(i), seqAvg(i),
+    conMin(i), conMax(i), conMed(i), conAvg(i)
+  )}.mkString("\n")
+
 }

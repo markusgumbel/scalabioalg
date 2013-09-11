@@ -11,10 +11,10 @@ import scala.collection.mutable.ListBuffer
  * Time: 12:13 AM
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
-protected[concurrency] object Messages {
+protected[dynpro] object Messages {
 //symbol messages
   val START = 'startMasterModule
-  val WAKEUP = 'wakeSlaveModuleUp
+  protected[concurrency] val WAKEUP = 'wakeSlaveModuleUp
   val DONE = 'computationDone
 }
 

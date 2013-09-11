@@ -14,22 +14,21 @@ import net.gumbix.dynpro.concurrency.Debugger
  * Time: 2:50 PM
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
-protected[analysis] class CreatorActor[SeqDT](elements: List[SeqDT], nrOfSeq: Int, len: Int)
+protected[analysis] class CreatorActor[SeqDT](elements: List[SeqDT], nrOfSeq: Int, len: Long)
 extends Actor{
   
   private def startCreators{
     //Anonymous actor
-    class SubCreatorActor(actor: CreatorActor[SeqDT]) extends Actor{
+    class SubCreatorActor extends Actor{
       override def act{
-        val seq = new mutable.StringBuilder
-        for(i <- 0 until len) seq ++= Random.shuffle(elements).head.toString
-
-        actor ! seq.toString
+        CreatorActor.this ! (0.asInstanceOf[Long] until len).map(_ =>
+          Random.shuffle(elements).head.toString
+        ).mkString
         //exit
       }
     }
 
-    (0 until nrOfSeq).foreach(_ => new SubCreatorActor(this).start)
+    (0 until nrOfSeq).foreach(_ => new SubCreatorActor().start)
   }
 
 

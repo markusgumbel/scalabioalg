@@ -28,9 +28,6 @@ abstract class AbstractNussinov(val s: String)
                 with MatrixPrinter[NussinovDecision] {
   formatter = INT
 
-  def updateXY(newS: String, __ : String){s.replace(s, newS)}
-  def updateS(newS: String){updateXY(newS, "")}
-
   def n = s.length
 
   def m = n
