@@ -42,7 +42,6 @@ protected[dynpro] final class DynProConfig[Decision](
   val clazz: ConClass, mode: ConMode, val solRange: Int, bcMailSize: Int, mxRange: Int
 ){
 
-
   /**
    * This method creates a master instance (MatrixActor or MatrixThread) depending on the given
    * ConMode, which then computes the cell values of the given matrix.
@@ -65,9 +64,7 @@ protected[dynpro] final class DynProConfig[Decision](
     mode match{
       case EVENT =>
         actor.start
-        actor !? START match{
-          case DONE => true //the matrix evaluation is done
-        }
+        actor !? START match{case DONE => true} //the matrix evaluation is done
 
       case THREAD => false //do nothing for now
     }
@@ -82,9 +79,7 @@ protected[dynpro] final class DynProConfig[Decision](
     case EVENT =>
       val actor = new MatlabActor(n, m, convert, mxRange)
       actor.start
-      actor !? START match{
-        case DONE => true //the matrix convertion is done
-      }
+      actor !? START match{case DONE => true} //the matrix convertion is done
 
     case THREAD => false //do nothing for now
   }
@@ -101,9 +96,8 @@ protected[dynpro] final class DynProConfig[Decision](
     case EVENT =>
       val actor = new SolutionActor[Decision](idx, getPath, solRange)
       actor.start
-      actor !? START match{
-        case pathList: ListBuffer[PathEntry[Decision]] => pathList //the path has been found.
-      }
+      actor !? START match{case pathList: ListBuffer[PathEntry[Decision]] => pathList}
+      //the path has been found.
 
     case THREAD => new ListBuffer[PathEntry[Decision]]()//for now do nothing
   }
@@ -127,7 +121,6 @@ protected[dynpro] final class DynProConfig[Decision](
       toReturn
     }
   }
-
 
 }
 

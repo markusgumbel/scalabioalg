@@ -15,9 +15,10 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.dynpro
 
-import collection.mutable.ListBuffer
+import collection.mutable.{ListBuffer, Map}
 import math.abs
-import net.gumbix.dynpro.concurrency.{DynProConfig}
+
+import net.gumbix.dynpro.concurrency.DynProConfig
 import concurrency.ConClass._
 import concurrency.ConMode._
 import concurrency.Stage._
@@ -28,12 +29,11 @@ import concurrency.Stage._
  *
  * Current DynPro's structure:
  * The dynpro's implementation of the dynamic programming algorithm is proceeded
- * in 4 stages. Each of this stages can be computed sequentially or concurrently.
- * - Stage i: the creation of an empty two-dimensional matrix.
- * - Stage ii: the evaluation of the cells within this matrix.
+ * in 2 stages. Each of this stages can be computed sequentially or concurrently.
+ * - Stage i: the evaluation of the cells within this matrix.
  *     This can be done either per row-wise or column-wise.
- * - Stage iii: the conversion of the values into a values interpretable by "Matlab".
- * - Stage iv: the back tracking of the correct path.
+ * - Stage ii: the back tracking of the correct path.
+ * Additionally one can convert the matrix object into an object interpretable by MatLab.
  *
  * The computation modes are the following:
  * - NO CONCURRENCY =: 100% sequential
@@ -43,15 +43,11 @@ import concurrency.Stage._
  *
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de), Patrick Meppe (tapmeppe@gmail.com)
  */
-abstract class DynPro[Decision] extends DynProBasic{
+abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decision] with MatrixPrinter[Decision]{
 
-  /********************************************************
-  concurrency mode setting - START
-  ********************************************************/
+  /***** concurrency mode setting - START *****/
   //default values
-  private val (minRange, bcMailSize, nanoToSecFact) = (500, 10, 1e9)
-
-  private var timeMap: Map[Stage, Double] = Map()
+  private val (minRange, bcMailSize, nanoToSecFact, timeMap) = (500, 10, 1e9, Map[Stage, Double]())
   def getDurations = timeMap
 
   //methods used to configure the "DynPro" computation
@@ -79,15 +75,10 @@ abstract class DynPro[Decision] extends DynProBasic{
   //protected val config: DynProConfig[Decision] = setConfig(LEFT_UP, EVENT)
 
   protected val config: DynProConfig[Decision] = null //setConfig(NO_CON, __)
+  /***** concurrency mode setting - END *****/
 
-  /********************************************************
-  concurrency mode setting - END
-  ********************************************************/
 
-  /********************************************************
-  attributes and methods to override - START
-  ********************************************************/
-
+  /***** attributes and methods to override - START *****/
   /**
    * matrixForwardPathBackward = true:
    * All possible decisions that lead to state (i, j).
@@ -129,16 +120,10 @@ abstract class DynPro[Decision] extends DynProBasic{
    * Boundary value: The value in the matrix for not existing states.
    */
   def initValues: Array[Double] = Array(0.0)
-
-  /********************************************************
-  attributes and methods to override - END
-  ********************************************************/
+  /***** attributes and methods to override - END *****/
 
 
-
-  /********************************************************
-  Main methods (potentially concurrent) - START
-  ********************************************************/
+  /***** Main methods (potentially concurrent) - START *****/
   //this block solely concerns the "matrix" method
   //private val inf = Double.NegativeInfinity
   private val hiddenMatrix: Array[Array[Option[Double]]] = Array.ofDim(n, m)
@@ -154,8 +139,9 @@ abstract class DynPro[Decision] extends DynProBasic{
    */
   protected lazy val matrix: Array[Array[Option[Double]]] = {
     /* Iterate through all the cells. Note that the order depends on the
-    problem. Many versions go from top to bottom and left to right.
-    However, any other order may also work. */
+     * problem. Many versions go from top to bottom and left to right.
+     * However, any other order may also work.
+     */
 
     def calcCellCost = for (k <- 0 until cellsSize){
       val idx = getCellIndex(k)
@@ -172,7 +158,7 @@ abstract class DynPro[Decision] extends DynProBasic{
         case _ => config.evaluateMatrix(n, m, getAccValues, this.calcCellCost) //LEFT_UP | UP
       }
     }
-    timeMap += (MATRIX -> ((System.nanoTime - mxStart) / nanoToSecFact))
+    timeMap += MATRIX -> ((System.nanoTime - mxStart) / nanoToSecFact)
 
     hiddenMatrix
   }
@@ -204,41 +190,53 @@ abstract class DynPro[Decision] extends DynProBasic{
 
 
   /**
-   * STAGE iv of iv
+   * STAGE ii of ii
    * Trace back the path starting from cell (i, j)
    * @param idx
    * @return List of PathEntry
    */
-  def solution(idx: Idx): List[PathEntry[Decision]] = {
+  override def solution(idx: Idx): List[PathEntry[Decision]] = {
     val start = System.nanoTime
     val sol = (config match {
       case null => getPath(idx, (_,_) => false)
       //(_, _) => false =: (a:Idx, b:Idx) => false =: def break(startIdx: Idx, cIdx: Idx) = false
 
       case _ =>
-        if(config.solRange < minRange || idx.MAX - config.solRange < minRange)
+        if(config.solRange < minRange || idx.MAX - config.solRange < minRange) getPath(idx, (_,_) => false)
         //seemly concurrent, in reality sequential when the range hasn't been set adequately
-          getPath(idx, (_,_) => false)
-
         else config.calculateSolution(idx, getPath)
     }).toList
 
-    val time = System.nanoTime - start
-    timeMap += SOLUTION -> (time / nanoToSecFact - timeMap(MATRIX))
-    timeMap += TOTAL -> time / nanoToSecFact
+    val time = (System.nanoTime - start) / nanoToSecFact
+    if(time < timeMap(MATRIX)){
+      //the "matrix" object has been invoked somewhere else before its invocation the "getPath" method
+      timeMap += SOLUTION -> time
+      timeMap(TOTAL) = timeMap(MATRIX) + timeMap(SOLUTION)
+    }else{ //the "getPath" method is the first to invoke the "matrix" object
+      timeMap(SOLUTION) = time - timeMap(MATRIX)
+      timeMap += TOTAL -> time
+    }
+
+
+    //The block below is used assuming the "matrix" val is invoked before
+    timeMap += SOLUTION -> (System.nanoTime - start) / nanoToSecFact
+    timeMap(TOTAL) = timeMap(MATRIX) + timeMap(SOLUTION)
 
     if (matrixForwardPathBackward) sol.reverse else sol
-
   }
 
-  /********************************************************
-  Main methods (potentially concurrent) - END
-  ********************************************************/
+  /**
+   * Trace back the path. Start cell depends on
+   * setting of attribute <code>backpropagationStart</code>.
+   */
+  def solution: List[PathEntry[Decision]] = {
+    val idx = cellIndices(backpropagationStart)
+    solution(idx)
+  }
+  /***** Main methods (potentially concurrent) - END *****/
 
 
-  /********************************************************
-  Support methods (sequential & concurrent support) - START
-    ********************************************************/
+  /***** Support methods (sequential & concurrent support) - START *****/
   /**
    * 06.09.2013
    * This is the recursive equivalent of the "getPath" method.
@@ -329,10 +327,9 @@ abstract class DynPro[Decision] extends DynProBasic{
             case indices: Array[Idx] => {
               val args: Array[Double] = for (pidx <- indices) yield {
                 matrix(pidx.i)(pidx.j) match {
-                  /*
-                 case None => throw new RuntimeException("Internal error: " +
-                         "Illegal previous state " + pidx + " at " + idx.toString)
-                  */
+                  /* case None => throw new RuntimeException("Internal error: " +
+                   * "Illegal previous state " + pidx + " at " + idx.toString)
+                   */
                   case Some(value) => value
                   case _ => initValues(0)
                 }
@@ -340,10 +337,12 @@ abstract class DynPro[Decision] extends DynProBasic{
               calcFBack(matrix(innerIdx.i)(innerIdx.j).get, args, calcG)
             }
           }
-          // If v (the difference) is the current value then
-          // this decision was made. Note: We may get rounding errors,
-          // so we use an epsilon. Also, if we have already found a
-          // solution we skip any further solutions:
+
+          /* If v (the difference) is the current value then
+           * this decision was made. Note: We may get rounding errors,
+           * so we use an epsilon. Also, if we have already found a
+           * solution we skip any further solutions:
+           */
           if (abs(v - value(innerIdx, u)) < eps) {
             pathList += PathEntry(u, matrix(innerIdx.i)(innerIdx.j).get, innerIdx, prevIdx)
             _prevIdx = prevIdx
@@ -358,14 +357,14 @@ abstract class DynPro[Decision] extends DynProBasic{
       val controlIdx = _prevIdx
       runInnerLoops
 
-      // The path finding comes to an end ,
-      // if the for each loops haven't be terminated because one acceptable solution was found,
-      // or if the "break" method returns the value "true".
+      /* The path finding comes to an end ,
+       * if the for each loops haven't be terminated because one acceptable solution was found,
+       * or if the "break" method returns the value "true".
+       */
       if(_prevIdx == controlIdx) keepOuterForEachAlive = false
     }
-
-      //if the _prevId is still equal to the controlIdx after the inner for each loop ist means that
-      //the path reconstruction is done
+    //If the _prevId is still equal to the controlIdx after the inner for each loop ist means that
+    //the path reconstruction is done
 
     pathList
   }
@@ -413,14 +412,9 @@ abstract class DynPro[Decision] extends DynProBasic{
       case _ => values.toList.reduceLeft(extremeFunction(_, _)) //the maximum or min
     }))
   }
-
-  /********************************************************
-  Support methods (sequential & concurrent support) - END
-    ********************************************************/
+  /***** Support methods (sequential & concurrent support) - END *****/
 
 }
-
-
 
 
 // because of Scala bug?!

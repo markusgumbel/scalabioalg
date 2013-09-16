@@ -27,8 +27,7 @@ import net.gumbix.dynpro.MatrixPrinter
  */
 
 class MultipleAlignment(val strings: Array[String], val mode: AlignmentMode)
-        extends MultipleAlignmentPrinter with MatrixPrinter[Int]
-                with Score with Logger {
+ extends MultipleAlignmentPrinter with MatrixPrinter[Int] with Score with Logger {
   logLevel = false
   formatter = INT
 

@@ -1,6 +1,7 @@
 package net.gumbix.dynpro.concurrency.actors
 
 import scala.actors.Actor
+import net.gumbix.dynpro.concurrency.Messages._
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -18,11 +19,11 @@ import scala.actors.Actor
  * @param len The length of the Iterator.
  * @param block The block of instructions that should be proceed.
  */
-class SpeedUpActor(len: Int, block: Int => Unit) extends Actor{
+protected[actors] abstract class BoastActor(len: Int, block: Int => Unit) extends Actor{
   val range = 200 //200*3/8 = 75
   val loopEnd: Int = len / range
 
-  def runForeach(s: Int, e: Int) = {
+  private def runForeach(s: Int, e: Int) = {
     new Actor{
       def act{(s until e).foreach(i => block(i))}
     }.start
@@ -30,8 +31,7 @@ class SpeedUpActor(len: Int, block: Int => Unit) extends Actor{
   //(0 to 2).foreach(i => print(i)) //-> 012
   //(0 until 2).foreach(i => print(i)) //-> 01
 
-
-  def act{
+  protected final def _act{
     if(loopEnd == 0) runForeach(0, len) //the only block
     else (0 until loopEnd).foreach(i =>{
       val rI = range*i
@@ -40,7 +40,7 @@ class SpeedUpActor(len: Int, block: Int => Unit) extends Actor{
       if(i == loopEnd - 1){
         val rest = len % range
 
-        if(8*rest < 3*range) //=: rest < range*3/8 (i'm just avoiding doubles)
+        if(8*rest < 3*range) //=: rest < range*3/8 (i'm just avoiding Doubles)
           runForeach(rI, rrI+rest)//the 2 last blocks shall be merged.
         else{
           runForeach(rI, rrI) //the 2nd to the last block.
@@ -49,4 +49,15 @@ class SpeedUpActor(len: Int, block: Int => Unit) extends Actor{
       }else runForeach(rI, rrI) //one of the other blocks
     })
   }
+}
+
+class BoastAsyncActor(len: Int, block: Int => Unit) extends BoastActor(len, block){
+  def act = _act
+}
+
+class BoastSyncActor(len: Int, block: Int => Unit) extends BoastActor(len, block){
+  def act{react{case START =>
+    _act
+    reply(DONE)
+  }}
 }

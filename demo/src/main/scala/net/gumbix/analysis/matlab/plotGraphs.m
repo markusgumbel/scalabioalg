@@ -1,4 +1,12 @@
 function plotGraphs(filename)
+    %fileFolder
+
+    %dirOutput = dir(fullfile(fileFolder,'*.bin'));
+    %fileNames = {dirOutput.name};
+    %for i = 1:length(fileNames)
+        %str = [fileFolder '\' fileNames{1,i}];   
+    %end
+    
     f=fopen(filename, 'r');
     sc = textscan(f, '%d %f %f %f %f %f %f %f %f'); 
     %x-coor, min-s, max-s, med-s, avg-s, min-c, max-c, med-c, avg-c 

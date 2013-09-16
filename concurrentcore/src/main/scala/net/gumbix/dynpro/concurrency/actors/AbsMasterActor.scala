@@ -62,12 +62,14 @@ protected[actors] abstract class AbsMasterActor extends IMaster with Actor{
   override final def act{
     react{
       case net.gumbix.dynpro.concurrency.Messages.START => //this is a synchronous message
+        //due to the 2nd react the value of the "sender" attribute is internally updated
+        //that's why the initial value has to be copied to be preserved
         val to = sender
-        /*
-        create and start all the necessary slave actors
-        This method is implemented in the IMaster trait.
-        */
-        startSlMods
+
+        /* Create and start all the necessary slave actors.
+         * This method is implemented in the IMaster trait.
+         */
+        iniSlMods
         beforeLoopWhile
 
         loopWhile(keepConLoopAlive){

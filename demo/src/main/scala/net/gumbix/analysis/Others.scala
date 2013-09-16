@@ -1,6 +1,9 @@
 package net.gumbix.analysis
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ListBuffer, Map}
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -53,19 +56,30 @@ object ViterbiFigures{
 
 
 protected[analysis] case class GraphValues(
-  lens: ListBuffer[Double],
-  seqMin: ListBuffer[Double],
-  seqMax: ListBuffer[Double],
-  seqMed: ListBuffer[Double],
-  seqAvg: ListBuffer[Double],
-  conMin: ListBuffer[Double],
-  conMax: ListBuffer[Double],
-  conMed: ListBuffer[Double],
-  conAvg: ListBuffer[Double]
+  lens: ListBuffer[Long],
+  seqMin: Map[Long, Double],
+  seqMax: Map[Long, Double],
+  seqMed: Map[Long, Double],
+  seqAvg: Map[Long, Double],
+  conMin: Map[Long, Double],
+  conMax: Map[Long, Double],
+  conMed: Map[Long, Double],
+  conAvg: Map[Long, Double]
 ){
-  def getText: String = (0 until lens.length).map{i => "%s %s %s %s %s %s %s %s %s".format(
-    lens(i), seqMin(i), seqMax(i), seqMed(i), seqAvg(i),
-    conMin(i), conMax(i), conMed(i), conAvg(i)
+  def getText: String = lens.sorted.map{len => "%s %s %s %s %s %s %s %s %s".format(
+    len, seqMin(len), seqMax(len), seqMed(len), seqAvg(len),
+    conMin(len), conMax(len), conMed(len), conAvg(len)
   )}.mkString("\n")
+}
 
+protected[analysis] object Db{
+  val (cores, dir, saveFormat, anaFormat) = ( //file related attributes
+    Runtime.getRuntime.availableProcessors,
+    "demo~src~main~scala~net~gumbix~analysis~matlab~results~".replace("~", File.separator),
+      //to avoid a operating system dependency
+    new SimpleDateFormat("yyyyMMddHHmmss"), new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+  )
+
+  def saveDate = saveFormat.format(new Date())
+  def anaDate = anaFormat.format(new Date())
 }

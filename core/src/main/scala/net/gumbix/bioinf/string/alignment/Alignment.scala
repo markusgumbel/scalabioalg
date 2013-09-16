@@ -40,8 +40,6 @@ class Alignment(val s1: String, val s2: String,
                 val mode: AlignmentMode,
                 override val substMatrix: Option[String])
         extends DynPro[AlignmentStep]
-                with Backpropagation[AlignmentStep]
-                with MatrixPrinter[AlignmentStep]
                 with AlignmentPrinter[AlignmentStep]
                 with Score {
   // Helper constructor if no substitution matrix is used:

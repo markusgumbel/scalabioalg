@@ -54,7 +54,7 @@ extends MxVecActor(mxActor){
           mxActor.calcCellCost(idx, accValues._2)//values
           j += 1
           if(j % mxActor.bcMailSize == 0 && loopEnd - j >= mxActor.bcMailSize/2) broadcast
-            /*The last sequence before the end will not automatically be broadcast*/
+          /*The last sequence before the end will not automatically be broadcast*/
         }
       }
     }

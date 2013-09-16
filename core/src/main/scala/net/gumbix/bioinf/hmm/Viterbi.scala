@@ -36,9 +36,7 @@ class Viterbi(val s: String, val alphabet: Array[Char],
               val states: Array[Char],
               val transP: Array[Array[Double]],
               val emmP: Array[Array[Double]])
-        extends DynPro[Int]
-                with Backpropagation[Int]
-                with MatrixPrinter[Int] {
+        extends DynPro[Int]{
 
   /**
    * Values can become very small, so a scientific notation is required.

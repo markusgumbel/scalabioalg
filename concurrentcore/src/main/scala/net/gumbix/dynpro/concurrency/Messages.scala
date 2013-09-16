@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
  * Time: 12:13 AM
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
-protected[dynpro] object Messages {
+protected[gumbix] object Messages {
 //symbol messages
   val START = 'startMasterModule
   protected[concurrency] val WAKEUP = 'wakeSlaveModuleUp

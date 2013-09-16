@@ -1,14 +1,22 @@
 package net.gumbix.analysis.demo.gui
 
-import scala.swing.{TextField, SplitPane, TextArea, Orientation, Label}
+import scala.swing.{TextField, SplitPane, TextArea, Orientation, CheckBox}
+
 import java.awt.{Color, Font}
+import scala.swing.event.Key
+import scala.swing.event.KeyPressed
+import scala.swing.event.KeyReleased
+import scala.actors.Actor
+
 import net.gumbix.bioinf.string.alignment.{AlignmentMode, Alignment}
 import net.gumbix.dynpro.concurrency.ConClass._
 import net.gumbix.dynpro.concurrency.ConMode._
 import net.gumbix.bioinf.string.alignment.AlignmentStep._
 import net.gumbix.bioinf.hmm.Viterbi
 import net.gumbix.analysis.ViterbiFigures._
-import scala.swing.event.{Key, KeyPressed, KeyReleased}
+import net.gumbix.dynpro.{PathEntry, DynPro}
+import net.gumbix.dynpro.concurrency.Messages._
+
 
 /**
  * An algorithm for data transfer.
@@ -58,71 +66,74 @@ object Db{
     List("GLOBAL ALIGNMENT", "HIDDEN MARKOV MODEL"),
     List('A', 'C', 'G', 'T'), Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1)
   )
+  val (_mx, _s) = (mx+":" +br+br, s+br)
 
-  val (seqMxTextArea, seqRsTextArea, conMxTextArea, conRsTextArea) = (
-    MyTextArea(mx), MyTextArea(rs), MyTextArea(mx), MyTextArea(rs)
+  val (seqMxTextArea, seqRsTextArea, conMxTextArea, conRsTextArea, mxCheckBox) = (
+    MyTextArea(mx), MyTextArea(rs), MyTextArea(mx), MyTextArea(rs),
+    new CheckBox("Show the matrix"){selected = true}
   )
 
-  private class ConAlign(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL){
-    override val (config, values) = (setConfig(LEFT_UP, EVENT), map)
-  }
-  private class SeqAlign(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL){
-    override val values = map
+  /********** ACTOR CLASSES - START **********/
+  private class DpActor(dp: DynPro[Any], rsTextArea: MyTextArea, mxTextArea: MyTextArea)
+  extends Actor{
+    private val className = "\t" + dp.getClass.getSimpleName
+
+    protected final lazy val sol = {
+      println(className + ": calculating the solution...")
+      val sol = dp.solution
+      println(className + ": the solution has been calculated.")
+      sol
+    }
+    protected lazy val prefix = ""
+
+    def act{
+      //first delete the old result if there was ever one.
+      rsTextArea.text = ""
+      mxTextArea.text = ""
+
+      //after that compute the new one.
+      rsTextArea.text = prefix +
+        sol.map(e => e.decision.toString).reduceLeft((s1, s2) => s1 + s2) +
+        dur + dp.getDurations.mkString(_s)+s
+
+      if(mxCheckBox.selected){
+        println(className + " : creating the matrix table...")
+        mxTextArea.text = _mx + dp._mkMatrixString(sol) + br
+        println(className + " : the creation is done.")
+      }
+    }
   }
 
+  private class GlobAlignActor(dp: Alignment, rsTextArea: MyTextArea, mxTextArea: MyTextArea)
+  extends DpActor(dp.asInstanceOf[DynPro[Any]], rsTextArea, mxTextArea){
+    override lazy val prefix = nbr + -dp.similarity + br +
+      dp.makeAlignmentString(sol.asInstanceOf[List[PathEntry[AlignmentStep]]]) + br
+  }
+
+  private class ViterbiActor(dp: Viterbi, rsTextArea: MyTextArea, mxTextArea: MyTextArea)
+  extends DpActor(dp.asInstanceOf[DynPro[Any]], rsTextArea, mxTextArea)
+  /********** ACTOR CLASSES - END **********/
+
+
+  private class ConAlign(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL){
+    override val config = setConfig(LEFT_UP, EVENT)
+  }
+  private class SeqAlign(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL)
+
   private class ConViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP){
-    override val config = setConfig(UP, EVENT)
+    override val config = setConfig(UP, EVENT) //don't worry this isn't an error
   }
   private class SeqViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP)
 
 
   def calc(s1: String, s2: String){
-    print(" --> calculating the solution...")
-    def _print{print(" --> creating the matrix table...")}
-
-    val (
-      seqSim, seqAlign, seqMatrix, seqDecision, seqDur,
-      conSim, conAlign, conMatrix, conDecision, conDur
-    ) = if(s2.nonEmpty){
-      val (seqDp, conDp) = (new SeqAlign(s1, s2), new ConAlign(s1, s2))
-      val (seqSol, conSol) = (seqDp.solution, conDp.solution)
-      _print
-
-      (
-        nbr + -seqDp.similarity + br,
-        seqDp.makeAlignmentString(seqSol) + br,
-        br+br + seqDp._mkMatrixString(seqSol) + br,
-        seqSol.map(e => e.decision.toString).reduceLeft((s1, s2) => s1 + s2),
-        dur + seqDp.getDurations.mkString(br),
-
-        nbr + -conDp.similarity + br,
-        conDp.makeAlignmentString(conSol) + br,
-        br+br + conDp._mkMatrixString(conSol) + br,
-        conSol.map(e => e.decision.toString).reduceLeft((s1, s2) => s1 + s2),
-        dur + conDp.getDurations.mkString(br)
-      )
+    //Concurrently get the results of the sequential- and the concurrent dyn pro alg.
+    if(s2.nonEmpty){
+      new GlobAlignActor(new SeqAlign(s1, s2), seqRsTextArea, seqMxTextArea).start
+      new GlobAlignActor(new ConAlign(s1, s2), conRsTextArea, conMxTextArea).start
     }else{
-      val (seqDp, conDp) = (new SeqViterbi(s1), new ConViterbi(s1))
-      val (seqSol, conSol) = (seqDp.solution, conDp.solution)
-      _print
-
-      ( "", "",
-        br+br + seqDp._mkMatrixString(seqSol) + br,
-        seqSol.map(e => e.decision.toString).reduceLeft((s1, s2) => s1 + s2),
-        dur + seqDp.getDurations.mkString(br),
-
-        "", "",
-        br+br + conDp._mkMatrixString(conSol) + br,
-        conSol.map(e => e.decision.toString).reduceLeft((s1, s2) => s1 + s2),
-        dur + conDp.getDurations.mkString(br)
-        )
+      new ViterbiActor(new SeqViterbi(s1), seqRsTextArea, seqMxTextArea).start
+      new ViterbiActor(new ConViterbi(s1), conRsTextArea, conMxTextArea).start
     }
-
-    print(" --> the creation is done.")
-    seqMxTextArea.text = mx+":" + seqMatrix
-    seqRsTextArea.text = seqSim + seqAlign + seqDecision + seqDur + s
-    conMxTextArea.text = mx+":" + conMatrix
-    conRsTextArea.text = conSim + conAlign + conDecision + conDur + s
   }
-
 }

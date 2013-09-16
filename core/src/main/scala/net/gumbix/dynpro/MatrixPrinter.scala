@@ -22,14 +22,15 @@ import java.text.{DecimalFormatSymbols, DecimalFormat}
 
 import net.gumbix.layout.Element
 import Element._
-import concurrency.Messages.START
+import concurrency.Messages._
+import concurrency.actors.BoastAsyncActor
 
 /**
  * Create a string of a formatted matrix. Matrix is of type Option[Double], i.e.
  * there can be cells with no value (=None).
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-trait MatrixPrinter[Decision] {
+protected[gumbix] trait MatrixPrinter[Decision] {
   class Formatter(val f: DecimalFormat) {
     f.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.US))
 
@@ -70,6 +71,7 @@ trait MatrixPrinter[Decision] {
   private def rowCounter =
     (0 until matrix.length).map(_.toString).toArray
 
+
   /**
    *
    * @return
@@ -95,7 +97,7 @@ trait MatrixPrinter[Decision] {
   }
 
 
-  /***** CONCURRENT CREATION - START *****/
+  /***** CONCURRENT CREATION - START [6.09.2013] *****/
   /**
    *
    * @param tbActor
@@ -128,18 +130,22 @@ trait MatrixPrinter[Decision] {
    * @param pathMatrix
    */
   private class TableActor(pathMatrix: Array[Array[Boolean]]) extends Actor{
-    private val _columns = getColumns
-    private var table = _columns._1 beside expandableLine(" ", ' ') beside _columns._2 beside expandableLine("|", '|')
+    private val columns = getColumns
+    private var table = columns._1 beside expandableLine(" ", ' ') beside columns._2 beside expandableLine("|", '|')
 
     def act{react{case START =>
       //Attributes
-      val (columns, loopEnd) = (scala.collection.mutable.Map[Int, Element](), matrix(0).size)
-      lazy val andThenBlock = { //instructions to be procee after the loopWhile below
+      val (to, columns, loopEnd) = (
+        sender, scala.collection.mutable.Map[Int, Element](), matrix(0).size
+        //due to the 2nd react the value of the "sender" attribute is internally updated
+        //that's why the initial value has to be copied to be preserved
+      )
+      lazy val andThenBlock = { //instructions to be proceed after the loopWhile below
         val sortedKeys = columns.keys.toList.sorted
         sortedKeys.foreach{j =>
           table = table beside columns(j) beside expandableLine(innerColumnSeparator.toString, innerColumnSeparator)
         }
-        reply(table) //return Element
+        to ! table //return Element
       }
 
       //Methods
@@ -158,7 +164,7 @@ trait MatrixPrinter[Decision] {
    * @param pathMatrix
    * @return
    */
-  private def _makeTable(pathMatrix: Array[Array[Boolean]]): Element = {
+  private def makeTable(pathMatrix: Array[Array[Boolean]]): Element = {
     val actor = new TableActor(pathMatrix)
     actor.start
     actor !? START match{case table: Element => table} //return
@@ -167,26 +173,29 @@ trait MatrixPrinter[Decision] {
   /**
    * Create a string that represents the entire matrix.
    */
-  def _mkMatrixString = _makeTable(Array.ofDim[Boolean](matrix.size, matrix(0).size)).toString
+  def mkMatrixString = makeTable(Array.ofDim[Boolean](matrix.size, matrix(0).size)).toString
 
   /**
    * Create a string that represents the entire matrix.
    * @param solution see <code>mkMatrixString</code>
    */
-  def _mkMatrixString(solution: List[PathEntry[Decision]]) = {
+  def mkMatrixString(solution: List[PathEntry[Decision]]) = {
     val pathMatrix: Array[Array[Boolean]] = Array.ofDim(matrix.size, matrix(0).size)
-    /* 11.09.2013
-     * There's no need for this loop. The compiler's Boolean default value is false
-     * for (i <- 0 until matrix.size; j <- 0 until matrix(0).size) pathMatrix(i)(j) = false
-     */
-    solution.foreach(x => pathMatrix(x.currCell.i)(x.currCell.j) = true)
-    _makeTable(pathMatrix).toString
+
+    //nested concurrency layer
+    val actor = new BoastAsyncActor(solution.length, {z =>
+      pathMatrix(solution(z).currCell.i)(solution(z).currCell.j) = true
+    })
+    actor.start
+    actor !? START match{case DONE => }
+
+    makeTable(pathMatrix).toString
   }
   /***** CONCURRENT CREATION - END *****/
 
 
   /***** SEQUENTIAL CREATION - START *****/
-  private def makeTable(pathMatrix: Array[Array[Boolean]]): Element = {
+  private def _makeTable(pathMatrix: Array[Array[Boolean]]): Element = {
     val columns = getColumns
     var table = columns._1 beside expandableLine(" ", ' ') beside columns._2 beside expandableLine("|", '|')
 
@@ -215,7 +224,7 @@ trait MatrixPrinter[Decision] {
   /**
    * Create a string that represents the entire matrix.
    */
-  def mkMatrixString = makeTable(Array.ofDim[Boolean](matrix.size, matrix(0).size)).toString
+  def _mkMatrixString = _makeTable(Array.ofDim[Boolean](matrix.size, matrix(0).size)).toString
 
   /**
    * Create a string that represents the entire matrix.
@@ -223,14 +232,14 @@ trait MatrixPrinter[Decision] {
    * solution in terms of dynamic programming. An asterisk is added to
    * each cell of the solution path.
    */
-  def mkMatrixString(solution: List[PathEntry[Decision]]) = {
+  def _mkMatrixString(solution: List[PathEntry[Decision]]) = {
     val pathMatrix: Array[Array[Boolean]] = Array.ofDim(matrix.size, matrix(0).size)
     /* 11.09.2013
      * There's no need for this loop. The compiler's Boolean default value is false
      * for (i <- 0 until matrix.size; j <- 0 until matrix(0).size) pathMatrix(i)(j) = false
      */
     solution.foreach(x => pathMatrix(x.currCell.i)(x.currCell.j) = true)
-    makeTable(pathMatrix).toString
+    _makeTable(pathMatrix).toString
   }
   /***** SEQUENTIAL CREATION - END *****/
 

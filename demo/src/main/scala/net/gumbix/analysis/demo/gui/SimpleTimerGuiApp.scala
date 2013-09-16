@@ -36,6 +36,13 @@ object SimpleTimerGuiApp extends SimpleSwingApplication with Publisher{
             case e: KeyReleased =>
               val tail = e.key.toString
               if(!tail.matches("\\d")) text = text.toUpperCase.replaceAll(tail+"$", "")
+              if(text.matches("\\d{4,}")){
+                mxCheckBox.selected = false
+                mxCheckBox.tooltip = "Warning: checking this checkbox will considerably slow down the computation."
+              }else{
+                mxCheckBox.selected = true
+                mxCheckBox.tooltip = "Check this checkbox the show the matrix."
+              }
 
             case KeyPressed(_, Key.Enter, _, _) => calc
           }
@@ -43,10 +50,17 @@ object SimpleTimerGuiApp extends SimpleSwingApplication with Publisher{
         new ComboBox(dps)
       )
 
+      var firstEntry = true
+      val start = "#################### START ####################"
       def calc{
-        print("START")
-        val _len = lenTextField.text
+        //print the beginning of the computation
+        val start = if(firstEntry){
+          firstEntry = false; this.start
+        }else "\n"+this.start
+        println(start)
 
+        //the computation itself
+        val _len = lenTextField.text
         if(_len.matches("\\d+")){
           val len = _len.toInt
           val (_s1, _s2) = (new StringBuilder, new StringBuilder)
@@ -61,9 +75,7 @@ object SimpleTimerGuiApp extends SimpleSwingApplication with Publisher{
           sTextField2.text = s2
 
           Db.calc(s1, s2)
-        }else print(" --> Invalid sequence length")
-
-        println("--> END")
+        }else print("\tInvalid sequence length")
       }
 
 
@@ -83,11 +95,14 @@ object SimpleTimerGuiApp extends SimpleSwingApplication with Publisher{
           border = Swing.EmptyBorder(0, 10, 0, 10)
         }) = Center
 
-        layout(new Button("Calc."){
-          reactions += {
-            case e: ButtonClicked => calc
-          }
-        }) = East
+        layout(new BoxPanel(Vertical){
+          contents += mxCheckBox
+          contents += new Button("CALC."){
+            foreground = Color.BLUE
+            reactions += {
+              case e: ButtonClicked => calc
+            }
+        }}) = East
       }) = North //NORTH - END
 
 

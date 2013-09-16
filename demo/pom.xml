@@ -19,6 +19,7 @@
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency><!-- I'm currently not using this api (not enough documentation found) -->
+            <!--http://stackoverflow.com/questions/364114/can-i-add-jars-to-maven-2-build-classpath-without-installing-them -->
             <groupId>net.gumbix</groupId>
             <artifactId>scabio-demo</artifactId>
             <version>${project.parent.version}</version>

@@ -108,7 +108,7 @@ protected[concurrency] trait IMaster{
   /**
    * This method is used to start the first wave of slave modules.
    */
-  protected final def startSlMods{
+  protected final def iniSlMods{
     /*The pool size value 100E6 is an experimental value
     * To get the value appropriate to your os run: Debugger.getMaxPoolSize*/
     val realPoolSize =

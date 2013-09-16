@@ -66,8 +66,7 @@ class GreedySuperstringImperative(s: Array[String]) extends GreedySuperstring(s)
  * Functional version of this algorithm according to
  * Böckenhauer & Bongartz, p. 175.
  */
-class GreedySuperstringFct(s: Array[String]) extends GreedySuperstring(s)
-        with Logger with SimpleSubstringFree {
+class GreedySuperstringFct(s: Array[String]) extends GreedySuperstring(s) with Logger with SimpleSubstringFree {
   lazy val superstrings = {
     def buildString(frgmts: Array[String]): List[String] = frgmts.size match {
       case 0 => throw new RuntimeException("Fragments array must not be empty")

@@ -49,14 +49,24 @@ protected[actors] abstract class MxActor(
    *       is still empty.
    */
   private lazy val syncActor = new Actor{
-    val len = channels.size
-
+    val (len, millis) = (channels.size, (1e4 / (2.6 * 1e6) + 1).asInstanceOf[Long])
+    /* 1GHz ~= 1e9 cycles/second (computer instructions/second)
+     * Unlike c/c++
+     *
+     * The following formula is used.
+     * millis [ms] = desired # of cycles before the syncActor's TIMEOUT expires / (CPU speed [GHz] * 1e6)
+     *
+     * The original formula is:
+     * millis [ms] = (desired # of cycles before the syncActor's TIMEOUT expires * 1e3) / (CPU speed [GHz] * 1e9)
+     *
+     * Currently the syncActor wakes up all sleeping actors periodically after approximately 1e4 cycles.
+     */
     def act{
       loop(
-        reactWithin(100){ //0.1 sec
+        reactWithin(scala.math.max(millis, 1)){
           case TIMEOUT =>
             val _channels = channels.toList
-            new SpeedUpActor(len, {i =>
+            new BoastAsyncActor(len, {i =>
               val actor = _channels(i)._1
               actor.getState match{
                 case Suspended => actor ! WAKEUP
@@ -146,17 +156,13 @@ protected[actors] abstract class MxActor(
    */
   override protected final def beforeLoopWhile{
     val _channels = channels.toList
-    new SpeedUpActor(channels.size, i => _channels(i)._1.start).start //start all the MxVecActor's
-    //channels.foreach(actor => actor._1.start)
-
+    new BoastAsyncActor(channels.size, i => _channels(i)._1.start).start //start all the MxVecActor's
     syncActor.start
   }
 
   override protected final def actReact{
     react{
-      case DONE => congestionControl
-      //this broadcast is received once a slave actor is done computing
-
+      case DONE => congestionControl //this broadcast is received once a slave actor is done computing
       case MsgException(e, ij, loopPointer) => handleException(e, ij, loopPointer)
     }
   }
