@@ -1,16 +1,18 @@
 package net.gumbix.analysis
 
-import scala.util.Random
-import scala.actors.Actor
+import util.Random
+import actors.Actor
+import collection.mutable.Map
 
 import net.gumbix.bioinf.hmm.Viterbi
 import net.gumbix.bioinf.string.alignment.{Alignment, AlignmentMode, AlignmentStep}
 import AlignmentStep._
 import net.gumbix.dynpro.DynPro
-import net.gumbix.dynpro.concurrency.{ConClass, ConMode, Messages}
+import net.gumbix.dynpro.concurrency.{ConClass, ConMode, Stage, Messages}
 import ConClass._
 import ConMode._
 import Messages._
+import Stage._
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -30,7 +32,7 @@ protected[analysis] abstract class DynProRunner[SeqDT](elements: List[SeqDT]){
 
 
   /***** PRIVATE ATTRIBUTES - START *****/
-  private val map = Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1)
+  //private val map = Map(INSERT -> -2, DELETE -> -2, MATCH -> 1, SUBSTITUTION -> -1)
 
   /***** PRIVATE ATTRIBUTES - END *****/
 
@@ -50,15 +52,14 @@ protected[analysis] abstract class DynProRunner[SeqDT](elements: List[SeqDT]){
       loopWhile(counter < 2){react{case DONE => counter += 1}}andThen to ! DONE
   }}}
   /********** SOLUTION CLASSES - END **********/
-
-  private class SeqAlignment(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL){
-    override val values = map
-  }
+  //Global Alignment
+  private class SeqAlignment(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL)
   private class ConAlignment(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL){
-    override val (values, config) = (map, setConfig(LEFT_UP, EVENT))
+    override val config = setConfig(LEFT_UP, EVENT)
   }
-  private class SeqViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP)
 
+  //Viterbi
+  private class SeqViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP)
   private class ConViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP){
     override val config = setConfig(UP, EVENT) //not to worry this isn't an error.
   }
@@ -78,7 +79,8 @@ protected[analysis] abstract class DynProRunner[SeqDT](elements: List[SeqDT]){
    * @param con The concurrent DynPro extender
    * @return
    */
-  private def getDurations(seq: DynPro[Any], con: DynPro[Any]) = {
+  private def getDurations(seq: DynPro[Any], con: DynPro[Any])
+  : (Map[Stage, Double], Map[Stage, Double]) = {
     //concurrently run the solutions
     val actor = new SolutionsActor(seq, con)
     actor.start

@@ -13,6 +13,14 @@ import java.util.Date
  * Time: 1:51 AM
  * @author Patrick Meppe (tapmeppe@gmail.com)
  */
+
+object AnalyserMode extends Enumeration{
+  type AnalyserMode = Value
+  val CON = Value("concurrent")
+  val SEQ = Value("sequential")
+}
+
+
 object FactoringMode extends Enumeration{
   type FactoringMode = Value
   val ARI = Value("arithmetical growth")

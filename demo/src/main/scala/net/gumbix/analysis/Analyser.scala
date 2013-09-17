@@ -9,6 +9,7 @@ import net.gumbix.dynpro.concurrency.Messages
 import Messages._
 import DynPro._
 import FactoringMode._
+import AnalyserMode._
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
@@ -52,7 +53,7 @@ import FactoringMode._
  * 4- One can now include the new identifier in the net.gumbix.analysis.demo.AnalyserApp and run it.
  *
  *
- *@note For test purposes i have raised my
+ * @note For test purposes i have raised my
  *       - JAVA Maximum heap size to Xmx4096m and
  *       - IntelliJ Maximum heap size to Xmx1024m
  *       That's as far as i can go.
@@ -64,19 +65,45 @@ protected[analysis] object Analyser{
    * @param maxLen The maximum length
    * @param nrOfCom The number of computations per round
    * @param factor The sequence length expansion factor
-   * @param mode The sequence length expansion mode
-   * @param dynpro The dyn pro alg used to run the analysis.
+   * @param fMode The sequence length expansion mode
+   * @param aMode The analyser running mode
+   * @param dynPros The dyn pro alg's used to run the analysis.
    * @return True (SUCCESSFUL) if the analysis is successful and all results have been successfully saved,
    *         false (ERROR) otherwise.
    */
-  def run(minLen: Int, maxLen: Long, nrOfCom: Int, factor: Int, mode: FactoringMode, dynpro: DynPro*): Map[DynPro, String] = {
-    println("[%s] START...".format(anaDate))
+  def run(
+    minLen: Int, maxLen: Long, nrOfCom: Int, factor: Int,
+    fMode: FactoringMode, aMode: AnalyserMode, dynPros: DynPro*
+  ) = {
+    val options =
+    " => {range = %s ... %s | nrOfCom = %s | factor = %s | factoring mode = %s |%s DynPro(s) = %s} =: ".format(
+      minLen, maxLen, nrOfCom, factor,
+      fMode, if(dynPros.length > 1) " analyser mode = %s | " else "",
+      dynPros.mkString(", ")
+    )
 
-    val actor = new AnalyserActor(minLen, maxLen, nrOfCom, factor, mode, dynpro)
-    actor.start
-    val results = actor !? START match{case results: Map[DynPro, String] => results}
+    println("[%s]%sSTART!".format(anaDate, options)) //this is the 1st of 5 milestones
+    val results = aMode match{
+      case CON =>
+        val actor = new AnalyserActor(minLen, maxLen, nrOfCom, factor, fMode, dynPros)
+        actor.start
+        actor !? START match{case results: Map[DynPro, String] => results}
 
-    println("[%s] END...\nResults: %s".format(anaDate, results.mkString(", ")))
+      case SEQ =>
+        val results = Map[DynPro, String]()
+        dynPros.map{dp =>
+          val actor = new AnalyserActor(minLen, maxLen, nrOfCom, factor, fMode, Seq(dp))
+          actor.start
+          actor !? START match{case _results: Map[DynPro, String] =>
+            val key = _results.keySet.head
+            results(key) = _results(key)
+          }
+        }
+        results
+    }
+    println("[%s]%sEND...\nResults: %s".format(anaDate, options, results.mkString(", ")))
+      //this is the 5th and last milestone.
+
     results
   }
 
@@ -91,7 +118,7 @@ protected[analysis] object Analyser{
       if(r1 && r2) true
       else return false //as soon as false is encountered, break the loop and return false
     )
-  }catch{case e: UnsupportedOperationException => true} //the folder is already empty
+  }catch{case e: UnsupportedOperationException => true} //the folder is already empty => empty.reduceLeft throws the exception.
   /***** PUBLIC METHODS - START *****/
 }
 

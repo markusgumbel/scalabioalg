@@ -1,8 +1,12 @@
 %get the plots
+%Before running this file make sure that the ../matlab folder has been
+%added to the MATLAB path.
+
 clear;
 clc;
-folder = 'results/';
-%In order to have the exact results the folder stated above needs to be added to the path.
+folder1 = 'matlab/results/';
+folder2 = 'matlab/resultsFinal/';
 
-plotGraphs([folder, 'test']);
-
+disp('PLOTING => START!')
+plotGraphs(folder2, 1);
+disp('PLOTING => END!')
