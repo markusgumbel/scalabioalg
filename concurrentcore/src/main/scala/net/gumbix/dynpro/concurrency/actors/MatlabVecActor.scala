@@ -55,7 +55,7 @@ extends AbsSlaveActor(mxActor){
       react{
         case DONE => reduceCounter //-> counter -= 1
       }
-    }andThen(mxActor ! DONE)
+    }andThen mxActor ! DONE
   }
 
 }

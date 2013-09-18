@@ -20,7 +20,10 @@ import AnalyserMode._
 object AnalyserApp{
   def main(args: Array[String]){
     //runAnalysis(100, 1E20.asInstanceOf[Long], 10, GEO, GLOBALG, VITERBI)
+
     Analyser.cleanResultDir
-    Analyser.run(500, 10000, 15, 400, ARI, CON, VITERBI)
+    Analyser.runWithRatio(1000, 100000, 20, 1000, 1.1, ARI, CON, VITERBI)
+
+    //Analyser.run(100, 10000, 10, 500, 1/2, ARI, CON, VITERBI)
   }
 }

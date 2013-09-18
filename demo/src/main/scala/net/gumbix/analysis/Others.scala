@@ -89,5 +89,5 @@ protected[analysis] object Db{
   )
 
   def saveDate = saveFormat.format(new Date())
-  def anaDate = anaFormat.format(new Date())
+  def anaDate = "[%s] => ".format(anaFormat.format(new Date()))
 }

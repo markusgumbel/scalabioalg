@@ -46,7 +46,8 @@ extends AbsSlaveActor(mxActor){
     def handleNullState(idx: Idx){
       mxActor.link(getIdxCoor(idx), this)
       noneStateInvoked = true
-      //once the "noneStateInvoked" is set to true it won't change its value again
+      //once the "noneStateInvoked" is set to true (in the getAccValues method's scope)
+      // it won't change its value again
     }
 
     val values = mxActor.getAccValues(idx, handleNullState)

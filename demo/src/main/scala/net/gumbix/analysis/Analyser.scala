@@ -1,6 +1,6 @@
 package net.gumbix.analysis
 
-import scala.collection.mutable.Map
+import scala.collection.mutable.{ListBuffer, Map}
 
 import java.io.File
 
@@ -33,7 +33,7 @@ import AnalyserMode._
  *
  * - The primary layer level is realised by the actor called "AnalyserActor".
  *   It the required number of computations per round per sequence length per dyn pro alg
- *   by creating a "DpActor" for each of them.
+ *   by creating a "DpSingleActor" for each of them.
  * - The secondary layer is provided the by the adequate DynProRunner extender method invoked.
  *   The sequential- and concurrent solutions are concurrently computed.
  *
@@ -59,6 +59,47 @@ import AnalyserMode._
  *       That's as far as i can go.
  */
 protected[analysis] object Analyser{
+
+  /**
+   * The method raises the current sequence length.
+   * @param mode see the "run" method
+   * @param len The current sequence length
+   * @param factor see the "run" method
+   * @return
+   */
+  private def raiseCurLen(mode: FactoringMode, len: Long, factor: Int): Long = mode match{
+    case ARI => len + factor
+    case GEO => len * factor
+    case EXP => math.pow(len, factor).asInstanceOf[Long]
+  }
+
+  /**
+   * This method is used to get the set of all sequence lengths to be computed.
+   * @return ListBuffer[Long](100, 150,..., 20000)
+   */
+  private def getLens(minLen: Int, maxLen: Long, leftRightBorder: Double, mode: FactoringMode, factor: Int) = {
+    val (lens, lensLeft, lensRight) = (ListBuffer[Long](), ListBuffer[Long](), ListBuffer[Long]())
+    var (lastRound, keepWhileLoopAlive, len) = (false, true, minLen.asInstanceOf[Long])
+
+    while(keepWhileLoopAlive){
+      lens += len //x-coordinates
+      //println(leftRightBorder)
+      if(len < leftRightBorder) lensLeft += len else lensRight += len //x-coordinates used by the DpActors
+
+      //raising the sequence length
+      if(lastRound) keepWhileLoopAlive = false
+      else{
+        len = raiseCurLen(mode, len, factor)
+        if(len >= maxLen){
+          len = maxLen
+          lastRound = true
+        }
+      }
+    }
+
+    (lens, lensLeft, lensRight)
+  }
+
   /**
    * The method is invoked to start the analysis.
    * @param minLen The minimum length
@@ -71,28 +112,32 @@ protected[analysis] object Analyser{
    * @return True (SUCCESSFUL) if the analysis is successful and all results have been successfully saved,
    *         false (ERROR) otherwise.
    */
-  def run(
+  private def run(
     minLen: Int, maxLen: Long, nrOfCom: Int, factor: Int,
-    fMode: FactoringMode, aMode: AnalyserMode, dynPros: DynPro*
-  ) = {
-    val options =
-    " => {range = %s ... %s | nrOfCom = %s | factor = %s | factoring mode = %s |%s DynPro(s) = %s} =: ".format(
+    leftRightBorder: Long, fMode: FactoringMode, aMode: AnalyserMode, dynPros: Seq[DynPro]
+  ) = if(minLen >= 100 && maxLen > minLen && nrOfCom >= 10 && factor > 0
+    && fMode.isInstanceOf[FactoringMode] && aMode.isInstanceOf[AnalyserMode] && dynPros.isInstanceOf[Seq[DynPro]]){
+    val lens = getLens(minLen, maxLen, leftRightBorder, fMode, factor)
+    val options = "{range = %s ... %s | nrOfCom = %s | factor = %s | factoring mode = %s | nrOfActors = %s |%s DynPro(s) = %s} =: "
+    .format(
       minLen, maxLen, nrOfCom, factor,
-      fMode, if(dynPros.length > 1) " analyser mode = %s | " else "",
+      fMode, 1 + 2*nrOfCom * (lens._3.length + 1),
+      //nrOfActors =: Analyser + (nrOfCom {for lensLeft} + nrOfCom*lensRight) *2 {sequential, concurrent}
+      if(dynPros.length > 1) " analyser mode = %s | " else "",
       dynPros.mkString(", ")
     )
 
-    println("[%s]%sSTART!".format(anaDate, options)) //this is the 1st of 5 milestones
+    println(anaDate + options + "START!") //this is the 1st of 5 milestones
     val results = aMode match{
       case CON =>
-        val actor = new AnalyserActor(minLen, maxLen, nrOfCom, factor, fMode, dynPros)
+        val actor = new AnalyserActor(minLen, maxLen, lens, nrOfCom, factor, fMode, dynPros)
         actor.start
         actor !? START match{case results: Map[DynPro, String] => results}
 
       case SEQ =>
         val results = Map[DynPro, String]()
         dynPros.map{dp =>
-          val actor = new AnalyserActor(minLen, maxLen, nrOfCom, factor, fMode, Seq(dp))
+          val actor = new AnalyserActor(minLen, maxLen, lens, nrOfCom, factor, fMode, Seq(dp))
           actor.start
           actor !? START match{case _results: Map[DynPro, String] =>
             val key = _results.keySet.head
@@ -101,11 +146,40 @@ protected[analysis] object Analyser{
         }
         results
     }
-    println("[%s]%sEND...\nResults: %s".format(anaDate, options, results.mkString(", ")))
+    println(anaDate + options + "END!\n\nResults: " + results.mkString(", "))
       //this is the 5th and last milestone.
 
     results
+  }else{
+    val (prefix, report) = ("\n\t", new StringBuilder("[%s] The Analyser couldn't start.".format(anaDate)))
+    def updateReport(text: String){report ++= prefix + text + "."}
+
+    if(minLen < 100) updateReport("The minimum sequence length is 100")
+    if(maxLen <= minLen) updateReport("The maximum sequence length must be higher than the minimum sequence length")
+    if(nrOfCom < 10) updateReport("The minimum number of computation per round is 10")
+    if(!fMode.isInstanceOf[FactoringMode]) updateReport("The factoring mode is of type FactoringMode")
+    if(!aMode.isInstanceOf[AnalyserMode]) updateReport("The analyser mode is of type AnalyserMode")
+    if(!dynPros.isInstanceOf[Seq[DynPro]]) updateReport("The dynPros object is of type Seq[DynPro]")
+
+    System.err.println(report)
+    null
   }
+
+  def runWithRatio(
+    minLen: Int, maxLen: Long, nrOfCom: Int, factor: Int, ratio: Double,
+    fMode: FactoringMode, aMode: AnalyserMode, dynPros: DynPro*
+  ): Map[DynPro, String] = run(
+    minLen, maxLen, nrOfCom, factor,
+    (minLen + (maxLen - minLen) * ratio).asInstanceOf[Long],
+    fMode, aMode, dynPros
+  )
+
+  def runWithBorder(
+    minLen: Int, maxLen: Long, nrOfCom: Int, factor: Int, leftRightBorder: Long,
+    fMode: FactoringMode, aMode: AnalyserMode, dynPros: DynPro*
+  ): Map[DynPro, String] = run(
+    minLen, maxLen, nrOfCom, factor, leftRightBorder, fMode, aMode, dynPros
+  )
 
 
   /**
