@@ -38,11 +38,11 @@ protected[analysis] abstract class DynProRunner[SeqDT](elements: List[SeqDT]){
 
   /***** PRIVATE CLASSES - START *****/
   /********** SOLUTION CLASSES - START **********/
-  private class SolActor(actor: SolutionsActor, dp: DynPro[Any]) extends Actor{def act{
+  private class SolActor[Dt](actor: SolutionsActor[Dt], dp: DynPro[Dt]) extends Actor{def act{
     dp.solution
     actor ! DONE
   }}
-  private class SolutionsActor(seq: DynPro[Any], con: DynPro[Any]) extends Actor{def act{react{
+  private class SolutionsActor[Dt](seq: DynPro[Dt], con: DynPro[Dt]) extends Actor{def act{react{
     case START =>
       val to = sender
       new SolActor(this, seq).start
@@ -79,9 +79,9 @@ protected[analysis] abstract class DynProRunner[SeqDT](elements: List[SeqDT]){
    * @param con The concurrent DynPro extender
    * @return
    */
-  private def getDurations(seq: DynPro[Any], con: DynPro[Any])
+  private def getDurations[Dt](seq: DynPro[Dt], con: DynPro[Dt])
   : (Map[Stage, Double], Map[Stage, Double]) = {
-    //concurrently run the solutions
+    //concurrently conRun the solutions
     val actor = new SolutionsActor(seq, con)
     actor.start
     actor !? START match{case DONE => }
@@ -99,10 +99,7 @@ protected[analysis] abstract class DynProRunner[SeqDT](elements: List[SeqDT]){
    */
   def runGlobalAlignment(len: Long) = {
     val (s1, s2) = (getSeq(len), getSeq(len))
-    getDurations(
-      new SeqAlignment(s1, s2).asInstanceOf[DynPro[Any]],
-      new ConAlignment(s1, s2).asInstanceOf[DynPro[Any]]
-    )
+    getDurations[AlignmentStep](new SeqAlignment(s1, s2), new ConAlignment(s1, s2))
   }
 
   /**
@@ -112,10 +109,7 @@ protected[analysis] abstract class DynProRunner[SeqDT](elements: List[SeqDT]){
    */
   def runViterbi(len: Long) = {
     val s = getSeq(len)
-    getDurations(
-      new SeqViterbi(s).asInstanceOf[DynPro[Any]],
-      new ConViterbi(s).asInstanceOf[DynPro[Any]]
-    )
+    getDurations[Int](new SeqViterbi(s), new ConViterbi(s))
   }
 
   // If necessary include HERE a new dynamic programming runner method.
@@ -132,7 +126,7 @@ protected[analysis] object DnaDynProRunner extends DynProRunner[Char](List('A', 
 
 
 protected[analysis] object RnaDynProRunner extends DynProRunner[Char](List('A', 'C', 'G', 'U')){
-  //the override block is missing
+  //the override block is incomplete
   protected val alphabet: String = ???
   protected val states: String = ???
   protected val transP: Array[Array[Double]] = ???

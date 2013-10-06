@@ -47,7 +47,7 @@ extends AbsSlaveActor(mxActor){
       mxActor.link(getIdxCoor(idx), this)
       noneStateInvoked = true
       //once the "noneStateInvoked" is set to true (in the getAccValues method's scope)
-      // it won't change its value again
+      //it won't change its value again
     }
 
     val values = mxActor.getAccValues(idx, handleNullState)
@@ -60,7 +60,6 @@ extends AbsSlaveActor(mxActor){
    * This method returns the (seemly) constant coordinate of the given index.
    * Idx.i for the "LEFT UP" dependency class.
    * Idx.j for the "UP" dependency class.
-   *
    * @param idx
    * @return
    */

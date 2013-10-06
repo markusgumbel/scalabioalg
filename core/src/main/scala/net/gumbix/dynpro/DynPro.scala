@@ -70,7 +70,6 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
     new DynProConfig[Decision](clazz, mode, solRange, bcMailSize, mxRange)
   }
 
-
   //default setting =: sequential mode, OVERRIDE IF NECESSARY
   //protected val config: DynProConfig[Decision] = setConfig(LEFT_UP, EVENT)
 

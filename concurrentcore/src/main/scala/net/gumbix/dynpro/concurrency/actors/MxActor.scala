@@ -29,17 +29,15 @@ protected[actors] abstract class MxActor(
 )extends AbsMasterActor{
   //actor states http://www.scala-lang.org/api/current/index.html#scala.actors.Actor$$State$
 
-  /**
-   * trapExit = true;
+  /** trapExit = true;
    * This is used to receive all the exceptions from the MxVecActors in form of messages.
    * But for some reason it cause an exception itself... I know right :)
    * That's why i implemented the exception handler myself.
    * @see <code>net.gumbix.dynpro.concurrency.actors.AbsSlaveActor.exceptionHandler</code>
    */
 
-
   /***** ATTRIBUTES - START ******/
-  private val channels = Map[MxVecActor, ListBuffer[MxVecActor]]() //actors -> its listeners
+  private val channels = Map[MxVecActor, ListBuffer[MxVecActor]]() //actors -> reference to its listeners
 
   /**
    * This attribute (actor) takes care of synchronising the MxVecActor's.
@@ -50,14 +48,15 @@ protected[actors] abstract class MxActor(
    */
   private lazy val syncActor = new Actor{
     val (len, millis) = (channels.size, (1e4 / (2.6 * 1e6) + 1).asInstanceOf[Long])
-    /* 1GHz ~= 1e9 cycles/second (computer instructions/second)
-     * Unlike c/c++
-     *
+    /** 1GHz ~= 1e9 cycles/second (computer instructions/second)
      * The following formula is used.
      * millis [ms] = desired # of cycles before the syncActor's TIMEOUT expires / (CPU speed [GHz] * 1e6)
      *
      * The original formula is:
      * millis [ms] = (desired # of cycles before the syncActor's TIMEOUT expires * 1e3) / (CPU speed [GHz] * 1e9)
+     *
+     * @note Unlike in c/c++ it it's almost impossible to programmatically have access to it's computer speed in java.
+     *       That's why the computer speed (CPU speed in the formula) has to be set manually
      *
      * Currently the syncActor wakes up all sleeping actors periodically after approximately 1e4 cycles.
      */
@@ -74,7 +73,7 @@ protected[actors] abstract class MxActor(
               }
             }).start
 
-          case DONE => exit
+          case DONE => exit //this DONE is sent by the MxActor itself right before it terminates.
         }
       )
     }

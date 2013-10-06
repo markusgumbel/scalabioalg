@@ -1,12 +1,9 @@
 package net.gumbix.analysis.demo.gui
 
-import scala.swing.{TextField, SplitPane, TextArea, Orientation, CheckBox}
-
+import swing.{TextField, SplitPane, TextArea, Orientation, CheckBox, Button}
+import swing.event.{Key, KeyPressed, KeyReleased}
 import java.awt.{Color, Font}
-import scala.swing.event.Key
-import scala.swing.event.KeyPressed
-import scala.swing.event.KeyReleased
-import scala.actors.Actor
+import actors.{Actor, TIMEOUT}
 
 import net.gumbix.bioinf.string.alignment.{AlignmentMode, Alignment}
 import net.gumbix.dynpro.concurrency.ConClass._
@@ -16,7 +13,6 @@ import net.gumbix.bioinf.hmm.Viterbi
 import net.gumbix.analysis.ViterbiFigures._
 import net.gumbix.dynpro.{PathEntry, DynPro}
 import net.gumbix.dynpro.concurrency.Messages._
-
 
 /**
  * An algorithm for data transfer.
@@ -59,14 +55,14 @@ class MyTextField extends TextField{
 }
 
 object Db{
-  val (br, mx, rs, seq, con, s, nbr, dur, monoFont, backGround, dps, aas, map) = (
-    "\n", "MATRIX", "RESULT", "SEQUENTIAL", "CONCURRENT", " sec",
-    "Number of changes: ", "\n\nDurations:\n",
-    Font.decode(Font.MONOSPACED + "-15"), new Color(240, 240, 240),
+  val (br, status, mx, rs, seq, con, s, nbr, monoFont, backGround, dps, aas, map) = (
+    "\n", "#################### %s ####################",
+    "MATRIX", "RESULT", "SEQUENTIAL", "CONCURRENT", " sec",
+    "Number of changes: ", Font.decode(Font.MONOSPACED + "-15"), new Color(240, 240, 240),
     List("GLOBAL ALIGNMENT", "HIDDEN MARKOV MODEL"),
     List('A', 'C', 'G', 'T'), Map(INSERT -> -1, DELETE -> -1, MATCH -> 0, SUBSTITUTION -> -1)
   )
-  val (_mx, _s) = (mx+":" +br+br, s+br)
+  val (_mx, _s, dur) = (mx+":"+br+br, s+br, br+br+"Durations:"+br)
 
   val (seqMxTextArea, seqRsTextArea, conMxTextArea, conRsTextArea, mxCheckBox) = (
     MyTextArea(mx), MyTextArea(rs), MyTextArea(mx), MyTextArea(rs),
@@ -74,47 +70,93 @@ object Db{
   )
 
   /********** ACTOR CLASSES - START **********/
-  private class DpActor(dp: DynPro[Any], rsTextArea: MyTextArea, mxTextArea: MyTextArea)
+  class CalcActor(s1: String, s2: String, lenTextField: TextField, calc: Button) extends Actor{
+    def act{
+      lenTextField.enabled = false
+      calc.enabled = false
+
+      lazy val andThenBlock = {
+        println(status.format("END"))
+        lenTextField.enabled = true
+        calc.enabled = true
+      }
+
+      //Concurrently get the results of the sequential- and the concurrent dyn pro alg.
+      val (seqActor, conActor) = if(s2.nonEmpty)(
+        new GlobAlignActor(this, new SeqAlign(s1, s2), seqRsTextArea, seqMxTextArea),
+        new GlobAlignActor(this, new ConAlign(s1, s2), conRsTextArea, conMxTextArea)
+      )else(
+        new ViterbiActor(this, new SeqViterbi(s1), seqRsTextArea, seqMxTextArea),
+        new ViterbiActor(this, new ConViterbi(s1), conRsTextArea, conMxTextArea)
+      )
+      seqActor.start
+      conActor.start
+
+      var nrOfAcDone = 0
+      loopWhile(nrOfAcDone < 2){reactWithin(120000){ //react within 2 min
+        case DONE => nrOfAcDone += 1
+        case TIMEOUT =>
+          seqActor.printStatus
+          conActor.printStatus
+      }}andThen andThenBlock
+    }
+  }
+
+  private class DpActor(calc: CalcActor, dp: DynPro[Any], rsTextArea: MyTextArea, mxTextArea: MyTextArea)
   extends Actor{
-    private val className = "\t" + dp.getClass.getSimpleName
+    private val className = "\t" + dp.getClass.getSimpleName + ": "
+    private var status = 0
 
     protected final lazy val sol = {
-      println(className + ": calculating the solution...")
+      println(className + "calculating the solution...")
       val sol = dp.solution
-      println(className + ": the solution has been calculated.")
+      println(className + "the solution has been calculated.")
       sol
     }
     protected lazy val prefix = ""
 
+    final def printStatus = println(className + (
+      if(status == 0) "still calculating the solution..."
+      else if(mxCheckBox.selected){
+        if(status == 1) "still creating the matrix..."
+        else if(status == 2) "everything is done!"
+      }else if(!mxCheckBox.selected && status == 1) "everything is done!"
+    ))
+
     def act{
       //first delete the old result if there was ever one.
-      rsTextArea.text = ""
-      mxTextArea.text = ""
+      rsTextArea.text = rs
+      mxTextArea.text = mx
 
       //after that compute the new one.
       rsTextArea.text = prefix +
         sol.map(e => e.decision.toString).reduceLeft((s1, s2) => s1 + s2) +
         dur + dp.getDurations.mkString(_s)+s
+      status = 1
 
       if(mxCheckBox.selected){
-        println(className + " : creating the matrix table...")
+        println(className + "creating the matrix table...")
         mxTextArea.text = _mx + dp._mkMatrixString(sol) + br
-        println(className + " : the creation is done.")
+        println(className + "the creation is done.")
+        status = 2
       }
+
+      calc ! DONE
     }
   }
 
-  private class GlobAlignActor(dp: Alignment, rsTextArea: MyTextArea, mxTextArea: MyTextArea)
-  extends DpActor(dp.asInstanceOf[DynPro[Any]], rsTextArea, mxTextArea){
+  private class GlobAlignActor(calc: CalcActor, dp: Alignment, rsTextArea: MyTextArea, mxTextArea: MyTextArea)
+  extends DpActor(calc, dp.asInstanceOf[DynPro[Any]], rsTextArea, mxTextArea){
     override lazy val prefix = nbr + -dp.similarity + br +
       dp.makeAlignmentString(sol.asInstanceOf[List[PathEntry[AlignmentStep]]]) + br
   }
 
-  private class ViterbiActor(dp: Viterbi, rsTextArea: MyTextArea, mxTextArea: MyTextArea)
-  extends DpActor(dp.asInstanceOf[DynPro[Any]], rsTextArea, mxTextArea)
+  private class ViterbiActor(calc: CalcActor, dp: Viterbi, rsTextArea: MyTextArea, mxTextArea: MyTextArea)
+  extends DpActor(calc, dp.asInstanceOf[DynPro[Any]], rsTextArea, mxTextArea)
   /********** ACTOR CLASSES - END **********/
 
 
+  /********** DYN PRO ALG CLASSES - START **********/
   private class ConAlign(s1: String, s2: String) extends Alignment(s1, s2, AlignmentMode.GLOBAL){
     override val config = setConfig(LEFT_UP, EVENT)
   }
@@ -125,15 +167,6 @@ object Db{
   }
   private class SeqViterbi(s: String) extends Viterbi(s, alphabet.toArray, states.toArray, transP, emmP)
 
-
-  def calc(s1: String, s2: String){
-    //Concurrently get the results of the sequential- and the concurrent dyn pro alg.
-    if(s2.nonEmpty){
-      new GlobAlignActor(new SeqAlign(s1, s2), seqRsTextArea, seqMxTextArea).start
-      new GlobAlignActor(new ConAlign(s1, s2), conRsTextArea, conMxTextArea).start
-    }else{
-      new ViterbiActor(new SeqViterbi(s1), seqRsTextArea, seqMxTextArea).start
-      new ViterbiActor(new ConViterbi(s1), conRsTextArea, conMxTextArea).start
-    }
-  }
+  //add further classes HERE
+  /********** DYN PRO ALG CLASSES - END **********/
 }

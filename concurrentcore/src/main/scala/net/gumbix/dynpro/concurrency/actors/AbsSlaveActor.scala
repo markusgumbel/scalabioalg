@@ -1,6 +1,6 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import scala.actors.Actor
+import actors.Actor
 import net.gumbix.dynpro.concurrency.MsgException
 
 /**
@@ -19,22 +19,15 @@ import net.gumbix.dynpro.concurrency.MsgException
 protected[actors] abstract class AbsSlaveActor(maAc: AbsMasterActor)
   extends Actor{
 
-  /*
-  This way all MasterActor objects will crash if their
-  SlaveActor crashes. That way we save resources.
-  */
-  //link(master)
-
+  /* This way all MasterActor objects will crash if their
+   * SlaveActor crashes. That way we save resources.
+   * link(master)
+   */
 
   /* Counter
-  The counter is used to constantly have an overview on the current amount of
-  internal actors.
-  Once their work done there is no further need to keep the "loop" (iterating them)
-  alive.
-  Caution:
-  The counter has to be initialized with -1 cuz besides being the overview instance
-  it's used as the key in in the MatlabVecActor.startInternalActors.pairMap .
-  */
+   * The counter is used to constantly have an overview on the current amount of internal actors.
+   * Once their work done there is no further need to keep the "loop" (iterating them) alive.
+   */
   private var counter = -1
   protected def getCounter = counter
   protected def raiseCounter = counter += 1
@@ -68,7 +61,7 @@ protected[actors] abstract class AbsSlaveActor(maAc: AbsMasterActor)
    * @return
    */
   override final def exceptionHandler = {
-    case e: ArrayIndexOutOfBoundsException =>
+    case e: ArrayIndexOutOfBoundsException => //on purpose
       maAc ! MsgException(e, ePair.key, ePair.pointer)
     case e: Exception =>
       maAc ! MsgException(e, ePair.key, ePair.pointer)

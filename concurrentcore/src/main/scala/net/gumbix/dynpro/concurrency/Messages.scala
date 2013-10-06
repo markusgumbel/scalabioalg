@@ -13,11 +13,11 @@ import scala.collection.mutable.ListBuffer
  */
 protected[gumbix] object Messages {
 //symbol messages
-  val START = 'startMasterModule
-  protected[concurrency] val WAKEUP = 'wakeSlaveModuleUp
-  val DONE = 'computationDone
+  val START = 'start
+  protected[concurrency] val WAKEUP = 'wakeUp //only required in case of dependency, hence the visibility scope.
+  val DONE = 'done
 }
 
-////Used in all master actors
+//Used in all master actors
 protected[concurrency] case class MsgException(e: Exception, key: Int, pointer: Int)
 

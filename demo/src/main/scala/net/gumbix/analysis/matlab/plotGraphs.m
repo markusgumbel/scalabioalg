@@ -21,20 +21,26 @@ function plotGraphs(path, isDir)
         figure(i)
         seqPlot(1, sc, 'Minimum');
         seqPlot(2, sc, 'Maximum');
-        seqPlot(3, sc, 'Median');
+        seqPlot_(3, sc, 2, 7, 'seq min', 'con max', 'sequential minimum vs. concurrent maximum')
+        %seqPlot(3, sc, 'Median');
         seqPlot(4, sc, 'Average'); 
         %['Figure ' int2str(i) ' =: ' fileName]
         fprintf('\tFigure %d =: %s\n', i, fileName)
     end   
 end
 
-function seqPlot(nr, sc, seqTitle)
-    subplot(2, 2, nr)
-    plot(sc{1}, sc{nr+1}, sc{1}, sc{nr+5});
-    %axis xy
-    leg = legend('seq', 'con');
-    set(leg, 'Location', 'NorthWest');
-    title([seqTitle,' values']);
-    %xlabel('sequence length');
-    ylabel('period in ms')
+function seqPlot(nr, sc, title_)
+    seqPlot_(nr, sc, nr+1, nr+5, 'seq', 'con', title_)
 end
+
+function seqPlot_(nr, sc, nr1, nr2, seq, con, title_)
+    subplot(2, 2, nr)
+    plot(sc{1}, sc{nr1}, sc{1}, sc{nr2});
+    %axis xy
+    leg = legend(seq, con);
+    set(leg, 'Location', 'NorthWest');
+    title([title_,' values']);
+    %xlabel('sequence length');
+    ylabel('period in s')    
+end
+

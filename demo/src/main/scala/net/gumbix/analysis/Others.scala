@@ -23,9 +23,9 @@ object AnalyserMode extends Enumeration{
 
 object FactoringMode extends Enumeration{
   type FactoringMode = Value
-  val ARI = Value("arithmetical growth")
-  val GEO = Value("geometrical growth")
-  val EXP = Value("exponential growth")
+  val ARI = Value("arithmetic")
+  val GEO = Value("geometric")
+  val EXP = Value("exponential")
 }
 
 

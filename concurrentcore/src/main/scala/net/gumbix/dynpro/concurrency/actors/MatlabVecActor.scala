@@ -30,7 +30,7 @@ extends AbsSlaveActor(mxActor){
       /*The first condition is to avoid having too small sub vectors.*/
       start = end; end += mxActor.range
       end = if ((end + mxActor.range/2) > loopEnd || end > loopEnd) loopEnd else end
-      raiseCounter//-> counter += 1
+      raiseCounter//-> counter += 1 - The BoastActor can't be used here due to this line
 
       loopPairs += LoopPair(start, end)
     }
@@ -38,7 +38,6 @@ extends AbsSlaveActor(mxActor){
     loopPairs.foreach(pair => {new Actor{ //anonymous sub slave actor
       override def act{
         for(i <- pair.loopStart until pair.loopEnd) mxActor.convert(Idx(row, i)) //convert a part of the matrix
-
         MatlabVecActor.this ! DONE
       }
     }.start })

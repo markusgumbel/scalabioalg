@@ -45,8 +45,8 @@ protected[dynpro] final class DynProConfig[Decision](
   /**
    * This method creates a master instance (MatrixActor or MatrixThread) depending on the given
    * ConMode, which then computes the cell values of the given matrix.
-   * @param n
-   * @param m
+   * @param n self explanatory
+   * @param m self explanatory
    * @param getAccValues The first method used to compute the value of each cells.
    * @param calcCellCost The second method used to compute the value of each cells.
    * @return
@@ -73,6 +73,9 @@ protected[dynpro] final class DynProConfig[Decision](
 
   /**
    *
+   * @param n self explanatory
+   * @param m self explanatory
+   * @param convert The method used to convert the values of the cells
    * @return
    */
   def convertMatrix(n: Int, m: Int, convert:(Idx) => Unit) = mode match {
@@ -86,7 +89,9 @@ protected[dynpro] final class DynProConfig[Decision](
 
 
   /**
-   *
+   * This method is used to concurrently get the solution path.
+   * @param idx The index from where the back tracking will start.
+   * @param getPath This method is used to get the solution path
    * @return
    */
   def calculateSolution(
@@ -100,26 +105,6 @@ protected[dynpro] final class DynProConfig[Decision](
       //the path has been found.
 
     case THREAD => new ListBuffer[PathEntry[Decision]]()//for now do nothing
-  }
-
-
-  /**
-   * 28.05.013 -> priority 50 :)
-   * Status: it has been test yet.
-   * @param method
-   * @param emptyVal
-   * @tparam DataType
-   */
-  private class BackUp[DataType](method: DataType, emptyVal: DataType){
-    def runMethod: DataType = {
-      var (keepLoopAlive, counter, toReturn) = (true, 0, emptyVal)
-      while(keepLoopAlive && counter < 3){
-        toReturn = method
-        if(toReturn == emptyVal) counter += 1
-        else keepLoopAlive = false
-      }
-      toReturn
-    }
   }
 
 }

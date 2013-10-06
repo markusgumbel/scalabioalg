@@ -24,29 +24,21 @@ object ConClass extends Enumeration{
   val LEFT_UP = Value("left up:" + stage(i, con) + stage(ii, con) + stage(m, con))
   val UP = Value("up:" + stage(i, con) + stage(ii, con) + stage(m, con))
   val NO_DEP = Value("no dependency:" + stage(i, seq) + stage(ii, con) + stage(m, con))
-  //val NO_CON = Value("no concurrency:" + stage(i, seq) + stage(ii, seq) + stage(m, seq))
-
 }
 
 
 object ConMode extends Enumeration{
   type ConMode = Value
 
-  val EVENT = Value("event based concurrency")
-  //event based concurrency
-
-  val THREAD = Value("thread based concurrency")
-  /*thread based concurrence
-  * Side note: this type of concurrence is as well reachable with actors as with threads. */
-
-  //val __ = Value("no concurrency")
-  //this value is simply a placeholder when the DepCase is set to "NO_CON"
-
+  val EVENT = Value("event based concurrency") //event based concurrency
+  val THREAD = Value("thread based concurrency") //thread based concurrency
+  // Side note: this type of concurrence is as well reachable with actors as with threads.
 }
 
 
 object Stage extends Enumeration{
   type Stage = Value
+
   val TOTAL = Value("total")
   val MATRIX = Value("stageI")
   val MATLABMX = Value("matlabMatrix")

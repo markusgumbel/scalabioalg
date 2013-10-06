@@ -1,6 +1,6 @@
 package net.gumbix.dynpro.concurrency.actors
 
-import scala.actors.Actor
+import actors.Actor
 import net.gumbix.dynpro.concurrency.IMaster
 
 /**
@@ -31,7 +31,6 @@ protected[actors] abstract class AbsMasterActor extends IMaster with Actor{
    */
   protected def actReact
 
-
   /**
    * This method should be used to insert a block that will come
    * right after between the "startSlMods" method and the "loopWhile" loop.
@@ -43,44 +42,39 @@ protected[actors] abstract class AbsMasterActor extends IMaster with Actor{
    */
   protected def beforeLoopWhile{}
 
-
   /**
    * This method should be used to reply to the object, that
    * invoked/created the master actor.
   */
   protected def ackStart: Any
 
-
   /* from concurrency.IMaster
-  protected def amPair: AmPair
-  protected def iniNewSlMod(key: Int)
-  protected def restartSlMod(key:Int) ##if necessary##
-  */
+   * protected def getPoolSize: PoolSize
+   * protected def iniNewSlMod(key: Int)
+   */
   //TO OVERRIDE - END
 
   //OVERRIDDEN - START
-  override final def act{
-    react{
-      case net.gumbix.dynpro.concurrency.Messages.START => //this is a synchronous message
-        //due to the 2nd react the value of the "sender" attribute is internally updated
-        //that's why the initial value has to be copied to be preserved
-        val to = sender
+  override final def act{react{
+    case net.gumbix.dynpro.concurrency.Messages.START => //this is a synchronous message
+      //due to the 2nd react the value of the "sender" attribute is internally updated
+      //that's why the initial value has to be copied to be preserved
+      val to = sender
 
-        /* Create and start all the necessary slave actors.
-         * This method is implemented in the IMaster trait.
-         */
-        iniSlMods
-        beforeLoopWhile
+      /* Create and start all the necessary slave actors.
+       * This method is implemented in the IMaster trait.
+       */
+      iniSlMods
+      beforeLoopWhile
 
-        loopWhile(keepConLoopAlive){
-          actReact //This is an abstract method.
-        }andThen to ! ackStart //afterLoopWhile
-    }
-   }
+      loopWhile(keepConLoopAlive){
+        actReact //This is an abstract method.
+      }andThen to ! ackStart //afterLoopWhile
+  }}
 
 
   override final def exceptionHandler = {
-    case e: Exception => System.err.println(e + "\n"); System.exit(-1)
+    case e: Exception => System.err.println(e + "\n"); sys.exit(-1)
   }
   //OVERRIDDEN - END
 

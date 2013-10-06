@@ -27,7 +27,7 @@ extends MxVecActor(mxActor){
    * This method should be used to set the values of the EPair case class.
    * @return
    */
-  protected def ePair = new EPair(J, i)
+  protected def ePair = new EPair(J, i) //in this case idx.j is constant, hence the capital J
 
 
   override def act{
@@ -46,30 +46,28 @@ extends MxVecActor(mxActor){
     }
 
     loop{ //loopWhile(i < loopEnd){
-      if(i == loopEnd){
+      if(i == loopEnd){ //the termination block
         broadcast
         mxActor ! DONE //this message is sent once this actor is done evaluating its vector
         exit
       }else{
         var _J = J //unlike J, _J is seemly constant
-        loopWhile(_J < mxActor.slModAm){//innerLoopEnd = matrix(0).length
+        loopWhile(_J < mxActor.slModAm){
           val idx = Idx(i, _J)
           //val accValues = getAccValues(idx, (idx: Idx) => idx.i)
           //this works just as good. An example is provided in MxLUpVecActor
           val (nullStateInvoked, values) = getAccValues(idx)
 
-          if(nullStateInvoked){
-            /*one or more "Null states" have encounter ergo
-            this actor will have to be SUSPENDED for a while.*/
+          if(nullStateInvoked){ //accValues._1
+            /* One or more "Null states" have encounter ergo
+             * this actor will be SUSPENDED for a while.
+             */
             react{//exclusively react on broadcasts
               case WAKEUP => //end of the SUSPENDED state
             }
           }else{
-            /*
-            All required costs are available ergo the evaluation of the current
-            can be proceeded.
-             */
-            mxActor.calcCellCost(idx, values)
+            //All required costs are available ergo the evaluation of the current can be proceeded.
+            mxActor.calcCellCost(idx, values) //accValues._2
             _J += mxActor.slAm
           }
         }andThen afterLoopWhile

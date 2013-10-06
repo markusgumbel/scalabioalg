@@ -4,8 +4,8 @@
 
 clear;
 clc;
-folder1 = 'matlab/results/';
-folder2 = 'matlab/resultsFinal/';
+folder1 = 'results/';
+folder2 = 'resultsFinal/';
 
 disp('PLOTING => START!')
 plotGraphs(folder2, 1);

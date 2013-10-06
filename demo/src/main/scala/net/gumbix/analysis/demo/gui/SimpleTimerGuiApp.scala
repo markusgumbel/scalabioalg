@@ -27,7 +27,7 @@ object SimpleTimerGuiApp extends SimpleSwingApplication with Publisher{
     preferredSize = new Dimension(1300, 750)
 
     contents = new BorderPanel{
-      val (sTextField1, sTextField2, lenTextField, modeComboBox) = (new MyTextField, new MyTextField,
+      val (sTextField1, sTextField2, lenTextField, calcButton, modeComboBox) = (new MyTextField, new MyTextField,
         new TextField("200"){
           font = Db.monoFont
           tooltip = "Sequences length"
@@ -47,11 +47,15 @@ object SimpleTimerGuiApp extends SimpleSwingApplication with Publisher{
             case KeyPressed(_, Key.Enter, _, _) => calc
           }
         },
+        new Button("CALC."){
+          foreground = Color.BLUE
+          reactions += {case e: ButtonClicked => calc}
+        },
         new ComboBox(dps)
       )
 
       var firstEntry = true
-      val start = "#################### START ####################"
+      val start = status.format("START")
       def calc{
         //print the beginning of the computation
         val start = if(firstEntry){
@@ -74,8 +78,9 @@ object SimpleTimerGuiApp extends SimpleSwingApplication with Publisher{
           sTextField1.text = s1
           sTextField2.text = s2
 
-          Db.calc(s1, s2)
-        }else print("\tInvalid sequence length")
+          new CalcActor(s1, s2, lenTextField, calcButton).start
+            //the printing of the end status is taken care by this actor.
+        }else println("\tInvalid sequence length" + br + status.format("END"))
       }
 
 
@@ -97,12 +102,7 @@ object SimpleTimerGuiApp extends SimpleSwingApplication with Publisher{
 
         layout(new BoxPanel(Vertical){
           contents += mxCheckBox
-          contents += new Button("CALC."){
-            foreground = Color.BLUE
-            reactions += {
-              case e: ButtonClicked => calc
-            }
-        }}) = East
+          contents += calcButton}) = East
       }) = North //NORTH - END
 
 

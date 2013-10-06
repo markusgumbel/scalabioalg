@@ -64,6 +64,9 @@ protected[concurrency] trait IMaster{
   protected val getPoolSize: PoolSize
 
   protected val dMaxPoolSize = Runtime.getRuntime().availableProcessors() * 100E6
+  /* The pool size value 100E6 is an experimental value
+   * To get the value appropriate to your OS run: Debugger.getMaxPoolSize
+   */
   /**********Pool size - END**********/
 
 
@@ -109,8 +112,6 @@ protected[concurrency] trait IMaster{
    * This method is used to start the first wave of slave modules.
    */
   protected final def iniSlMods{
-    /*The pool size value 100E6 is an experimental value
-    * To get the value appropriate to your os run: Debugger.getMaxPoolSize*/
     val realPoolSize =
       math.min(dMaxPoolSize - getPoolSize.subSlMod, getPoolSize.slMod).asInstanceOf[Int]
 
@@ -125,11 +126,11 @@ protected[concurrency] trait IMaster{
    * if required start slave modules after the first wave.
    */
   protected final def congestionControl{
-    /*
-    NOTE: not to worry, "pointer" is being SEEMLY concurrently updated.
-    In fact the method (independently from the moment the event related to it will be fired)
-    won't be proceeded before the for - loop in the "startSlaves" method is done iterating.
-    */
+    /** @note
+     * Not to worry, "pointer" is being SEEMLY concurrently updated.
+     * In fact the method (independently from the moment the event related to it will be fired)
+     * won't be proceeded before the for - loop in the "startSlaves" method is done iterating.
+     */
     if(pointer < getPoolSize.slMod){
       iniNewSlMod(pointer)
       pointer += 1

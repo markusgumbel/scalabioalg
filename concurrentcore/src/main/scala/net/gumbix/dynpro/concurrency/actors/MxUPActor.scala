@@ -19,13 +19,9 @@ protected[concurrency] final class MxUpActor(
   calcCellCost:(Idx, Array[Double]) => Unit
 )extends MxActor(bcMailSize, getAccValues, calcCellCost){
 
-  //val loopEnd = matrix.length
-
   //amount of slaves actors
   protected[actors] lazy val slAm = getPoolSize.slMod
 
-
-  /***** OVERRIDDEN FINAL METHODS - START *****/
   override protected val eTermKey = "Column"
 
   /**
@@ -44,5 +40,5 @@ protected[concurrency] final class MxUpActor(
    */
   override protected def getNewVecActor(firstJ: Int) = new MxUpVecActor(this, firstJ)
     //NO actor.start
-  /***** OVERRIDDEN FINAL METHODS - END *****/
+
 }
