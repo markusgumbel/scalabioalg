@@ -135,12 +135,10 @@ protected[analysis] object Analyser{
       getLens(leftLen, rightLen, leftLen + (rightLen - leftLen) * switch, fMode, factor)
     else getLens(leftLen, rightLen, switch, fMode, factor) //-> value switch
 
-    val options = "{range = %s ... %s | nrOfCom = %s | factor = %s | factoring mode = %s | nrOfActors = %s |%s DynPro(s) = %s} =: "
+    val options = "{range = %s ... %s | nrOfCom = %s | factor = %s | factoring mode = %s |%s DynPro(s) = %s} =: "
     .format(
       leftLen, rightLen, nrOfCom, factor,
-      fMode, 1 + 2*nrOfCom * (lens._3.length + 1),
-      //nrOfActors =: Analyser + (nrOfCom {for lensLeft} + nrOfCom*lensRight) *2 {sequential, concurrent}
-      if(dynPros.length > 1) " analyser mode = %s | " else "",
+      fMode, if(dynPros.length > 1) " analyser mode = %s | " else "",
       dynPros.mkString(", ")
     )
     val fileName = dir + "%s_%s_%s_" + "core=%s_leftLen=%s_rightLen=%s_nrofcomp=%s_factor=%s_mode=%s.scabio".format(
