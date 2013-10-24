@@ -32,13 +32,11 @@ import scala.math.log
  * the character c when being in state q. 
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class Viterbi(val s: Array[Char], val alphabet: Array[Char],
+class Viterbi(val s: String, val alphabet: Array[Char],
               val states: Array[Char],
               val transP: Array[Array[Double]],
               val emmP: Array[Array[Double]])
-        extends DynPro[Int]
-                with Backpropagation[Int]
-                with MatrixPrinter[Int] {
+        extends DynPro[Int]{
 
   /**
    * Values can become very small, so a scientific notation is required.
@@ -46,6 +44,7 @@ class Viterbi(val s: Array[Char], val alphabet: Array[Char],
   formatter = ENGINEER
 
   override val backpropagationStart = MAXIMUM_VALUE_LAST_ROW
+
 
   /**
    * Length of the string to analyse plus the empty string (-).
@@ -72,14 +71,14 @@ class Viterbi(val s: Array[Char], val alphabet: Array[Char],
     case (0, jState) => log(transP(0)(jState + 1))
     case (iChar, jState) => {
       // The index of the current char (for this row):
-      val idxS = alphabet.indexOf(s(iChar - 1))
+      val idxS = alphabet.indexOf(s.charAt(iChar - 1))
       val e = emmP(jState + 1 - 1)(idxS) // state, char
       val t = transP(dState)(jState + 1)
       log(e * t)
     }
   }
 
-  override def rowLabels: Array[String] = makeLabels(s, ".")
+  override def rowLabels: Array[String] = makeLabels(s.toArray, ".")
 
   private def makeLabels(s: Array[Char], first: String) = {
     val buffer = new ArrayBuffer[String]()

@@ -18,9 +18,11 @@ package net.gumbix.bioinf.string.alignment
 import net.gumbix.bioinf.string.alignment.AlignmentMode._
 import net.gumbix.bioinf.string.alignment.AlignmentStep._
 import net.gumbix.dynpro.CellPosition._
-import net.gumbix.dynpro.Backpropagation
+import net.gumbix.dynpro._
 import net.gumbix.bioinf.string.alignment.GapType._
-import net.gumbix.dynpro.{PathEntry, MatrixPrinter, Idx, DynPro}
+import scala.Some
+import net.gumbix.dynpro.Idx
+import scala.Tuple2
 
 /**
  * s1 is supposed to be the search string whereas s2 is the (longer) original
@@ -38,8 +40,6 @@ class Alignment(val s1: String, val s2: String,
                 val mode: AlignmentMode,
                 override val substMatrix: Option[String])
         extends DynPro[AlignmentStep]
-                with Backpropagation[AlignmentStep]
-                with MatrixPrinter[AlignmentStep]
                 with AlignmentPrinter[AlignmentStep]
                 with Score {
   // Helper constructor if no substitution matrix is used:
@@ -128,11 +128,11 @@ class Alignment(val s1: String, val s2: String,
     }
   }
 
-  def alignedStrings(): Tuple2[AlignedString, AlignedString]
+  def alignedStrings: Tuple2[AlignedString, AlignedString]
   = alignedStrings(solution)
 
   /**
-   * @param solution A possible solution for the alignment.
+   * @param solution2 A possible solution for the alignment.
    * @return The aligned string based on on the given solution.
    */
   def alignedStrings(solution2: List[PathEntry[AlignmentStep]]) = {
@@ -142,8 +142,8 @@ class Alignment(val s1: String, val s2: String,
     import scala.math._
 
     if (solution.isEmpty) {
-      val as1 = new AlignedString(s1)
-      val as2 = new AlignedString(s2)
+      val as1 = new AlignedString(s1.toString)
+      val as2 = new AlignedString(s2.toString)
       as1.insertGapBefore(0, s2.length, EMPTY)
       as2.insertGapAtEnd(s1.length, EMPTY)
       (as1, as2)
@@ -170,8 +170,8 @@ class Alignment(val s1: String, val s2: String,
     val gapE1 = e - ie
     val gapE2 = e - je
 
-    val as1 = new AlignedString(s1)
-    val as2 = new AlignedString(s2)
+    val as1 = new AlignedString(s1.toString)
+    val as2 = new AlignedString(s2.toString)
 
     as1.insertGapBefore(0, gapB1, EMPTY)
     as2.insertGapBefore(0, gapB2, EMPTY)
@@ -199,9 +199,10 @@ class Alignment(val s1: String, val s2: String,
    */
   val deltaIdx = Map(INSERT -> Idx(0, -1), DELETE -> Idx(-1, 0), BOTH -> Idx(-1, -1))
 
-  override def rowLabels = makeLabels(s1).toArray
+  override def rowLabels = makeLabels(s1.toString).toArray
 
-  override def columnLabels = Some(makeLabels(s2).toArray)
+  override def columnLabels = Some(makeLabels(s2.toString).toArray)
 
   private def makeLabels(s: String) = "-" :: s.toCharArray.map(_.toString).toList
+
 }

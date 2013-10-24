@@ -48,7 +48,7 @@ trait MultipleAlignmentPrinter {
     element.toString
   }
 
-  def mkAlignmentTable() {
+  def _mkAlignmentTable() {
     object o extends MatrixPrinter[Double] {
       val matrix = {
         val n = strings.size

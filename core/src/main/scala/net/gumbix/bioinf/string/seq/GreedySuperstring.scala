@@ -66,8 +66,7 @@ class GreedySuperstringImperative(s: Array[String]) extends GreedySuperstring(s)
  * Functional version of this algorithm according to
  * Böckenhauer & Bongartz, p. 175.
  */
-class GreedySuperstringFct(s: Array[String]) extends GreedySuperstring(s)
-        with Logger with SimpleSubstringFree {
+class GreedySuperstringFct(s: Array[String]) extends GreedySuperstring(s) with Logger with SimpleSubstringFree {
   lazy val superstrings = {
     def buildString(frgmts: Array[String]): List[String] = frgmts.size match {
       case 0 => throw new RuntimeException("Fragments array must not be empty")
@@ -118,7 +117,7 @@ class GreedySuperstringFct(s: Array[String]) extends GreedySuperstring(s)
 
 trait Overlap {
   /**
-   * Overlap in O(n^2) in functional style.
+   * Overlap in O(n&#94;2) in functional style.
    */
   def overlap(s1: String, s2: String): String = {
 

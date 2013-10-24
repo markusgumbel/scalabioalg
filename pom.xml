@@ -20,6 +20,13 @@
                 <role>Administrator</role>
             </roles>
         </developer>
+        <developer>
+            <name>Patrick Meppe</name>
+            <email>tapmeppe@gmail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
     </developers>
     <inceptionYear>2011</inceptionYear>
 
@@ -39,23 +46,29 @@
         <module>core</module>
         <module>demo</module>
         <module>biojava</module>
+        <module>concurrentcore</module>
     </modules>
 
     <dependencies>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>2.9.1</version>
+            <version>2.10.2</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-swing</artifactId>
-            <version>2.9.1</version>
+            <version>2.10.2</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-compiler</artifactId>
-            <version>2.9.1</version>
+            <version>2.10.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-actors</artifactId>
+            <version>2.10.2</version>
         </dependency>
         <!-- Test framework -->
         <dependency>
