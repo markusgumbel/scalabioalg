@@ -20,6 +20,11 @@ h3. Requirements
 * "GIT":http://git-scm.com/
 * "Maven 2":http://maven.apache.org/
 
+h3. Branches
+
+* master: main branch with serial dynamic programming algorithm
+* conc_dp: concurrent dynamic programming algorithm
+
 h3. Installation
 
 The project uses Maven 2 as the build tool. Check out the project and run the Maven goal _mvn site_. This will generate all the relevant artifacts. The scaladoc can be found in ./target/site/index.html. More details are described int the "manual":http://www.mi.hs-mannheim.de/gumbel/files/scabio-manual.pdf.
