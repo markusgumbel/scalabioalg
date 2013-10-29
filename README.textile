@@ -15,6 +15,11 @@ h2. Getting Started
 
 _More documentation will come soon._ Please refer to "project home page":http://www.mi.hs-mannheim.de/gumbel/en/forschung/scabio/ or the to the "wiki pages":https://github.com/markusgumbel/scalabioalg/wiki for more information. A good start is to read the preliminary "manual":http://www.mi.hs-mannheim.de/gumbel/files/scabio-manual.pdf or the generated scaladoc API documentation. See installation below where to find it.
 
+There are two important branches:
+
+* master: The main branch that contains the sequential dynamic programming algorithm.
+* conc_dp: An experimental branch that uses a concurrent dynamic programming approach.
+
 h3. Requirements
 
 * "GIT":http://git-scm.com/
