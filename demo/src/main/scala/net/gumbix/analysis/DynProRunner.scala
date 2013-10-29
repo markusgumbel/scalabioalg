@@ -1,6 +1,5 @@
 package net.gumbix.analysis
 
-import util.Random
 import actors.Actor
 import collection.mutable.Map
 
@@ -13,6 +12,7 @@ import ConClass._
 import ConMode._
 import Messages._
 import Stage._
+import scala.util.Random
 
 /**
  * An algorithm for dynamic programming. It uses internally a two-dimensional
