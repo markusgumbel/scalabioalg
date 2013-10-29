@@ -23,7 +23,12 @@
             <groupId>org.biojava</groupId>
             <artifactId>biojava3-core</artifactId>
             <version>3.0.1</version>
-        </dependency>        
+        </dependency>
+        <dependency>
+            <groupId>org.biojava</groupId>
+            <artifactId>biojava3-alignment</artifactId>
+            <version>3.0.1</version>
+        </dependency>
     </dependencies>
 
     <repositories>
