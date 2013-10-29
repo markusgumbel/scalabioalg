@@ -47,11 +47,11 @@ trait DynProMatrix {
  * Time: 8:22 AM
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de), Patrick Meppe (tapmeppe@gmail.com)
  */
-abstract class DynProBasic[Decision] extends DynProMatrix{
+abstract class DynProBasic[Decision] extends DynProMatrix {
 
-  /********************************************************
+  /** ******************************************************
   Support attributes and methods (mainly sequential support) - START
-    ********************************************************/
+    * *******************************************************/
 
   /**
    * TODO Appears to be quick and dirty.
@@ -67,7 +67,6 @@ abstract class DynProBasic[Decision] extends DynProMatrix{
    */
   def cellsSize = n * m
 
-
   /**
    * Get the cell index for the k-th step where k is in range
    * 0 to cellSize - 1. The default order is to iterate over the matrix
@@ -82,12 +81,12 @@ abstract class DynProBasic[Decision] extends DynProMatrix{
     Idx(row, col)
   }
 
-
   /**
    * Extreme functions
    */
   val MIN = (x1: Double, x2: Double) => if (x1 < x2) x1 else x2
   val MAX = (x1: Double, x2: Double) => if (x1 > x2) x1 else x2
+
   /**
    * Set this function to specify whether the algorithm
    * calculates a minimum or a maximum. Default is maximum.
@@ -105,7 +104,7 @@ abstract class DynProBasic[Decision] extends DynProMatrix{
    * Default is: accValue = currentValue + g(prevsAccValues)
    * @param currentValue The value for the current state (given a decision)
    * @param prevValues Array of previous values (given a decision).
-   * Most of the dynamic optimization problems have exactly one previous value.
+   *                   Most of the dynamic optimization problems have exactly one previous value.
    * @param gDef Function that calculates the previous values.
    * @return
    */
@@ -135,8 +134,8 @@ abstract class DynProBasic[Decision] extends DynProMatrix{
    */
   def reviseMax(max: Double): Double = max
 
-  /********************************************************
+  /** ******************************************************
   Support attributes and methods (mainly sequential support) - END
-    ********************************************************/
+    * *******************************************************/
 
 }

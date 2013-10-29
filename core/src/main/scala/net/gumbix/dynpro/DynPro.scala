@@ -31,23 +31,24 @@ import concurrency.Stage._
  * The dynpro's implementation of the dynamic programming algorithm is proceeded
  * in 2 stages. Each of this stages can be computed sequentially or concurrently.
  * - Stage i: the evaluation of the cells within this matrix.
- *     This can be done either per row-wise or column-wise.
+ * This can be done either per row-wise or column-wise.
  * - Stage ii: the back tracking of the correct path.
  * Additionally one can convert the matrix object into an object interpretable by MatLab.
  *
  * The computation modes are the following:
  * - NO CONCURRENCY =: 100% sequential
  * - NO DEPENDENCY =: stage ii is sequential , the rest concurrent
- *    stage-wise 25% sequential
+ * stage-wise 25% sequential
  * - CONCURRENCY =: 100% concurrent
  *
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de), Patrick Meppe (tapmeppe@gmail.com)
  */
-abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decision] with MatrixPrinter[Decision]{
+abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decision] with MatrixPrinter[Decision] {
 
-  /***** concurrency mode setting - START *****/
+  /** *** concurrency mode setting - START *****/
   //default values
   private val (minRange, bcMailSize, nanoToSecFact, timeMap) = (500, 10, 1e9, Map[Stage, Double]())
+
   def getDurations = timeMap
 
   //methods used to configure the "DynPro" computation
@@ -55,17 +56,17 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
     setConfig(clazz, mode, 0, bcMailSize, 0)
 
   protected final def setConfig(clazz: ConClass, mode: ConMode, solRange: Int): DynProConfig[Decision] =
-   setConfig(clazz, mode, solRange, bcMailSize, 0)
+    setConfig(clazz, mode, solRange, bcMailSize, 0)
 
   protected final def setConfig(clazz: ConClass, mode: ConMode, solRange: Int, _bcMailSize: Int, _mxRange: Int)
   : DynProConfig[Decision] = {
     val (mxRange, bcMailSize) =
-      (if(_mxRange < minRange || m - _mxRange < minRange) m else _mxRange, //m =: the matrix width
-       clazz match{
-         case LEFT_UP => abs(_bcMailSize)
-         case UP => 1 //for now.
-         case _ => 0
-       })
+      (if (_mxRange < minRange || m - _mxRange < minRange) m else _mxRange, //m =: the matrix width
+        clazz match {
+          case LEFT_UP => abs(_bcMailSize)
+          case UP => 1 //for now.
+          case _ => 0
+        })
 
     new DynProConfig[Decision](clazz, mode, solRange, bcMailSize, mxRange)
   }
@@ -74,10 +75,10 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
   //protected val config: DynProConfig[Decision] = setConfig(LEFT_UP, EVENT)
 
   protected val config: DynProConfig[Decision] = null //setConfig(NO_CON, __)
-  /***** concurrency mode setting - END *****/
+  /** *** concurrency mode setting - END *****/
 
 
-  /***** attributes and methods to override - START *****/
+  /** *** attributes and methods to override - START *****/
   /**
    * matrixForwardPathBackward = true:
    * All possible decisions that lead to state (i, j).
@@ -119,10 +120,11 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
    * Boundary value: The value in the matrix for not existing states.
    */
   def initValues: Array[Double] = Array(0.0)
-  /***** attributes and methods to override - END *****/
+
+  /** *** attributes and methods to override - END *****/
 
 
-  /***** Main methods (potentially concurrent) - START *****/
+  /** *** Main methods (potentially concurrent) - START *****/
   //this block solely concerns the "matrix" method
   //private val inf = Double.NegativeInfinity
   private val hiddenMatrix: Array[Array[Option[Double]]] = Array.ofDim(n, m)
@@ -142,10 +144,10 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
      * However, any other order may also work.
      */
 
-    def calcCellCost = for (k <- 0 until cellsSize){
+    def calcCellCost = for (k <- 0 until cellsSize) {
       val idx = getCellIndex(k)
       //(idx) => Unit =: def handleNullState(idx: Idx){}//do nothing
-      this.calcCellCost(idx, getAccValues(idx,(idx) => Unit))
+      this.calcCellCost(idx, getAccValues(idx, (idx) => Unit))
     }
 
     val mxStart = System.nanoTime
@@ -165,12 +167,14 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
 
   //matlab matrix block
   private val hiddenMatlabMatrix = Array.ofDim[Double](n, m)
-  private def convert(idx: Idx){
+
+  private def convert(idx: Idx) {
     hiddenMatlabMatrix(idx.i)(idx.j) = matrix(idx.i)(idx.j) match {
       case value: Some[Double] => value.get
       case _ => 0.0
     }
   }
+
   /**
    * TODO Q&D hack for matlab
    * Concerning the concurrency this stage has a very low priority.
@@ -179,7 +183,7 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
   lazy val matlabMatrix: Array[Array[Double]] = {
     val start = System.nanoTime
     config match {
-      case null => for (i <- 0 until n; j <- 0 until m) convert(Idx(i,j))
+      case null => for (i <- 0 until n; j <- 0 until m) convert(Idx(i, j))
       case _ => config.convertMatrix(n, m, convert)
     }
 
@@ -197,21 +201,22 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
   override def solution(idx: Idx): List[PathEntry[Decision]] = {
     val start = System.nanoTime
     val sol = (config match {
-      case null => getPath(idx, (_,_) => false)
+      case null => getPath(idx, (_, _) => false)
       //(_, _) => false =: (a:Idx, b:Idx) => false =: def break(startIdx: Idx, cIdx: Idx) = false
 
       case _ =>
-        if(config.solRange < minRange || idx.MAX - config.solRange < minRange) getPath(idx, (_,_) => false)
+        if (config.solRange < minRange || idx.MAX - config.solRange < minRange) getPath(idx, (_, _) => false)
         //seemly concurrent, in reality sequential when the range hasn't been set adequately
         else config.calculateSolution(idx, getPath)
     }).toList
 
     val time = (System.nanoTime - start) / nanoToSecFact
-    if(time < timeMap(MATRIX)){
+    if (time < timeMap(MATRIX)) {
       //the "matrix" object has been invoked somewhere else before its invocation the "getPath" method
       timeMap += SOLUTION -> time
       timeMap(TOTAL) = timeMap(MATRIX) + timeMap(SOLUTION)
-    }else{ //the "getPath" method is the first to invoke the "matrix" object
+    } else {
+      //the "getPath" method is the first to invoke the "matrix" object
       timeMap(SOLUTION) = time - timeMap(MATRIX)
       timeMap += TOTAL -> time
     }
@@ -232,10 +237,11 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
     val idx = cellIndices(backpropagationStart)
     solution(idx)
   }
-  /***** Main methods (potentially concurrent) - END *****/
+
+  /** *** Main methods (potentially concurrent) - END *****/
 
 
-  /***** Support methods (sequential & concurrent support) - START *****/
+  /** *** Support methods (sequential & concurrent support) - START *****/
   /**
    * 06.09.2013
    * This is the recursive equivalent of the "getPath" method.
@@ -247,7 +253,7 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
    * @param break
    * @return
    */
-  private def _getPath(idx: Idx, break:(Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
+  private def _getPath(idx: Idx, break: (Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
     val (eps, pathList) = (0.001, new ListBuffer[PathEntry[Decision]]())
     /*
     * Inner function.
@@ -302,7 +308,7 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
    * @param break limit (end of the solution path)
    * @return
    */
-  private def getPath(idx: Idx, break:(Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
+  private def getPath(idx: Idx, break: (Idx, Idx) => Boolean): ListBuffer[PathEntry[Decision]] = {
     val (eps, pathList) = (0.001, new ListBuffer[PathEntry[Decision]]())
     var _prevIdx = Array(idx)
 
@@ -314,8 +320,10 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
     * since the "break" method/statement doesn't exist in scala.
     */
     def runInnerLoops {
-      for(innerIdx <- _prevIdx  if !break(idx, innerIdx)){ //outer for each loop
-        for (u <- decisions(innerIdx)) { //inner for each loop
+      for (innerIdx <- _prevIdx if !break(idx, innerIdx)) {
+        //outer for each loop
+        for (u <- decisions(innerIdx)) {
+          //inner for each loop
           val prevIdx = prevStates(innerIdx, u)
           // v is difference of the current value and the previous values
           // when decision u was made:
@@ -352,7 +360,7 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
     }
 
     var keepOuterForEachAlive = true
-    while(keepOuterForEachAlive){
+    while (keepOuterForEachAlive) {
       val controlIdx = _prevIdx
       runInnerLoops
 
@@ -360,7 +368,7 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
        * if the for each loops haven't be terminated because one acceptable solution was found,
        * or if the "break" method returns the value "true".
        */
-      if(_prevIdx == controlIdx) keepOuterForEachAlive = false
+      if (_prevIdx == controlIdx) keepOuterForEachAlive = false
     }
     //If the _prevId is still equal to the controlIdx after the inner for each loop ist means that
     //the path reconstruction is done
@@ -376,10 +384,10 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
    *                        concurrent mode.
    * @return Array[Double]
    */
-  private def getAccValues(idx: Idx, handleNullState:(Idx) => Unit): Array[Double] =
-  for (u <- decisions(idx)) yield prevStates(idx, u) match {
+  private def getAccValues(idx: Idx, handleNullState: (Idx) => Unit): Array[Double] =
+    for (u <- decisions(idx)) yield prevStates(idx, u) match {
       // Empty array, i.e. there are no prev. states:
-      case Array() => calcF(value(idx, u), initValues, calcG)//sum of current and previous values
+      case Array() => calcF(value(idx, u), initValues, calcG) //sum of current and previous values
       // Non-empty array:
       case prevIndexes: Array[Idx] => {
         val prevValues: Array[Double] = for (pidx <- prevIndexes) yield {
@@ -389,9 +397,9 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
             case _ => handleNullState(pidx); initValues(0)
           }
         }
-        calcF(value(idx, u), prevValues , calcG)
+        calcF(value(idx, u), prevValues, calcG)
       }
-  }
+    }
 
 
   /**
@@ -400,7 +408,7 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
    * @param values
    * @return
    */
-  private def calcCellCost(idx: Idx, values: Array[Double]){
+  private def calcCellCost(idx: Idx, values: Array[Double]) {
     // Calculate the new value (min. or max.):
     hiddenMatrix(idx.i)(idx.j) = Some(reviseMax(values match {
       /* A double value, while overriding the initValues method, the dev should keep in mind that
@@ -411,7 +419,8 @@ abstract class DynPro[Decision] extends DynProBasic with Backpropagation[Decisio
       case _ => values.toList.reduceLeft(extremeFunction(_, _)) //the maximum or min
     }))
   }
-  /***** Support methods (sequential & concurrent support) - END *****/
+
+  /** *** Support methods (sequential & concurrent support) - END *****/
 
 }
 
@@ -429,7 +438,7 @@ class IntDynPro extends DynPro[java.lang.Integer] with MatrixPrinter[java.lang.I
 
   def value(idx: Idx, d: java.lang.Integer) = 0
 
-  def updateXY(newX: String, newY: String) = {}//do nothing
+  def updateXY(newX: String, newY: String) = {} //do nothing
 
   formatter = INT
 }
