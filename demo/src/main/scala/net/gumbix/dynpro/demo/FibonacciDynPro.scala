@@ -70,7 +70,7 @@ class FibonacciDynPro(k: Int)
 
   /**
    * If the decision is INIT, the value is the start value 1.
-   * If not, the (added) is 0 as the dynamic programming
+   * If not, the (added) value is 0 as the dynamic programming
    * algorithm adds the value of the two previous states:
    * a = 0 + fib(k-2) + fib(k-1)
    */
