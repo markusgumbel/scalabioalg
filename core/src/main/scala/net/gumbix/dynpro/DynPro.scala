@@ -278,3 +278,7 @@ class IntDynPro extends DynPro[java.lang.Integer] with MatrixPrinter[java.lang.I
 
   formatter = INT
 }
+
+abstract class DynProJava[Decision] extends DynPro[Decision] with MatrixPrinter[Decision] {
+  formatter = INT
+}

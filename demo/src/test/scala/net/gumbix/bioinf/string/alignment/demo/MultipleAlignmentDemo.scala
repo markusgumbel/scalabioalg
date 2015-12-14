@@ -39,7 +39,7 @@ class MultipleAlignmentDemo extends TestCase {
 
   def doMultipleAligment(s: Array[String], mode: AlignmentMode, comment: String) {
     println("---------------------------------")
-    println("Multiple Ali gnment, mode = " + mode + ", " + comment)
+    println("Multiple Alignment, mode = " + mode + ", " + comment)
     println()
     (0 until s.size).foreach {i => print("s" + i + " = '" + s(i) + "', ")}
     println()
