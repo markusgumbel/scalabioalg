@@ -137,7 +137,7 @@ object Element {
                        override val height: Int) extends Element {
     private val line = get.toString * width
 
-    def contents = Array.make(height, Content(line, ' '))
+    def contents = Array.tabulate(height){i => Content(line, ' ')}
   }
 
   val NUMBER = {s: String =>
