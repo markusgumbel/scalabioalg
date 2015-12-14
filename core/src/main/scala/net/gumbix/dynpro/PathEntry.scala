@@ -26,7 +26,7 @@ class PathEntry[Decision](
   override def toString = {
     val prev = prevCell match {
       case Array() => "none"
-      case _ => prevCell.toString
+      case _ => prevCell.mkString("(", ",", ")")
     }
     "decision=" + decision + ", v=" + value.toString +
             ", curr=" + currCell.toString + ", prev=" + prev
