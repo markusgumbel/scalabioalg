@@ -15,18 +15,15 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.hmm
 
-import net.gumbix.dynpro.Backpropagation
 import net.gumbix.dynpro.CellPosition._
-import net.gumbix.dynpro.{Idx, DynPro, MatrixPrinter}
-import collection.mutable.ArrayBuffer
-import Math.log
+import net.gumbix.dynpro.{Backpropagation, DynPro, Idx, MatrixPrinter}
 
 /**
   * The Viterbi algorithm to determine patterns in a string.
   * @param s The string to analyse.
   * @param alphabet Alphabet of the emissions.
   * @param states States (excl. q0).
-  * @param transP Transition-Probabilities, e.g. probability from
+  * @param transP Transition-Probabilities, e.g. probability
   * going from state p to q.
   * @param emmP Emission-Probabilities, e.g. probability to emit
   * the character c when being in state q.
@@ -48,12 +45,12 @@ class Viterbi(val s: Array[Char], val alphabet: Array[Char],
   override val backpropagationStart = MAXIMUM_VALUE_LAST_ROW
 
   /**
-    * Length of the string to analyse plus the empty string (-).
+    * Length of the string to analyse.
     */
   def n = s.length
 
   /**
-    * Number of states
+    * Number of states.
     */
   def m = states.length
 
@@ -79,12 +76,7 @@ class Viterbi(val s: Array[Char], val alphabet: Array[Char],
     }
   }
 
-  override def rowLabels: Array[String] = makeLabels(s, ".")
+  override def rowLabels = s.map(c => c.toString)
 
-  private def makeLabels(s: Array[Char], first: String) = {
-    val buffer = new ArrayBuffer[String]()
-    // buffer += first
-    s.foreach(buffer += _.toString)
-    buffer.toArray
-  }
+  override def columnLabels = Some(states.map(c => c.toString))
 }

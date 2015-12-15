@@ -29,7 +29,7 @@ import net.gumbix.dynpro.MatrixPrinter
 class MultipleAlignment(val strings: Array[String], val mode: AlignmentMode)
         extends MultipleAlignmentPrinter with MatrixPrinter[Int]
                 with Score with Logger {
-  logLevel = false
+  logLevel = true
   formatter = INT
 
   /**
@@ -158,7 +158,7 @@ class MultipleAlignment(val strings: Array[String], val mode: AlignmentMode)
      * compatible. The principle is: once a gap, always a gap.
      * @param s1 First aligned string
      * @param s2 Second aligned string
-     * @retrun a tuple of two lists containing the insert-positions
+     * @return a tuple of two lists containing the insert-positions
      * for string s1 and s2.
      */
     def getInsertions(s1: AlignedString, s2: AlignedString):
@@ -220,7 +220,7 @@ class MultipleAlignment(val strings: Array[String], val mode: AlignmentMode)
     // Go through the remaining children...
     for (idx <- idxs.drop(1)) {
 
-      logln("\nTree Buffer Before:")
+      logln("\nMultiple Alignment (before step):")
       logln(treeBuffer.mkString("\n"))
 
       val aPair = if (rootIdx > idx) { // See comment above.
@@ -229,10 +229,11 @@ class MultipleAlignment(val strings: Array[String], val mode: AlignmentMode)
         alignments(rootIdx)(idx).alignedStrings
       }
 
-      logln("\ncompare rootIdx = " + rootIdx + " with idx " + idx)
+      logln("\ncompare root idx = " + rootIdx + " with leaf idx = " + idx)
       logln("Current  root = " + treeBuffer(0).toString)
-      logln("Original root = " + aPair._1.toString)
-      logln("aligned with  = " + aPair._2.toString)
+      logln("Alignment of root with new leaf:")
+      logln("root =          " + aPair._1.toString)
+      logln("leaf  =         " + aPair._2.toString)
 
       // Identify inserts such that the current root and
       // the root aligned with idx are compatible:
@@ -246,10 +247,10 @@ class MultipleAlignment(val strings: Array[String], val mode: AlignmentMode)
       insertGaps(aPair._2, insertPos._2)
       treeBuffer += aPair._2
 
-      logln("\nTree Buffer After:")
+      logln("\nMultiple Alignment (after step):")
       logln(treeBuffer.mkString("\n"))
     }
-    logln("\nDone\n")
+    logln("\nDone.\n")
 
     treeBuffer.toArray
   }
