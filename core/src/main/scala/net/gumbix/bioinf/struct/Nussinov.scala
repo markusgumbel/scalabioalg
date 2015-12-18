@@ -99,7 +99,7 @@ abstract class AbstractNussinov(val s: String)
 class NussinovCount(s: String) extends AbstractNussinov(s) {
   def value(idx: Idx, d: NussinovDecision) = d.move match {
     case PAIR =>
-      val validPair = (s(idx.i), s(idx.j)) match {
+      val validPair = (s.charAt(idx.i), s.charAt(idx.j)) match {
         case ('A', 'U') => true
         case ('U', 'A') => true
         case ('C', 'G') => true
@@ -125,7 +125,7 @@ class NussinovEnergy(s: String) extends AbstractNussinov(s) {
   def value(idx: Idx, d: NussinovDecision) = d.move match {
     // Values taken from Merkl p. 403:
     case PAIR =>
-      val e = (s(idx.i), s(idx.j)) match {
+      val e = (s.charAt(idx.i), s.charAt(idx.j)) match {
         case ('A', 'U') => -2.0
         case ('U', 'A') => -2.0
         case ('C', 'G') => -3.0

@@ -16,7 +16,6 @@ Copyright 2011 the original author or authors.
 package net.gumbix.optimize
 
 import junit.framework.TestCase
-import net.gumbix.optimize.{KnapsackRecMatrix, KnapsackRecursive}
 
 /**
  * Here are some examples for optimization problems, mainly those

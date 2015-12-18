@@ -42,7 +42,7 @@ class KnapsackRecMatrix(val items: Array[String],
    * The pure matrix.
    */
   def matrix: Array[Array[Option[Double]]] = {
-    val m: Array[Array[Option[Double]]] = new Array(weights.size, capacity + 1)
+    val m: Array[Array[Option[Double]]] = Array.ofDim(weights.size, capacity + 1)
     for (i <- 0 until weights.size; j <- 0 to capacity) {
       m(i)(j) = matrix2(i)(j) match {
         case None => None
