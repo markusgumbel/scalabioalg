@@ -16,8 +16,8 @@ Copyright 2011 the original author or authors.
 package net.gumbix.bioinf.hmm.demo
 
 import junit.framework.TestCase
-import org.apache.commons.math.stat.Frequency
-import net.gumbix.bioinf.hmm.{Viterbi, HiddenMarkovAutomata}
+import net.gumbix.bioinf.hmm.{HiddenMarkovAutomata, Viterbi}
+import org.apache.commons.math3.stat.Frequency
 
 /**
  * Demo classes using th Viterbi-algorithm.

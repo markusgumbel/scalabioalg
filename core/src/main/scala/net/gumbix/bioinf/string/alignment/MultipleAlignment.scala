@@ -18,7 +18,7 @@ package net.gumbix.bioinf.string.alignment
 import collection.mutable.ArrayBuffer
 import net.gumbix.bioinf.string.alignment.GapType._
 import net.gumbix.bioinf.string.alignment.AlignmentMode._
-import org.apache.commons.math.stat.Frequency
+import org.apache.commons.math3.stat.Frequency
 import net.gumbix.util.Logger
 import net.gumbix.dynpro.DynProMatrixPrinter
 

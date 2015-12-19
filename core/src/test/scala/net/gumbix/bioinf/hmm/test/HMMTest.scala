@@ -16,8 +16,6 @@ Copyright 2011 the original author or authors.
 package net.gumbix.bioinf.hmm.test
 
 import junit.framework.TestCase
-import org.apache.commons.math.stat.Frequency
-import net.gumbix.bioinf.hmm.{Viterbi, HiddenMarkovAutomata}
 
 /**
  * Test cases to verify the viterbi algorithm.

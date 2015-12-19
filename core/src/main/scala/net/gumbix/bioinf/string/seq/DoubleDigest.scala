@@ -17,7 +17,7 @@ package net.gumbix.bioinf.string.seq
 
 import collection.immutable.::
 import collection.mutable.HashSet
-import org.apache.commons.math.util.MathUtils.{factorial => fac}
+import org.apache.commons.math3.util.CombinatoricsUtils.{factorial => fac}
 import net.gumbix.util.{Logger, Permutation}
 
 /**
