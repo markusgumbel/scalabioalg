@@ -268,7 +268,7 @@ abstract class DynPro[Decision] extends DynProMatrix {
 
 // because of Scala bug?!
 // solved in build with timestamp 2010 10 19
-class IntDynPro extends DynPro[java.lang.Integer] with MatrixPrinter[java.lang.Integer] {
+class IntDynPro extends DynPro[java.lang.Integer] with DynProMatrixPrinter[java.lang.Integer] {
   def n = 1
 
   def m = 1
@@ -282,7 +282,7 @@ class IntDynPro extends DynPro[java.lang.Integer] with MatrixPrinter[java.lang.I
   formatter = INT
 }
 
-abstract class DynProJava[Decision] extends DynPro[Decision] with MatrixPrinter[Decision] {
+abstract class DynProJava[Decision] extends DynPro[Decision] with DynProMatrixPrinter[Decision] {
   formatter = INT
 
   def solutionAsList(idx: Idx): java.util.List[PathEntry[Decision]]

@@ -1,58 +1,70 @@
 package net.gumbix.bioinf.phylo
 
 /**
+  * Base class for all distance-based phylogenetic trees.
+  * @param taxa List of taxa.
+  * @param dist Matrix containing the distances.
   */
-class TaxaMetric(val taxa: Array[String], dist: Array[Array[Double]]) {
+class TaxaMetric(val taxa: Array[String], val dist: Array[Array[Double]])
+  extends TaxaMetricPrinter {
 
   protected val taxonToIdx: Map[String, Int] = {
     // zip with numbers from 0 to n-1 and then map it to key-value pairs:
     taxa.zip(0 until taxa.size).toMap
   }
 
-  def distByTaxon(taxon1: String, taxon2: String) = distByIndex(taxonToIdx(taxon1), taxonToIdx(taxon2))
-
-  def distByIndex(i: Int, j: Int) = if (i <= j) dist(i)(j) else dist(j)(i)
-
-  val isAdditive = false
-
-  def mkString = {
-    // TODO use MatrixPrinter
-    taxa.mkString("   ") + "\n" +
-      dist.map(row => row.mkString(" ")).mkString("\n")
-  }
-}
-
-class NeighborJoiningMetric(taxa: Array[String], dist: Array[Array[Double]]) extends TaxaMetric(taxa, dist) {
-
-  val njDist = {
-
-    def r(i: Int) = {
-      val d = for (k <- 0 until taxa.size) yield {distByIndex(i, k)}
-      1.0 / (taxa.size - 2) * d.sum
-    }
-
-    Array.tabulate(taxa.size, taxa.size) {
-      (i, j) =>
-        if (i < j) distByIndex(i, j) - (r(i) + r(j)) else 0
-    }
-  }
-
-  def njDistByTaxon(taxon1: String, taxon2: String) = njDistByIndex(taxonToIdx(taxon1), taxonToIdx(taxon2))
-
-  def njDistByIndex(i: Int, j: Int) = if (i <= j) njDist(i)(j) else njDist(j)(i)
-
+  /**
+    * Number of taxa (n), i.e. matrix has dimension n x n.
+    */
+  val size = dist.length
 
   /**
-   * The index of the minimum neighbor-joining distance.
-   */
-  val minIdx = {
-    val valIdx = for (i <- 0 until taxa.size; j <- i until taxa.size) yield ((i, j), njDistByIndex(i, j))
-    valIdx.minBy(_._2)._1 // Find minimum in distance-list and return index.
+    * Get the distance for two taxa.
+    * @param taxon1 First taxon.
+    * @param taxon2 Second taxon.
+    * @return Distance.
+    */
+  def distByTaxon(taxon1: String, taxon2: String)
+  = distByIndex(taxonToIdx(taxon1), taxonToIdx(taxon2))
+
+  /**
+    * Get the distance for two taxa addressed by the index i and j.
+    * @param i First index of a taxon.
+    * @param j Second index of a taxon.
+    * @return Distance.
+    */
+  def distByIndex(i: Int, j: Int) = {
+    if (i == j) {
+      Double.NaN
+    } else {
+      if (i < j) dist(i)(j) else dist(j)(i)
+    }
   }
 
-  def mkNJString = {
-    // TODO use MatrixPrinter
-    taxa.mkString("   ") + "\n" +
-      njDist.map(row => row.mkString(" ")).mkString("\n")
+  /**
+    * True if a additive tree can be constructed with this
+    * distance matrix or else if not.
+    */
+  val isAdditive = {
+    def check(): Boolean = {
+      // Iterate over all possible index combinations containing
+      // 4 indices (i1, i2, i3, i4):
+      for (i1 <- 0 until size; i2 <- 0 until size if (i1 != i2);
+           i3 <- 0 until size if (i1 != i3 && i2 != i3);
+           i4 <- 0 until size if (i1 != i4 && i2 != i4 && i3 != i4)) {
+        // Test for Buneman's four point condition:
+        val d1 = distByIndex(i1, i2) + distByIndex(i3, i4)
+        val d2 = distByIndex(i1, i3) + distByIndex(i2, i4)
+        val d3 = distByIndex(i1, i4) + distByIndex(i2, i3)
+        val min = List(d1, d2, d3).min
+        val additive =
+          (d1 == min && d2 == d3) ||
+            (d2 == min && d1 == d3) ||
+            (d3 == min && d1 == d2)
+        if (!additive) return false // First negative, exit...
+      }
+      true
+    }
+    check()
   }
 }

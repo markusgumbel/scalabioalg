@@ -20,7 +20,7 @@ import net.gumbix.bioinf.string.alignment.AlignmentStep._
 import net.gumbix.dynpro.CellPosition._
 import net.gumbix.dynpro.Backpropagation
 import net.gumbix.bioinf.string.alignment.GapType._
-import net.gumbix.dynpro.{PathEntry, MatrixPrinter, Idx, DynPro}
+import net.gumbix.dynpro.{PathEntry, DynProMatrixPrinter, Idx, DynPro}
 
 /**
  * s1 is supposed to be the search string whereas s2 is the (longer) original
@@ -39,7 +39,7 @@ class Alignment(val s1: String, val s2: String,
                 override val substMatrix: Option[String])
         extends DynPro[AlignmentStep]
                 with Backpropagation[AlignmentStep]
-                with MatrixPrinter[AlignmentStep]
+                with DynProMatrixPrinter[AlignmentStep]
                 with AlignmentPrinter[AlignmentStep]
                 with Score {
   // Helper constructor if no substitution matrix is used:

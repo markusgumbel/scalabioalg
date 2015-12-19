@@ -15,7 +15,7 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.dynpro.demo
 
-import net.gumbix.dynpro.{PathEntry, MatrixPrinter, Idx, DynPro}
+import net.gumbix.dynpro.{PathEntry, DynProMatrixPrinter, Idx, DynPro}
 import net.gumbix.optimize.Knapsack
 
 /*

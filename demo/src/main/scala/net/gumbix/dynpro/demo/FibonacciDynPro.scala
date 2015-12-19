@@ -28,7 +28,7 @@ object FibonacciState extends Enumeration {
 
 import net.gumbix.dynpro.demo.FibonacciState._
 import net.gumbix.dynpro.Idx
-import net.gumbix.dynpro.MatrixPrinter
+import net.gumbix.dynpro.DynProMatrixPrinter
 import net.gumbix.dynpro.DynPro
 import net.gumbix.dynpro.PathEntry
 
@@ -38,7 +38,7 @@ import net.gumbix.dynpro.PathEntry
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 class FibonacciDynPro(k: Int)
-        extends DynPro[FibonacciState] with MatrixPrinter[FibonacciState] {
+        extends DynPro[FibonacciState] with DynProMatrixPrinter[FibonacciState] {
   formatter = INT
 
   def n = k + 1

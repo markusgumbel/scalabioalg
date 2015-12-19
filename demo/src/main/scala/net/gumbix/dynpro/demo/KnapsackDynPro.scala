@@ -16,7 +16,7 @@ Copyright 2011 the original author or authors.
 package net.gumbix.dynpro.demo
 
 import net.gumbix.optimize.Knapsack
-import net.gumbix.dynpro.{Idx, MatrixPrinter, DynPro, PathEntry}
+import net.gumbix.dynpro.{Idx, DynProMatrixPrinter, DynPro, PathEntry}
 
 /*
 i|a_i|w_i|v_i|d_i
@@ -50,7 +50,7 @@ class KnapsackDynPro(val items: Array[String],
                       val weights: Array[Int], val values: Array[Int],
                       val capacity: Int)
         extends DynPro[Int]
-                with MatrixPrinter[Int]
+                with DynProMatrixPrinter[Int]
                 with Knapsack {
   formatter = INT
 

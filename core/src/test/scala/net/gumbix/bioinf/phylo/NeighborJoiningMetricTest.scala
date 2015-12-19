@@ -12,10 +12,10 @@ class NeighborJoiningMetricTest extends TestCase {
 
   def test3Taxa() {
     val d: Array[Array[Double]] = A(
-      A(0, 1, 2, 2),
-      A(0, 0, 1, 1),
-      A(0, 0, 0, 3),
-      A(0, 0, 0, 0)
+      A(0d, 1, 2, 2),
+      A(0d, 0, 1, 1),
+      A(0d, 0, 0, 3),
+      A(0d, 0, 0, 0)
     )
     val m = new NeighborJoiningMetric(Array("A", "B", "C", "D"), d)
     assertEquals(m.distByIndex(0, 0), 0.0);
@@ -25,9 +25,9 @@ class NeighborJoiningMetricTest extends TestCase {
     assertEquals(m.distByTaxon("A", "B"), 1.0);
     assertEquals(m.distByTaxon("A", "C"), 2.0);
     assertEquals(m.distByTaxon("C", "A"), 2.0);
-    println(m.mkString)
-    println(m.mkNJString)
-    println(m.minIdx)
+    assertEquals(m.isAdditive, false); // Really?
+    println(m.mkMatrixString)
+    println("\n" + m.mkNJString)
+    println("minimum distance index: " + m.minIdx)
   }
-
 }

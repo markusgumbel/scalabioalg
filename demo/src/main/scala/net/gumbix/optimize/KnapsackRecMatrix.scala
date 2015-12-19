@@ -15,7 +15,7 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.optimize
 
-import net.gumbix.dynpro.MatrixPrinter
+import net.gumbix.dynpro.DynProMatrixPrinter
 
 /**
  * The knapsack algorithm which uses internally a matrix to store already
@@ -25,7 +25,7 @@ import net.gumbix.dynpro.MatrixPrinter
 class KnapsackRecMatrix(val items: Array[String],
                         val weights: Array[Int], val values: Array[Int],
                         val capacity: Int)
-        extends MatrixPrinter[Int] with Knapsack {
+        extends DynProMatrixPrinter[Int] with Knapsack {
   /**
    * Internally used matrix to keep already computed results.
    */

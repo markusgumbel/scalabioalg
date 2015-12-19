@@ -15,7 +15,7 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.struct
 
-import net.gumbix.dynpro.{Idx, MatrixPrinter, DynPro}
+import net.gumbix.dynpro.{Idx, DynProMatrixPrinter, DynPro}
 import net.gumbix.bioinf.struct.NussinovState._
 
 /**
@@ -25,7 +25,7 @@ import net.gumbix.bioinf.struct.NussinovState._
  */
 abstract class AbstractNussinov(val s: String)
         extends DynPro[NussinovDecision]
-                with MatrixPrinter[NussinovDecision] {
+                with DynProMatrixPrinter[NussinovDecision] {
   formatter = INT
 
   def n = s.length

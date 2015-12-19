@@ -16,7 +16,7 @@ Copyright 2011 the original author or authors.
 package net.gumbix.bioinf.hmm
 
 import net.gumbix.dynpro.CellPosition._
-import net.gumbix.dynpro.{Backpropagation, DynPro, Idx, MatrixPrinter}
+import net.gumbix.dynpro.{Backpropagation, DynPro, Idx, DynProMatrixPrinter}
 
 /**
   * The Viterbi algorithm to determine patterns in a string.
@@ -35,7 +35,7 @@ class Viterbi(val s: Array[Char], val alphabet: Array[Char],
               val emmP: Array[Array[Double]])
   extends DynPro[Int]
   with Backpropagation[Int]
-  with MatrixPrinter[Int] {
+  with DynProMatrixPrinter[Int] {
 
   /**
     * Values can become very small, so a scientific notation is required.

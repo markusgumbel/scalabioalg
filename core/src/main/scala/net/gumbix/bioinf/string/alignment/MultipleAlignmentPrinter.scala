@@ -15,7 +15,7 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.alignment
 
-import net.gumbix.dynpro.MatrixPrinter
+import net.gumbix.dynpro.DynProMatrixPrinter
 import net.gumbix.layout.Element._
 
 /**
@@ -49,7 +49,7 @@ trait MultipleAlignmentPrinter {
   }
 
   def mkAlignmentTable() {
-    object o extends MatrixPrinter[Double] {
+    object o extends DynProMatrixPrinter[Double] {
       val matrix = {
         val n = strings.size
         val matrix: Array[Array[Option[Double]]] = Array.ofDim(n, n)

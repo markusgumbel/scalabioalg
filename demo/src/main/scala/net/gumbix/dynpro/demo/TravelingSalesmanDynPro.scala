@@ -1,6 +1,6 @@
 package net.gumbix.dynpro.demo
 
-import net.gumbix.dynpro.{PathEntry, Idx, MatrixPrinter, DynPro}
+import net.gumbix.dynpro.{PathEntry, Idx, DynProMatrixPrinter, DynPro}
 import scala.Array
 
 /**
@@ -10,7 +10,7 @@ import scala.Array
  */
 
 class TravelingSalesmanDynPro(val dist: Array[Array[Int]])
-  extends DynPro[Int] with MatrixPrinter[Int] {
+  extends DynPro[Int] with DynProMatrixPrinter[Int] {
 
   formatter = DECIMAL
 

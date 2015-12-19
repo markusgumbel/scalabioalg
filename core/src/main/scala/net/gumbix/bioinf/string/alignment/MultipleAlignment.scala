@@ -20,14 +20,14 @@ import net.gumbix.bioinf.string.alignment.GapType._
 import net.gumbix.bioinf.string.alignment.AlignmentMode._
 import org.apache.commons.math.stat.Frequency
 import net.gumbix.util.Logger
-import net.gumbix.dynpro.MatrixPrinter
+import net.gumbix.dynpro.DynProMatrixPrinter
 
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 
 class MultipleAlignment(val strings: Array[String], val mode: AlignmentMode)
-        extends MultipleAlignmentPrinter with MatrixPrinter[Int]
+        extends MultipleAlignmentPrinter with DynProMatrixPrinter[Int]
                 with Score with Logger {
   logLevel = true
   formatter = INT

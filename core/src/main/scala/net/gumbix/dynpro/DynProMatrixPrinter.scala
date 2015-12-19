@@ -19,61 +19,19 @@ import net.gumbix.layout.Element._
 import java.util.Locale
 import java.text.{DecimalFormatSymbols, DecimalFormat}
 
+import net.gumbix.util.MatrixPrinter
+
 /**
  * Create a string of a formatted matrix. Matrix is of type Option[Double], i.e.
  * there can be cells with no value (=None).
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-trait MatrixPrinter[Decision] {
-  class Formatter(val f: DecimalFormat) {
-    f.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.US))
-
-    def format(n: Double) = f.format(n)
-  }
-
-  val INT = new Formatter(new DecimalFormat("0."))
-  val DECIMAL = new Formatter(new DecimalFormat("0.00"))
-  val ENGINEER = new Formatter(new DecimalFormat("0.000E00"))
-
-  /**
-   * Specifies how the numeric values are formatted.
-   */
-  var formatter = ENGINEER
-
-  def matrix: Array[Array[Option[Double]]]
-
-  var innerColumnSeparator = ' '
-
-  /**
-   * What labels should the columns get?
-   */
-  def columnLabels: Option[Array[String]] = {
-    Some((1 to matrix(0).length).toList.map("col" + _.toString).toArray)
-  }
-
-  /**
-   * What labels should the rows get?
-   */
-  def rowLabels: Array[String] = {
-    (1 to matrix.length).toList.map("row" + _.toString).toArray
-  }
-
-  /**
-   * A counter for each column, beginning with 0.
-   */
-  def columnCounter =
-    (0 until matrix(0).length).map(_.toString).toArray
-
-  /**
-   * A counter for each row, beginning with 0.
-   */
-  def rowCounter =
-    (0 until matrix.length).map(_.toString).toArray
+trait DynProMatrixPrinter[Decision] extends MatrixPrinter {
 
   /**
    * Create a string that represents the entire matrix.
    */
-  def mkMatrixString =
+  override def mkMatrixString =
     makeTable(matrix, Array.ofDim(matrix.size, matrix(0).size)).toString
 
   /**
