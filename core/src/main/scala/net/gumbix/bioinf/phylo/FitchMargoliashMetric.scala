@@ -3,7 +3,7 @@ package net.gumbix.bioinf.phylo
 /**
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
-class FitchMargoliashMetric(joinedTaxa: Array[Taxon], dist: Array[Array[Double]])
+class FitchMargoliashMetric(val joinedTaxa: Array[Taxon], dist: Array[Array[Double]])
   extends TaxaMetric(joinedTaxa.map(_.toString), dist) {
 
   def this(taxa: Array[String], dist: Array[Array[Double]]) =
