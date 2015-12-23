@@ -6,6 +6,8 @@ import org.apache.commons.math3.linear._
 import scala.collection.mutable
 
 /**
+  * Phylogenetic tree construction with the Fitch-Margoliash
+  * algorithm.
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
 class FitchMargoliashTree(val metric: FitchMargoliashMetric)
@@ -20,7 +22,8 @@ class FitchMargoliashTree(val metric: FitchMargoliashMetric)
     // A sorted list of instructions how to build the tree:
     val allEdges = new mutable.ArrayBuffer[(Taxon, Double)]()
 
-    if (metric.size >= 3) { // Otherwise there is no problem.
+    if (metric.size >= 3) {
+      // Otherwise there is no problem.
       def dist(taxon: Taxon, p: Map[Taxon, Double]) = taxon match {
         case jt: JoinedTaxon => {
           val avgDist = avgEdges(jt)
@@ -103,7 +106,7 @@ class FitchMargoliashTree(val metric: FitchMargoliashMetric)
     val a: Array[Array[Double]] = A(
       A(1d, 1, 0), // a + b = dist(A,B)
       A(1d, 0, 1), // a + c = dist(A,C)
-      A(0d, 1, 1) // b + c = dist(B,C)
+      A(0d, 1, 1) //  b + c = dist(B,C)
     )
     val coefficients = new Array2DRowRealMatrix(a, false)
     val solver = new LUDecomposition(coefficients).getSolver()

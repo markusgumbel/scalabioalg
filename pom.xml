@@ -37,8 +37,9 @@
 
     <modules>
         <module>core</module>
-        <module>demo</module>
+        <module>ui</module>
         <module>biojava</module>
+        <module>demo</module>
     </modules>
 
     <dependencies>

@@ -2,8 +2,8 @@
     
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.gumbix</groupId>
-    <artifactId>scabio-demo</artifactId>
-    <name>SCABIO bioinformatics algorithms demos</name>
+    <artifactId>scabio-ui</artifactId>
+    <name>SCABIO UI components</name>
     <packaging>jar</packaging>
 
     <parent>
@@ -16,11 +16,6 @@
         <dependency>
             <groupId>net.gumbix</groupId>
             <artifactId>scabio-core</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>net.gumbix</groupId>
-            <artifactId>scabio-ui</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <!-- JUNG libraries -->
