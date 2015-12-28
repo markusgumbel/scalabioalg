@@ -11,7 +11,7 @@ import scala.collection.mutable
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
 class FitchMargoliashTree(val metric: FitchMargoliashMetric)
-  extends Logger {
+  extends PhyloTree with Logger {
 
   logLevel = false
 

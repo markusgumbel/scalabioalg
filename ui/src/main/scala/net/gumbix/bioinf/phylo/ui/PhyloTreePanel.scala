@@ -9,7 +9,7 @@ import edu.uci.ics.jung.visualization.VisualizationViewer
 import edu.uci.ics.jung.visualization.control.{DefaultModalGraphMouse, ModalGraphMouse}
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position
-import net.gumbix.bioinf.phylo.{FitchMargoliashTree, JoinedTaxon, Taxon}
+import net.gumbix.bioinf.phylo.{PhyloTree, FitchMargoliashTree, JoinedTaxon, Taxon}
 import org.apache.commons.collections15.Transformer
 
 import scala.collection.mutable.HashMap
@@ -23,7 +23,7 @@ class PhyloTreePanel extends JPanel {
   /**
     * @param m The tree to be rendered.
     */
-  def setTree(m: FitchMargoliashTree) {
+  def setTree(m: PhyloTree) {
 
     object vertexPaint extends Transformer[Node, Paint] {
       def transform(n: Node) = n.taxon match {
@@ -71,7 +71,7 @@ class PhyloTreePanel extends JPanel {
       * @param m Tree.
       * @return
       */
-    def graph(m: FitchMargoliashTree) = {
+    def graph(m: PhyloTree) = {
       val tree = m.tree()
       val taxon2Dist = tree.toMap
 

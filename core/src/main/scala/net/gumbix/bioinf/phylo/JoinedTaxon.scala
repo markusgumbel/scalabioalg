@@ -21,6 +21,8 @@ class Taxon(val name: String) {
 
 class JoinedTaxon(val taxa: Array[Taxon]) extends Taxon("") {
 
+  override val name = toString()
+
   override val size = taxa.length
 
   override def toString() = taxa.mkString("{", ", ", "}")

@@ -1,40 +1,35 @@
 package net.gumbix.bioinf.phylo
 
-import net.gumbix.util.MatrixPrinter
-
 /**
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
-class NeighborJoiningMetric(taxa: Array[String], dist: Array[Array[Double]])
-  extends TaxaMetric(taxa, dist) {
+class NeighborJoiningMetric(joinedTaxa: Array[Taxon], dist: Array[Array[Double]])
+  extends JoinedTaxaMetric[NeighborJoiningMetric](joinedTaxa, dist) {
 
-  val njDist = {
+  def this(taxa: Array[String], dist: Array[Array[Double]]) =
+    this(taxa.map(s => new Taxon(s)), dist)
 
-    def r(i: Int) = {
-      val d = for (k <- 0 until taxa.size) yield {
+  val r = {
+    val h = for (i <- 0 until taxa.length) yield {
+      val d = for (k <- 0 until taxa.size if (k != i)) yield {
         distByIndex(i, k)
       }
       1.0 / (taxa.size - 2) * d.sum
     }
-
-    Array.tabulate(taxa.size, taxa.size) {
-      (i, j) =>
-        if (i < j) distByIndex(i, j) - (r(i) + r(j)) else 0
-    }
+    h.toArray
   }
 
-  def njDistByTaxon(taxon1: String, taxon2: String) = njDistByIndex(taxonToIdx(taxon1), taxonToIdx(taxon2))
+  def rByTaxon(taxon: String) = r(taxonToIdx(taxon))
+
+  val njDist = Array.tabulate(taxa.size, taxa.size) {
+    (i, j) =>
+      if (i < j) distByIndex(i, j) - (r(i) + r(j)) else 0
+  }
+
+  def njDistByTaxon(taxon1: String, taxon2: String) =
+    njDistByIndex(taxonToIdx(taxon1), taxonToIdx(taxon2))
 
   def njDistByIndex(i: Int, j: Int) = if (i <= j) njDist(i)(j) else njDist(j)(i)
-
-
-  /**
-    * The index of the minimum neighbor-joining distance.
-    */
-  val minIdx = {
-    val valIdx = for (i <- 0 until taxa.size; j <- i until taxa.size) yield ((i, j), njDistByIndex(i, j))
-    valIdx.minBy(_._2)._1 // Find minimum in distance-list and return index.
-  }
 
   def mkNJString = {
     val these = this
@@ -45,5 +40,28 @@ class NeighborJoiningMetric(taxa: Array[String], dist: Array[Array[Double]])
       val size = these.size
     }
     tmp.mkMatrixString
+  }
+
+  def joinDistByIdx(i: Int, j: Int) = njDistByIndex(i, j)
+
+  /**
+    * Calculate average distance from i-th taxon to taxa
+    * in list idxCluster.
+    * @param k
+    * @param idxCluster
+    * @return
+    */
+  def average(k: Int, idxCluster: Array[Int]) = {
+    if (idxCluster.length == 2) {
+      val i = idxCluster(0)
+      val j = idxCluster(1)
+      0.5 * (distByIndex(i, k) + distByIndex(j, k) - distByIndex(i, j))
+    } else {
+      throw new RuntimeException("Neighbor joining alg. expects cluster of size 2.")
+    }
+  }
+
+  def newJoinedMetric(joinedTaxa: Array[Taxon], dist: Array[Array[Double]]) = {
+    new NeighborJoiningMetric(joinedTaxa, dist)
   }
 }
