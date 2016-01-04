@@ -133,6 +133,18 @@ object PhyloTreeViewer {
           )
           )
       },
+      "W15" -> {
+        (
+          Array("A", "B", "C", "D", "E"),
+          A(
+            A(0d, 4, 9, 9, 2),
+            A(0d, 0, 6, 7, 4),
+            A(0d, 0, 0, 3, 8),
+            A(0d, 0, 0, 0, 9),
+            A(0d, 0, 0, 0, 0)
+          )
+          )
+      },
       "Tree with 4 taxa" -> {
         (
           Array("A", "B", "C", "D"),

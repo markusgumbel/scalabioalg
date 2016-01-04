@@ -3,7 +3,7 @@ package net.gumbix.bioinf.phylo.ui
 import java.awt._
 import javax.swing.JPanel
 
-import edu.uci.ics.jung.algorithms.layout.ISOMLayout
+import edu.uci.ics.jung.algorithms.layout.{KKLayout, DAGLayout, SpringLayout2, ISOMLayout}
 import edu.uci.ics.jung.graph.{Graph, SparseMultigraph}
 import edu.uci.ics.jung.visualization.VisualizationViewer
 import edu.uci.ics.jung.visualization.control.{DefaultModalGraphMouse, ModalGraphMouse}
@@ -48,6 +48,7 @@ class PhyloTreePanel extends JPanel {
     def graphPanel(graph: Graph[Node, Edge]) = {
       val layout = new ISOMLayout(graph)
       // val layout = new SpringLayout2(graph, edgeLengthTransformer)
+      // val layout = new DAGLayout(graph)
 
       // val layout = new KKLayout(graph)
       // layout.setAdjustForGravity(true)
