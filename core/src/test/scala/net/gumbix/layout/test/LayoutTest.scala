@@ -39,7 +39,6 @@ class LayoutTest extends TestCase {
     val x2 = line("Und?") above line("Ha!")
     val x3 = x1 beside x2
     println(x3)
-    1
   }
 
   def test01c {
@@ -47,7 +46,6 @@ class LayoutTest extends TestCase {
     val x1 = line("12.34") above line("1.0")
 
     println(expandableLine("|", '|') beside x1 beside expandableLine("|", '|'))
-    1
   }
 
   def test02 {
@@ -58,7 +56,6 @@ class LayoutTest extends TestCase {
       Array(1.0, 2.123456)
       )
     println(makeTable(m))
-    1
   }
 
   def test03 {
@@ -70,7 +67,6 @@ class LayoutTest extends TestCase {
       Array("Was", "steht denn hier?")
       )
     println(makeTable(m, Array("1", "2", "3", "4"), Array("a", "b")))
-    1
   }
 
   def test04 {
@@ -80,7 +76,6 @@ class LayoutTest extends TestCase {
       matrix(i)(j) = random * random * 100 - 20
     }
     println(makeTable(matrix))
-    1
   }
 
 

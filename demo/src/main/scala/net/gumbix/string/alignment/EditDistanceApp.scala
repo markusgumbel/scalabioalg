@@ -118,7 +118,6 @@ object EditDistanceApp {
 
     top.pack()
     top.visible = true
-    1
   }
 
   def calc(s1: String, s2: String) {

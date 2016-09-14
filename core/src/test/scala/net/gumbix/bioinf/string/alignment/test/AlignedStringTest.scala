@@ -17,13 +17,14 @@ package net.gumbix.bioinf.string.alignment.test
 
 import junit.framework.TestCase
 import junit.framework.Assert._
-import net.gumbix.bioinf.string.alignment.AlignedString
+import net.gumbix.bioinf.string.alignment.{AlignmentPrinter, AlignedString}
 import net.gumbix.bioinf.string.alignment.GapType._
 
 /**
  * Test cases for aligned strings.
  * TODO Write more!
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+  *
+  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 class AlignedStringTest extends TestCase {
   def testAlignedString() {
@@ -42,5 +43,49 @@ class AlignedStringTest extends TestCase {
     assertEquals(als.toString(), "-----h-ello----")
     assertEquals(als(5).toString, "h")
     assertEquals(als.primaryString, "hello")
+  }
+
+  def testParserNoGaps() {
+    val s1 = new AlignedString("ACTGAG")
+    assertEquals(s1.primaryString, "ACTGAG")
+  }
+
+  def testParser1Gap() {
+    val s1 = new AlignedString("AC-TGAG")
+    assertEquals(s1.primaryString, "ACTGAG")
+    assertEquals(s1.isGapAt(0), false)
+    assertEquals(s1.isGapAt(2), true)
+  }
+
+  def testParser2Gap() {
+    val s1 = new AlignedString("AC--TGAG")
+    assertEquals(s1.primaryString, "ACTGAG")
+    assertEquals(s1.isGapAt(0), false)
+    assertEquals(s1.isGapAt(2), true)
+    assertEquals(s1.isGapAt(3), true)
+  }
+
+  def testParserGapBeginning() {
+    val s1 = new AlignedString("-ACTGAG")
+    assertEquals(s1.primaryString, "ACTGAG")
+    assertEquals(s1.size, 7)
+    assertEquals(s1.isGapAt(0), true)
+    assertEquals(s1.isGapAt(6), false)
+  }
+
+  def testParserGapEnd() {
+    val s1 = new AlignedString("ACTGAG-")
+    assertEquals(s1.primaryString, "ACTGAG")
+    assertEquals(s1.size, 7)
+    assertEquals(s1.isGapAt(0), false)
+    assertEquals(s1.isGapAt(6), true)
+  }
+
+  def testLaTeX() {
+    val s1 = new AlignedString("-ACTGAG")
+    val s2 = new AlignedString("GAAT--G")
+    val latex = new AlignmentPrinter(){}.makeLaTeXAlignmentString(s1, s2)
+    val should = "\\begin{tikzpicture}\n \\node [alignment,matrix,ampersand replacement=\\&] (matrix) at (0,0) {\n  \\node[] (1_1) {-}; \\&\\node[] (1_2) {A}; \\&\\node[] (1_3) {C}; \\&\\node[] (1_4) {T}; \\&\\node[] (1_5) {G}; \\&\\node[] (1_6) {A}; \\&\\node[] (1_7) {G}; \\\\\n  \\node[] { }; \\&\\node[] {\\textcolor{gray}{$\\vert$}}; \\&\\node[] { }; \\&\\node[] {\\textcolor{gray}{$\\vert$}}; \\&\\node[] { }; \\&\\node[] { }; \\&\\node[] {\\textcolor{gray}{$\\vert$}}; \\\\\n  \\node[] (2_1) {G}; \\&\\node[] (2_2) {A}; \\&\\node[] (2_3) {A}; \\&\\node[] (2_4) {T}; \\&\\node[] (2_5) {-}; \\&\\node[] (2_6) {-}; \\&\\node[] (2_7) {G}; \\\\\n};\n\\node[left=2mm of 1_1] {$s_1$};\n\\node[left=2mm of 2_1] {$s_2$};\n\\end{tikzpicture}"
+    assertEquals(latex, should)
   }
 }
