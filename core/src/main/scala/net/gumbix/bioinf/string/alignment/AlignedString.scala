@@ -16,40 +16,44 @@ Copyright 2011 the original author or authors.
 package net.gumbix.bioinf.string.alignment
 
 /**
- * A string that can have gaps.
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
- */
+  * A string that can have gaps.
+  * @param s The input string that is either a plain string
+  *          or it can contains gaps identified by the - character.
+  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+  */
+class AlignedString(s: String) {
 
-class AlignedString(val primaryString: String) {
   import net.gumbix.bioinf.string.alignment.GapType._
 
-  require(primaryString.length > 0)
+  require(s.length > 0)
+
+  val primaryString = s.filter(c => c!='-').toString
 
   /**
-   * Each position (0 .. primaryString.size + 1) points to the
-   * position in the primary string. Example for primaryString = "Markus":
-   * Init settings:
-   * M: mapper(0) = 0
-   * a: mapper(1) = 1
-   * r: mapper(2) = 2
-   * k: mapper(3) = 3
-   * u: mapper(4) = 4
-   * s: mapper(5) = 5
-   * €: mapper(6) = 6
-   *                0123456
-   * Aligned string Markus
-   * With gaps:
-   * M: mapper(0) = 2
-   * a: mapper(1) = 3
-   * r: mapper(2) = 5
-   * k: mapper(3) = 6
-   * u: mapper(4) = 7
-   * s: mapper(5) = 8
-   * €: mapper(6) = 10
-   *                012345678910
-   * Aligned string --Ma-rkus-
-   * + 1 because of artificial end character. 
-   */
+    * Each position (0 .. primaryString.size + 1) points to the
+    * position in the primary string. Example for primaryString = "Markus":
+    * Init settings:
+    * M: mapper(0) = 0
+    * a: mapper(1) = 1
+    * r: mapper(2) = 2
+    * k: mapper(3) = 3
+    * u: mapper(4) = 4
+    * s: mapper(5) = 5
+    * €: mapper(6) = 6
+    * 0123456
+    * Aligned string Markus
+    * With gaps:
+    * M: mapper(0) = 2
+    * a: mapper(1) = 3
+    * r: mapper(2) = 5
+    * k: mapper(3) = 6
+    * u: mapper(4) = 7
+    * s: mapper(5) = 8
+    * €: mapper(6) = 10
+    * 012345678910
+    * Aligned string --Ma-rkus-
+    * + 1 because of artificial end character.
+    */
   private val mapper = {
     val a = new Array[Tuple2[Int, GapType]](primaryString.length + 1)
     for (i <- 0 until a.size) a(i) = (i, PAIR)
@@ -67,9 +71,9 @@ class AlignedString(val primaryString: String) {
   }
 
   /**
-   * Is position pos a gap? This is not true if there is a pointer
-   * in mapper which points to pos.
-   */
+    * Is position pos a gap? This is not true if there is a pointer
+    * in mapper which points to pos.
+    */
   def isGapAt(pos: Int) = pos != mapper(getMapperIndex(pos))._1
 
 
@@ -78,12 +82,13 @@ class AlignedString(val primaryString: String) {
   }
 
   /**
-   * Note: pos = string size is possible. This inserts gaps
-   * at the end of the string.
-   * @param pos Index position where to insert the gap
-   * @param length Size of the gap.
-   * @param gapType
-   */
+    * Note: pos = string size is possible. This inserts gaps
+    * at the end of the string.
+    *
+    * @param pos    Index position where to insert the gap
+    * @param length Size of the gap.
+    * @param gapType
+    */
   def insertGapBefore(pos: Int, length: Int, gapType: GapType) {
     if (pos < 0 || pos > this.size) {
       val text = "pos = " + pos + " must be in 0 ... " + this.size
@@ -109,14 +114,16 @@ class AlignedString(val primaryString: String) {
   }
 
   override def toString() = {
-    val list = for (i <- 0 until size) yield {this(i)}
+    val list = for (i <- 0 until size) yield {
+      this (i)
+    }
     list.mkString
   }
 
   /**
-   * @param pos A position in the aligned string.
-   * @return Index in mapper that points to pos
-   */
+    * @param pos A position in the aligned string.
+    * @return Index in mapper that points to pos
+    */
   private def getMapperIndex(pos: Int) = {
     var i = 0
     var (vPos, gapType) = mapper(i)
@@ -126,6 +133,16 @@ class AlignedString(val primaryString: String) {
     }
     i
   }
+
+  private def stripString() {
+    val idx = (0 until s.size)
+    val l = idx zip s
+    val pos = l.filter(c => c._2=='-').map(c => c._1)
+    pos.foreach{
+      pos => insertGapBefore(pos, GAP)
+    }
+  }
+  stripString()
 }
 
 

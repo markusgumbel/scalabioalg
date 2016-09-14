@@ -40,7 +40,7 @@ class Alignment(val s1: String, val s2: String,
         extends DynPro[AlignmentStep]
                 with Backpropagation[AlignmentStep]
                 with MatrixPrinter[AlignmentStep]
-                with AlignmentPrinter[AlignmentStep]
+                with DynProAlignmentPrinter[AlignmentStep]
                 with Score {
   // Helper constructor if no substitution matrix is used:
   def this(s1: String, s2: String, mode: AlignmentMode) = this (s1, s2, mode, None)
