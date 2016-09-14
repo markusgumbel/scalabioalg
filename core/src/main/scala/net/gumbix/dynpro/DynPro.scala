@@ -249,7 +249,7 @@ abstract class DynPro[Decision] extends DynProMatrix {
         // so we use an epsilon. Also, if we have already found a
         // solution we skip any further solutions:
         if (abs(v - value(idx, u)) < eps) {
-          listBuffer += new PathEntry(u, matrix(idx.i)(idx.j).get, idx, prevIdx)
+          listBuffer += new PathEntry(u, v, idx, prevIdx)
           count += 1
           for (nidx <- prevIdx) {
             calculateSolutionInternal(nidx)

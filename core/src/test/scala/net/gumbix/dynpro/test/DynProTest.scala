@@ -15,16 +15,31 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.dynpro.test
 
+import junit.framework.Assert._
 import junit.framework.TestCase
+import net.gumbix.bioinf.string.alignment.Alignment
+import net.gumbix.bioinf.string.alignment.AlignmentMode._
 
 /**
  * Test cases to verify the dynamic programming algorithm.
  * Note: examples can be found in the demo module at
  * net.gumbix.dynpro.demo.*.
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+  *
+  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 class DynProTest extends TestCase {
   def testDummy() {
     // TODO
+  }
+
+  def testLaTeXMatrix() {
+    val s1 = "CTGAGACATTACTG"
+    val s2 = "AGCAGACTTACCA"
+    val dp = new Alignment(s1, s2, GLOBAL)
+    val latex = dp.mkMatrixLaTeXStringSolution(dp.solution)
+    println(latex)
+    val (as1, as2) = dp.alignedStrings()
+    println(dp.makeLaTeXAlignmentString(as1, as2))
+    assertEquals(true, true)
   }
 }

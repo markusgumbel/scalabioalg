@@ -28,7 +28,7 @@ class PathEntry[Decision](
       case Array() => "none"
       case _ => prevCell.mkString("(", ",", ")")
     }
-    "decision=" + decision + ", v=" + value.toString +
-            ", curr=" + currCell.toString + ", prev=" + prev
+    "decision = " + decision + ", v = " + value.toString +
+            ", curr = " + currCell.toString + ", prev = " + prev
   }
 }

@@ -85,7 +85,7 @@ class AlignedStringTest extends TestCase {
     val s1 = new AlignedString("-ACTGAG")
     val s2 = new AlignedString("GAAT--G")
     val latex = new AlignmentPrinter(){}.makeLaTeXAlignmentString(s1, s2)
-    val should = "\\begin{tikzpicture}\n \\node [alignment,matrix,ampersand replacement=\\&] (matrix) at (0,0) {\n  \\node[] (1_1) {-}; \\&\\node[] (1_2) {A}; \\&\\node[] (1_3) {C}; \\&\\node[] (1_4) {T}; \\&\\node[] (1_5) {G}; \\&\\node[] (1_6) {A}; \\&\\node[] (1_7) {G}; \\\\\n  \\node[] { }; \\&\\node[] {\\textcolor{gray}{$\\vert$}}; \\&\\node[] { }; \\&\\node[] {\\textcolor{gray}{$\\vert$}}; \\&\\node[] { }; \\&\\node[] { }; \\&\\node[] {\\textcolor{gray}{$\\vert$}}; \\\\\n  \\node[] (2_1) {G}; \\&\\node[] (2_2) {A}; \\&\\node[] (2_3) {A}; \\&\\node[] (2_4) {T}; \\&\\node[] (2_5) {-}; \\&\\node[] (2_6) {-}; \\&\\node[] (2_7) {G}; \\\\\n};\n\\node[left=2mm of 1_1] {$s_1$};\n\\node[left=2mm of 2_1] {$s_2$};\n\\end{tikzpicture}"
+    val should = "\\begin{tikzpicture}\n\\matrix (matrix) [matrix of nodes,ampersand replacement=\\&,alignment] {\n  - \\& A \\& C \\& T \\& G \\& A \\& G \\\\\n    \\& \\textcolor{gray}{$\\vert$} \\&   \\& \\textcolor{gray}{$\\vert$} \\&   \\&   \\& \\textcolor{gray}{$\\vert$} \\\\\n  G \\& A \\& A \\& T \\& - \\& - \\& G \\\\\n};\n\\node[left=2mm of matrix-1-1] {$s_1$};\n\\node[left=2mm of matrix-3-1] {$s_2$};\n\\end{tikzpicture}"
     assertEquals(latex, should)
   }
 }

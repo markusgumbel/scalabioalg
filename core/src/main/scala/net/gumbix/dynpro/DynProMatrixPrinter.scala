@@ -22,24 +22,26 @@ import java.text.{DecimalFormatSymbols, DecimalFormat}
 import net.gumbix.util.MatrixPrinter
 
 /**
- * Create a string of a formatted matrix. Matrix is of type Option[Double], i.e.
- * there can be cells with no value (=None).
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
- */
+  * Create a string of a formatted matrix. Matrix is of type Option[Double], i.e.
+  * there can be cells with no value (=None).
+  *
+  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+  */
 trait DynProMatrixPrinter[Decision] extends MatrixPrinter {
 
   /**
-   * Create a string that represents the entire matrix.
-   */
+    * Create a string that represents the entire matrix.
+    */
   override def mkMatrixString =
     makeTable(matrix, Array.ofDim(matrix.size, matrix(0).size)).toString
 
   /**
-   * Create a string that represents the entire matrix.
-   * @param solution A path through the matrix that represents a
-   * solution in terms of dynamic programming. An asterisk is added to
-   * each cell of the solution path.
-   */
+    * Create a string that represents the entire matrix.
+    *
+    * @param solution A path through the matrix that represents a
+    *                 solution in terms of dynamic programming. An asterisk is added to
+    *                 each cell of the solution path.
+    */
   def mkMatrixString(solution: List[PathEntry[Decision]]) = {
 
     val pathMatrix: Array[Array[Boolean]] = Array.ofDim(matrix.size, matrix(0).size)
@@ -48,6 +50,29 @@ trait DynProMatrixPrinter[Decision] extends MatrixPrinter {
     }
     solution.foreach(x => pathMatrix(x.currCell.i)(x.currCell.j) = true)
     makeTable(matrix, pathMatrix).toString
+  }
+
+  def mkMatrixLaTeXStringSolution(solution: List[PathEntry[Decision]]): String = {
+    def f() = {
+      val lines = for (e <- solution) yield {
+        e.prevCell.size match {
+          case 0 => {
+            val from = (e.currCell.i + 1) + "-" + (e.currCell.j + 1)
+            "\\draw[->,gray!50,dashed,thick] (matrix-" + from + ".center) " +
+              "|- node[blue] {\\scriptsize " + e.value + "} +(0,0.5);"
+          }
+          case 1 => {
+            val from = (e.currCell.i + 1) + "-" + (e.currCell.j + 1)
+            val to = (e.prevCell(0).i + 1) + "-" + (e.prevCell(0).j + 1)
+            "\\draw[->,blue!80,dashed,thick,shorten >= 4pt,shorten <= 4pt] (matrix-" + from + ".center) " +
+            "|- node[blue] {\\scriptsize " + e.value + "} (matrix-" + to + ".center);"
+          }
+          case _ => ""
+        }
+      }
+      lines.mkString("\n")
+    }
+    mkMatrixLaTeXString(f)
   }
 
   def makeTable(matrix: Array[Array[Option[Double]]], pathMatrix: Array[Array[Boolean]]):
@@ -71,7 +96,7 @@ trait DynProMatrixPrinter[Decision] extends MatrixPrinter {
     rowLabels.foreach(r => secondColumn = secondColumn above line(r))
 
     var table = firstColumn beside
-            expandableLine(" ", ' ') beside secondColumn beside expandableLine("|", '|')
+      expandableLine(" ", ' ') beside secondColumn beside expandableLine("|", '|')
     for (j <- 0 until matrix(0).size) {
       align = net.gumbix.layout.Element.CENTER
       var col = columnLabels match {
@@ -89,7 +114,7 @@ trait DynProMatrixPrinter[Decision] extends MatrixPrinter {
         col = col above line(p)
       }
       table = table beside col beside
-              expandableLine(innerColumnSeparator.toString, innerColumnSeparator)
+        expandableLine(innerColumnSeparator.toString, innerColumnSeparator)
     }
     table
   }
