@@ -17,9 +17,9 @@ package net.gumbix.layout.test
 
 import junit.framework.TestCase
 import junit.framework.Assert._
-import net.gumbix.layout.Element._
 import net.gumbix.layout.Element
 import scala.math._
+import net.gumbix.layout.Element._
 
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)

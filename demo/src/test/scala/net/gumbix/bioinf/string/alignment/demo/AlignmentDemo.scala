@@ -44,7 +44,6 @@ class AlignmentDemo extends TestCase {
   }
 
   def doAligmentDP(mode: AlignmentMode, s1: String, s2: String, comment: String) {
-    AlignmentMode.GLOBAL
     println()
     println("---------------------------------")
     println("Alignment: method = " + mode + "; " + comment)

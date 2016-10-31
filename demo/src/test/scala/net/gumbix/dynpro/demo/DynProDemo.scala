@@ -15,9 +15,7 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.dynpro.demo
 
-import net.gumbix.dynpro.Idx
 import junit.framework.TestCase
-import net.gumbix.dynpro.demo.{KnapsackDynProBackwards, KnapsackDynPro, FibonacciDynPro}
 
 /**
  * Several examples for dynamic programming. Mainly the knapsack problem

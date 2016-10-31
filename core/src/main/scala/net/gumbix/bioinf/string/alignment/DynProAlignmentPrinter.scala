@@ -15,7 +15,6 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.alignment
 
-import net.gumbix.layout.Element._
 import net.gumbix.dynpro.PathEntry
 
 /**

@@ -15,11 +15,8 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.dynpro
 
-import net.gumbix.layout.Element._
-import java.util.Locale
-import java.text.{DecimalFormatSymbols, DecimalFormat}
-
 import net.gumbix.util.MatrixPrinter
+import net.gumbix.layout.Element._
 
 /**
   * Create a string of a formatted matrix. Matrix is of type Option[Double], i.e.
