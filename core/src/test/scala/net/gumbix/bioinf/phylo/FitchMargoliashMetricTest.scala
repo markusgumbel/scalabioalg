@@ -1,16 +1,19 @@
 package net.gumbix.bioinf.phylo
 
-import junit.framework.Assert._
-import junit.framework.TestCase
+import org.junit.Test
+import org.junit.Assert._
 
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class FitchMargoliashMetricTest extends TestCase {
+class FitchMargoliashMetricTest {
+
+  val DELTA = 0.00001
 
   val A = Array
   val E = Double.NaN
 
+  @Test
   def test3Taxa() {
     val d: Array[Array[Double]] = A(
       A(E, 1, 2, 2),
@@ -19,13 +22,13 @@ class FitchMargoliashMetricTest extends TestCase {
       A(E, E, E, E)
     )
     val m = new FitchMargoliashMetric(Array("A", "B", "C", "D"), d)
-    assertEquals(m.distByIndex(0, 0), E);
-    assertEquals(m.distByIndex(0, 1), 1.0);
-    assertEquals(m.distByIndex(1, 0), 1.0);
-    assertEquals(m.distByTaxon("A", "A"), E);
-    assertEquals(m.distByTaxon("A", "B"), 1.0);
-    assertEquals(m.distByTaxon("A", "C"), 2.0);
-    assertEquals(m.distByTaxon("C", "A"), 2.0);
+    assertEquals(m.distByIndex(0, 0), E, DELTA);
+    assertEquals(m.distByIndex(0, 1), 1.0, DELTA);
+    assertEquals(m.distByIndex(1, 0), 1.0, DELTA);
+    assertEquals(m.distByTaxon("A", "A"), E, DELTA);
+    assertEquals(m.distByTaxon("A", "B"), 1.0, DELTA);
+    assertEquals(m.distByTaxon("A", "C"), 2.0, DELTA);
+    assertEquals(m.distByTaxon("C", "A"), 2.0, DELTA);
     assertEquals(m.isAdditive, false); // Really?
     println(m.mkMatrixString)
     val im = m.minDistanceIdx(0)

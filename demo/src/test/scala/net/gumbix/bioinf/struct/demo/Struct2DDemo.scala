@@ -15,21 +15,23 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.struct.demo
 
-import junit.framework.TestCase
 import net.gumbix.dynpro.Idx
 import net.gumbix.bioinf.struct.NussinovCount
+import org.junit.{Ignore, Test}
 
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 
-class Struct2DDemo extends TestCase {
+class Struct2DDemo {
   /**
    * human tRNA
    * http://www.ebi.ac.uk/ena/data/view/M31637&display=text
    */
   val tRNA = "UCCCUGGUGGUCUAGUGGDUAGGAUUCGGCGCUCUCACCGCCGCGGCCCGGGUUCGAUUCCCGGUCAGGGAACCA"
 
+  @Test
+  @Ignore
   def testHumantRNA() {
     doStructure(tRNA)
   }

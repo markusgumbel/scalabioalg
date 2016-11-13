@@ -15,15 +15,17 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.hmm.test
 
-import junit.framework.TestCase
+import org.junit.Test
 
 /**
  * Test cases to verify the viterbi algorithm.
  * Note: examples can be found in the demo module at
- * net.gumbix.bioinf.hmm.demo.* 
+ * net.gumbix.bioinf.hmm.demo.*
+ *
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class HMMTest extends TestCase {
+class HMMTest  {
+  @Test
   def testDummy() {
   }
 }

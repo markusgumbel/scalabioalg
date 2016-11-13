@@ -1,13 +1,14 @@
 package net.gumbix.bioinf.phylo
 
-import junit.framework.TestCase
+import org.junit.Test
 
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class NeighborJoiningTest extends TestCase {
+class NeighborJoiningTest {
   val A = Array
 
+  @Test
   def test2Taxa01() {
     val d: Array[Array[Double]] = A(
       A(0d, 3),
@@ -18,6 +19,7 @@ class NeighborJoiningTest extends TestCase {
     buildTree(metric)
   }
 
+  @Test
   def test3Taxa01() {
     val d: Array[Array[Double]] = A(
       A(0d, 3, 4),
@@ -29,6 +31,7 @@ class NeighborJoiningTest extends TestCase {
     buildTree(metric)
   }
 
+  @Test
   def test4Taxa01() {
     val d: Array[Array[Double]] = A(
       A(0d, 3, 22, 24),
@@ -41,6 +44,7 @@ class NeighborJoiningTest extends TestCase {
     buildTree(metric)
   }
 
+  @Test
   def test5Taxa01() {
     val d: Array[Array[Double]] = A(
       A(0d, 22, 39, 39, 41),
@@ -57,6 +61,7 @@ class NeighborJoiningTest extends TestCase {
   /**
     * Additive tree.
     */
+  @Test
   def test6Taxa01() {
     val d: Array[Array[Double]] = A(
       A(0d, 3, 13, 12, 8, 9),
@@ -74,6 +79,7 @@ class NeighborJoiningTest extends TestCase {
   /**
     * Not additive.
     */
+  @Test
   def test6Taxa02() {
     val d: Array[Array[Double]] = A(
       A(0d, 22, 39, 39, 41, 20),

@@ -15,11 +15,11 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.alignment.demo
 
-import junit.framework.TestCase
-import net.gumbix.bioinf.string.alignment.{MultipleAlignment, AlignmentMode}
 import net.gumbix.bioinf.string.alignment.AlignmentMode._
+import net.gumbix.bioinf.string.alignment.{AlignmentMode, MultipleAlignment}
+import org.junit.{Ignore, Test}
 
-class MultipleAlignmentDemo extends TestCase {
+class MultipleAlignmentDemo {
   val strings: Array[Tuple2[Array[String], String]] = Array(
     (Array("ATGCATT", "AGTCAAT", "TCTCA"), "Böckenhauer, p. 107"),
     (Array("KYFHKAGNQHSPT", "KYFHKAGNGHT", "KEFHNGHT"), "Hütt, p. 187"),
@@ -31,6 +31,8 @@ class MultipleAlignmentDemo extends TestCase {
     (Array("GCTTATA", "GCTATA", "GTTATA", "GCTTAGA"), "Übung MSA")
     )
 
+  @Test
+  @Ignore
   def testMultipleAlignment() {
     for (s <- strings; if (s._2.startsWith("Übung MSA")); mode <- AlignmentMode.values) {
       doMultipleAligment(s._1, mode, s._2)

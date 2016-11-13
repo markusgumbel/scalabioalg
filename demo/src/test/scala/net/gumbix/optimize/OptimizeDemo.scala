@@ -15,17 +15,20 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.optimize
 
-import junit.framework.TestCase
+import org.junit.{Ignore, Test}
 
 /**
- * Here are some examples for optimization problems, mainly those
- * who could be (better) solved with dynamic programming.
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
- */
-class OptimizeDemo extends TestCase {
+  * Here are some examples for optimization problems, mainly those
+  * who could be (better) solved with dynamic programming.
+  *
+  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+  */
+class OptimizeDemo {
   /**
-   * The knapsack problem using a specific recursive algorithm.
-   */
+    * The knapsack problem using a specific recursive algorithm.
+    */
+  @Test
+  @Ignore
   def testKnapsack() {
     val ks = new KnapsackRecursive(Array("A", "B", "C", "D"),
       Array(2, 2, 6, 5), Array(6, 3, 5, 4), 10)
@@ -36,9 +39,11 @@ class OptimizeDemo extends TestCase {
   }
 
   /**
-   * The knapsack problem solved by a recursive algorithm
-   * that uses a matrix to store results (like in dynamic programming).
-   */
+    * The knapsack problem solved by a recursive algorithm
+    * that uses a matrix to store results (like in dynamic programming).
+    */
+  @Test
+  @Ignore
   def testKnapsackMatrix() {
     val ks = new KnapsackRecMatrix(Array("A", "B", "C", "D"),
       Array(2, 2, 6, 5), Array(6, 3, 5, 4), 10)

@@ -15,12 +15,12 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.alignment.demo
 
-import junit.framework.TestCase
 import net.gumbix.bioinf.string.alignment.AlignmentMode._
+import org.junit.{Ignore, Test}
 import collection.immutable.HashMap
 import net.gumbix.bioinf.string.alignment.{Alignment, AlignmentMode}
 
-class AlignmentDemo extends TestCase {
+class AlignmentDemo {
   val seqs = HashMap[String, Tuple3[String, String, String]](
     "Boeck-p88" ->("AAAAACTCTCTCT", "GCGCGCGCAAAAA", "Böckenhauer, p. 88"),
     "Huett-p151" ->("CGATCCTGT", "CATCGCCTT", "Hütt, p. 151"),
@@ -34,8 +34,10 @@ class AlignmentDemo extends TestCase {
   )
 
   /**
-   * Perform all kind of alignments.
-   */
+    * Perform all kind of alignments.
+    */
+  @Test
+  @Ignore
   def testAllAlignments() {
     for ((s1, s2, comment) <- seqs.values;
          mode <- AlignmentMode.values) {
@@ -64,6 +66,8 @@ class AlignmentDemo extends TestCase {
     }
   }
 
+  @Test
+  @Ignore
   def testDoListing() {
     val s1 = "ACGT"
     val s2 = "ACGATC"

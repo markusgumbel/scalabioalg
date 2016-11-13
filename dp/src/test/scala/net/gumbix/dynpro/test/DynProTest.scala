@@ -15,9 +15,7 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.dynpro.test
 
-import junit.framework.Assert._
-import junit.framework.TestCase
-import net.gumbix.util.MatrixPrinter
+import org.junit.Test
 
 /**
  * Test cases to verify the dynamic programming algorithm.
@@ -26,7 +24,8 @@ import net.gumbix.util.MatrixPrinter
   *
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class DynProTest extends TestCase {
+class DynProTest {
+  @Test
   def testDummy() {
     // TODO
   }

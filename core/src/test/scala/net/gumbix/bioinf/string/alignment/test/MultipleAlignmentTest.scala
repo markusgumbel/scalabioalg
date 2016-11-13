@@ -15,18 +15,18 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.alignment.test
 
-import junit.framework.TestCase
-import net.gumbix.bioinf.string.alignment.{AlignmentMode, MultipleAlignment}
-import net.gumbix.bioinf.string.alignment.AlignmentMode._
+import org.junit.Test
 
 /**
  * Unit test cases for multiple aligments.
  * Note: examples can be found in the demo module at
- * net.gumbix.bioinf.string.alignment.demo.*. 
+ * net.gumbix.bioinf.string.alignment.demo.*.
+ *
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class MultipleAlignmentTest extends TestCase {
+class MultipleAlignmentTest {
 
+  @Test
   def testDummy() {
     // TODO
   }

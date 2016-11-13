@@ -1,13 +1,14 @@
 package net.gumbix.bioinf.phylo
 
-import junit.framework.TestCase
+import org.junit.Test
 
 /**
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
-class FitchMargoliashTreeTest extends TestCase {
+class FitchMargoliashTreeTest {
   val A = Array
 
+  @Test
   def test2Taxa01() {
     val d: Array[Array[Double]] = A(
       A(0d, 3),
@@ -18,6 +19,7 @@ class FitchMargoliashTreeTest extends TestCase {
     buildTree(metric)
   }
 
+  @Test
   def test3Taxa01() {
     val d: Array[Array[Double]] = A(
       A(0d, 3, 4),
@@ -41,6 +43,7 @@ class FitchMargoliashTreeTest extends TestCase {
     buildTree(metric)
   }
 
+  @Test
   def test5Taxa01() {
     val d: Array[Array[Double]] = A(
       A(0d, 22, 39, 39, 41),
@@ -57,6 +60,7 @@ class FitchMargoliashTreeTest extends TestCase {
   /**
     * Additive tree.
     */
+  @Test
   def test6Taxa01() {
     val d: Array[Array[Double]] = A(
       A(0d, 3, 13, 12, 8, 9),
@@ -74,6 +78,7 @@ class FitchMargoliashTreeTest extends TestCase {
   /**
     * Not additive.
     */
+  @Test
   def test6Taxa02() {
     val d: Array[Array[Double]] = A(
       A(0d, 22, 39, 39, 41, 20),

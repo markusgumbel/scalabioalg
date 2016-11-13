@@ -15,14 +15,14 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.seq.test
 
-import junit.framework.TestCase
 import net.gumbix.bioinf.string.seq.{Fragments, GreedySuperstringFct, GreedySuperstringImperative, GreedySuperstring}
 import net.gumbix.util.Logger
+import org.junit.Test
 
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class SeqTest extends TestCase with Logger {
+class SeqTest extends Logger {
 
   logLevel = false
   
@@ -36,6 +36,7 @@ class SeqTest extends TestCase with Logger {
     Array("ein Text", "Das is", "Das ist", "ist ein T", "n Text")
     )
 
+  @Test
   def testImp() {
     seqs.foreach {
       s =>
@@ -45,6 +46,7 @@ class SeqTest extends TestCase with Logger {
     }
   }
 
+  @Test
   def testFct() {
     seqs.foreach {
       s =>
@@ -55,6 +57,7 @@ class SeqTest extends TestCase with Logger {
     }
   }
 
+  @Test
   def testBig() {
     strings.foreach {
       s =>
@@ -73,6 +76,7 @@ class SeqTest extends TestCase with Logger {
     }
   }
 
+  @Test
   def testOverlap() {
     println("Overlap")
     val gs = new GreedySuperstringImperative(Array[String]("aba", "baaaa", "aab"))
@@ -89,6 +93,7 @@ class SeqTest extends TestCase with Logger {
     }
   }
 
+  @Test
   def testFragmentation() {
     println("Fragmentation")
     val f = new Fragments("Markus Gumbel und Susanne Wassmuth-Gumbel",

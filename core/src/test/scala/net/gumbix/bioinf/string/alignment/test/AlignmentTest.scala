@@ -15,15 +15,18 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.alignment.test
 
-import junit.framework.TestCase
+import org.junit.Test
 
 /**
  * Unit test cases for aligments.
  * Note: examples can be found in the demo module at
  * net.gumbix.bioinf.string.alignment.demo.*.
+ *
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class AlignmentTest extends TestCase {
+class AlignmentTest {
+
+  @Test
   def testDummy() {
     // TODO
   }

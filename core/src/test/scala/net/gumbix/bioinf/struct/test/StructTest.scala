@@ -15,18 +15,18 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.struct.test
 
-import junit.framework.TestCase
-import net.gumbix.dynpro.Idx
-import net.gumbix.bioinf.struct.NussinovCount
+import org.junit.Test
 
 /**
  * Test cases for the struct package.
  * Note: examples can be found in the demo module at
- * net.gumbix.bioinf.struct.demo.*. 
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+ * net.gumbix.bioinf.struct.demo.*.
+  *
+  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class StructTest extends TestCase {
+class StructTest {
 
+  @Test
   def testDummy() {
     // TODO
   }

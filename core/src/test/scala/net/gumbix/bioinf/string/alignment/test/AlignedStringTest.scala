@@ -15,10 +15,10 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.alignment.test
 
-import junit.framework.TestCase
-import junit.framework.Assert._
 import net.gumbix.bioinf.string.alignment.{AlignmentPrinter, AlignedString}
 import net.gumbix.bioinf.string.alignment.GapType._
+import org.junit.Test
+import org.junit.Assert._
 
 /**
  * Test cases for aligned strings.
@@ -26,7 +26,9 @@ import net.gumbix.bioinf.string.alignment.GapType._
   *
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class AlignedStringTest extends TestCase {
+class AlignedStringTest {
+
+  @Test
   def testAlignedString() {
 
     val als = new AlignedString("hello")
@@ -45,11 +47,13 @@ class AlignedStringTest extends TestCase {
     assertEquals(als.primaryString, "hello")
   }
 
+  @Test
   def testParserNoGaps() {
     val s1 = new AlignedString("ACTGAG")
     assertEquals(s1.primaryString, "ACTGAG")
   }
 
+  @Test
   def testParser1Gap() {
     val s1 = new AlignedString("AC-TGAG")
     assertEquals(s1.primaryString, "ACTGAG")
@@ -57,6 +61,7 @@ class AlignedStringTest extends TestCase {
     assertEquals(s1.isGapAt(2), true)
   }
 
+  @Test
   def testParser2Gap() {
     val s1 = new AlignedString("AC--TGAG")
     assertEquals(s1.primaryString, "ACTGAG")
@@ -65,6 +70,7 @@ class AlignedStringTest extends TestCase {
     assertEquals(s1.isGapAt(3), true)
   }
 
+  @Test
   def testParserGapBeginning() {
     val s1 = new AlignedString("-ACTGAG")
     assertEquals(s1.primaryString, "ACTGAG")
@@ -73,6 +79,7 @@ class AlignedStringTest extends TestCase {
     assertEquals(s1.isGapAt(6), false)
   }
 
+  @Test
   def testParserGapEnd() {
     val s1 = new AlignedString("ACTGAG-")
     assertEquals(s1.primaryString, "ACTGAG")
@@ -81,6 +88,7 @@ class AlignedStringTest extends TestCase {
     assertEquals(s1.isGapAt(6), true)
   }
 
+  @Test
   def testLaTeX() {
     val s1 = new AlignedString("-ACTGAG")
     val s2 = new AlignedString("GAAT--G")

@@ -15,18 +15,21 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.dynpro.demo
 
-import junit.framework.TestCase
+import org.junit.{Ignore, Test}
 
 /**
  * Several examples for dynamic programming. Mainly the knapsack problem
- * and the calculation of Fibonacci numbers. 
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+ * and the calculation of Fibonacci numbers.
+  *
+  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class DynProDemo extends TestCase {
+class DynProDemo {
 
   /**
    * Values are taken from Saake & Sattler, p. 222.
    */
+  @Test
+  @Ignore
   def testKnapsackDPSaakeSattler222() {
     val dp = new KnapsackDynPro(Array("A", "B", "C", "D"),
       Array(2, 2, 6, 5), Array(6, 3, 5, 4), 10)
@@ -37,6 +40,8 @@ class DynProDemo extends TestCase {
    * Reverse order.
    * Values are taken from Saake & Sattler, p. 222. 
    */
+  @Test
+  @Ignore
   def testKnapsackDPSaakeSattler222Reverse() {
     val dp = new KnapsackDynPro(Array("A", "B", "C", "D"),
       Array(5, 6, 2, 2), Array(4, 5, 3, 6), 10)
@@ -46,6 +51,8 @@ class DynProDemo extends TestCase {
   /**
    * Values are taken from Saake & Sattler, p. 222.
    */
+  @Test
+  @Ignore
   def testKnapsackDPSaakeSattler222Backwards() {
     val dp = new KnapsackDynProBackwards(Array("A", "B", "C", "D"),
       Array(5, 6, 2, 2), Array(4, 5, 3, 6), 10)
@@ -55,6 +62,8 @@ class DynProDemo extends TestCase {
   /**
    * As in Saake & Sattler, p. 224f.
    */
+  @Test
+  @Ignore
   def testKnapsackDPSaakeSattler224() {
     val dp = new KnapsackDynProBackwards(Array("1", "2", "3", "4", "5"),
       Array(2, 2, 6, 5, 4), Array(6, 3, 5, 4, 6), 10)
@@ -64,6 +73,8 @@ class DynProDemo extends TestCase {
   /**
    * As in Morlock & Neumann, p. 610f.
    */
+  @Test
+  @Ignore
   def testKnapsackNeumannMorlock610() {
     val dp = new KnapsackDynProBackwards(Array("1", "2", "3", "4"),
       Array(2, 2, 4, 6), Array(8, 6, 10, 12), 11)
@@ -85,6 +96,8 @@ class DynProDemo extends TestCase {
   /**
    * Calculate a Fibonacci number. 
    */
+  @Test
+  @Ignore
   def testFibonacci() {
     val dp = new FibonacciDynPro(8)
     println(dp.mkMatrixString(dp.solution))

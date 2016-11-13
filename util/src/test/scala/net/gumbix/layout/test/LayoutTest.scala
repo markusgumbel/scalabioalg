@@ -15,23 +15,28 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.layout.test
 
-import junit.framework.TestCase
-import junit.framework.Assert._
 import net.gumbix.layout.Element
-import scala.math._
 import net.gumbix.layout.Element._
+import org.junit.Test
+import org.junit.Assert._
+
+import scala.math._
 
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class LayoutTest extends TestCase {
+class LayoutTest {
+
+  @Test
   def test01 {
+    align = RIGHT
     val x1 = line("Hello") above line("World!")
     assertEquals(" Hello\nWorld!", x1.toString)
     val x2 = line("What?") beside x1
     assertEquals("What? Hello\n     World!", x2.toString)
   }
 
+  @Test
   def test01b {
     align = {s: String => s.length}
     val x1 = line("Hallo") above line("Welt")
@@ -41,6 +46,7 @@ class LayoutTest extends TestCase {
     println(x3)
   }
 
+  @Test
   def test01c {
     align = {s: String => min(max(s.indexOf('.') + 1, 0), s.length)}
     val x1 = line("12.34") above line("1.0")
@@ -48,6 +54,7 @@ class LayoutTest extends TestCase {
     println(expandableLine("|", '|') beside x1 beside expandableLine("|", '|'))
   }
 
+  @Test
   def test02 {
     align = NUMBER
 
@@ -58,6 +65,7 @@ class LayoutTest extends TestCase {
     println(makeTable(m))
   }
 
+  @Test
   def test03 {
     align = CENTER
     val m: Array[Array[String]] = Array(
@@ -69,6 +77,7 @@ class LayoutTest extends TestCase {
     println(makeTable(m, Array("1", "2", "3", "4"), Array("a", "b")))
   }
 
+  @Test
   def test04 {
     align = NUMBER
     val matrix: Array[Array[Double]] = Array.ofDim(20, 10)
@@ -79,6 +88,7 @@ class LayoutTest extends TestCase {
   }
 
 
+  @Test
   def test05 {
     val s = line(".......ACAGGCT") above line("11111112|22|||") above line("ACTTTATGCCTGCT")
     println(s)
