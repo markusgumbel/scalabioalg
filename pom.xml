@@ -1,4 +1,12 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<!--
+Not yet finished.
+Run
+1) mvn site:site
+2) mvn site:stage
+to generate full documentation.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +22,8 @@
         <developer>
             <name>Markus Gumbel</name>
             <email>M.Gumbel@hs-mannheim.de</email>
-            <organization>Mannheim University of Applied Sciences</organization>
+            <organization>Mannheim University of Applied Sciences
+            </organization>
             <roles>
                 <role>Developer</role>
                 <role>Administrator</role>
@@ -30,9 +39,10 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-    
+
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.sourceEncoding>UTF-8
+        </project.build.sourceEncoding>
     </properties>
 
     <modules>
@@ -59,12 +69,50 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <sourceDirectory>src/main/scala</sourceDirectory>
+        <testSourceDirectory>src/test/scala</testSourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.scala-tools</groupId>
+                <artifactId>maven-scala-plugin</artifactId>
+                <version>2.15.2</version>
+                <executions>
+                    <execution>
+                        <id>main-scalac</id>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jvmArgs>
+                        <jvmArg>-Xms128m</jvmArg>
+                        <jvmArg>-Xmx1024m</jvmArg>
+                    </jvmArgs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <scm>
-        <connection>scm:git@github.com:markusgumbel/scalabioalg.git</connection>
-        <developerConnection>scm:git@github.com:markusgumbel/scalabioalg.git</developerConnection>
+        <connection>scm:git@github.com:markusgumbel/scalabioalg.git
+        </connection>
+        <developerConnection>
+            scm:git@github.com:markusgumbel/scalabioalg.git
+        </developerConnection>
         <url>scm:git@github.com:markusgumbel/scalabioalg.git</url>
     </scm>
-    
+
+    <distributionManagement>
+        <site>
+            <id>site</id>
+            <name>site</name>
+            <url>scp://www.yourcompany.com/www/docs/project/</url>
+        </site>
+    </distributionManagement>
+
     <!-- Repositories etc. -->
     <repositories>
         <repository>
@@ -91,16 +139,11 @@
             <plugin>
                 <groupId>org.scala-tools</groupId>
                 <artifactId>maven-scala-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <argLine>-Xmx1024m -Xss10m</argLine>
-                </configuration>
+                <version>2.15.2</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
                 <version>2.19.1</version>
             </plugin>
         </plugins>
