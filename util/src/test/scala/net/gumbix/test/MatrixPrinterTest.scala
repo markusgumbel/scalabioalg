@@ -13,39 +13,34 @@ Copyright 2011 the original author or authors.
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package net.gumbix.dynpro.demo
+package net.gumbix.util.test
 
-import org.junit.{Ignore, Test}
+import net.gumbix.util.MatrixPrinter
+import org.junit.Test
+import org.junit.Assert._
 
 /**
-  * Some examples of the knapsack problem to demonstrate
-  * the dynamic programming algorithm.
+  * Test cases for aligned strings.
+  * TODO Write more!
   *
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
-class DynProDemo {
+class MatrixPrinterTest {
 
-  /**
-    * Values are taken from Saake & Sattler, p. 222.
-    */
   @Test
-  @Ignore
-  def testKnapsackDPSaakeSattler222() {
-    val dp = new KnapsackDynPro(Array("A", "B", "C", "D"),
-      Array(2, 2, 6, 5), Array(6, 3, 5, 4), 10)
-    doKnapsack(dp)
+  def testMatrix() {
+    val latex = matrixPrinter.mkMatrixLaTeXString()
+    println(latex)
+    assertEquals(true, true)
   }
 
-
-  /**
-    * Some nice output.
-    */
-  def doKnapsack(dp: KnapsackDynPro) {
-    val solution = dp.solution
-    println(dp.mkOverviewString)
-    println()
-    println(dp.mkMatrixString(solution))
-    println()
-    solution.foreach(println)
+  val matrixPrinter = new MatrixPrinter() {
+    formatter = INT
+    def matrix: Array[Array[Option[Double]]] = {
+      Array.tabulate(5, 4) {
+        (i, j) =>
+          Some((i * j).toDouble)
+      }
+    }
   }
 }

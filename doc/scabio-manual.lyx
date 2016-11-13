@@ -1,7 +1,9 @@
-#LyX 2.0 created this file. For more info see http://www.lyx.org/
-\lyxformat 413
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass article
 \begin_preamble
 \usepackage{comment}
@@ -25,16 +27,16 @@ customHeadersFooters
 \language_package default
 \inputencoding auto
 \fontencoding global
-\font_roman default
-\font_sans default
-\font_typewriter default
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
-
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -56,15 +58,24 @@ customHeadersFooters
 \pdf_pdfusetitle true
 \papersize a4paper
 \use_geometry true
-\use_amsmath 1
-\use_esint 1
-\use_mhchem 1
-\use_mathdots 1
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
 \suppress_date false
+\justification true
 \use_refstyle 1
 \branch taschenrechner
 \selected 1
@@ -150,7 +161,7 @@ customHeadersFooters
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -220,7 +231,7 @@ scabio
  It was originally developed to demonstrate algorithms for a lecture in
  bioinformatics but has grown in the meantime and become a comprehensive
  collection.
- The framework contains so far a generic (2D) extensible dynamic programing
+ The framework contains so far a generic (2D) extensible dynamic programming
  algorithm, global, semi-local and local pairwise alignment, multiple alignment,
  pattern recognition with the Viterbi-algorithm, RNA 2D structure viewer
  based on Nussinov algorithm, greedy superstring algorithm for sequence
@@ -358,7 +369,7 @@ target "https://github.com/markusgumbel/scalabioalg"
 generic (2D) dynamic programing algorithm (see 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Dynamic-programming"
+reference "subsec:Dynamic-programming"
 
 \end_inset
 
@@ -369,7 +380,7 @@ reference "sub:Dynamic-programming"
 Global, semi-local and local pairwise alignment (see 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Pairwise-alignment"
+reference "subsec:Pairwise-alignment"
 
 \end_inset
 
@@ -384,7 +395,7 @@ Multiple alignment (star algorithm, see )
 Pattern recognition with the Viterbi-algorithm (see 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Pattern-recognition"
+reference "subsec:Pattern-recognition"
 
 \end_inset
 
@@ -395,7 +406,7 @@ reference "sub:Pattern-recognition"
 RNA 2D struct viewer based on Nussinov algorithm (see 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:RNA-secondary-structures"
+reference "subsec:RNA-secondary-structures"
 
 \end_inset
 
@@ -406,7 +417,7 @@ reference "sub:RNA-secondary-structures"
 Greedy superstring algorithm for sequence assembly (see 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:DNA-assembly"
+reference "subsec:DNA-assembly"
 
 \end_inset
 
@@ -692,7 +703,7 @@ This section explains how to use the library.
  Please read section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:for-developers-extend"
+reference "subsec:for-developers-extend"
 
 \end_inset
 
@@ -702,7 +713,7 @@ and compile your project.
 \begin_layout Subsection
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:for-developers-extend"
+name "subsec:for-developers-extend"
 
 \end_inset
 
@@ -822,7 +833,7 @@ var
 
 \end_inset
 
- keyword -- instead only immutable 
+ keyword – instead only immutable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1092,7 +1103,7 @@ status open
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 \begin_inset CommandInset label
@@ -1129,6 +1140,10 @@ net.gumbix.bioinf
 \end_inset
 
 : Algorithms for bioinformatics
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1164,6 +1179,10 @@ e.
 \end_inset
 
 sequences.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1276,7 +1295,7 @@ net.gumbix.util
 \begin_layout Subsection
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Dynamic-programming"
+name "subsec:Dynamic-programming"
 
 \end_inset
 
@@ -1300,7 +1319,7 @@ Tbd.
 \begin_layout Subsection
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Pairwise-alignment"
+name "subsec:Pairwise-alignment"
 
 \end_inset
 
@@ -1324,7 +1343,7 @@ Tbd.
 \begin_layout Subsection
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:DNA-assembly"
+name "subsec:DNA-assembly"
 
 \end_inset
 
@@ -1348,7 +1367,7 @@ Tbd.
 \begin_layout Subsection
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:RNA-secondary-structures"
+name "subsec:RNA-secondary-structures"
 
 \end_inset
 
@@ -1372,7 +1391,7 @@ Tbd.
 \begin_layout Subsection
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Pattern-recognition"
+name "subsec:Pattern-recognition"
 
 \end_inset
 
@@ -1558,7 +1577,7 @@ status open
 \begin_layout Plain Layout
 
 ...
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 \begin_inset CommandInset label
@@ -1729,8 +1748,8 @@ reference "list:Knapsack"
  shows the class.
 \begin_inset CommandInset include
 LatexCommand lstinputlisting
-filename "D:/users/markus/src/eclipse/hs-ma-workspace/bioalg/demo/src/main/scala/net/gumbix/dynpro/demo/KnapsackDynPro.scala"
-lstparams "basicstyle={\\ttfamily},breaklines=true,caption={Knapsack},captionpos=t,frame=tb,label={list:Knapsack},language=Java,linerange={16-20, 49-1000},numbers=left,numbersep=5pt,numberstyle={\\tiny},showlines=true,stepnumber=2,tabsize=2"
+filename "../demo/src/main/scala/net/gumbix/dynpro/demo/KnapsackDynPro.scala"
+lstparams "basicstyle={\\ttfamily},breaklines=true,captionpos=t,frame=tb,language=Java,linerange={16-20, 49-1000},numbers=left,numbersep=5pt,numberstyle={\\tiny},showlines=true,stepnumber=2,tabsize=2,caption={Knapsack},label={list:Knapsack}"
 
 \end_inset
 
@@ -1819,7 +1838,7 @@ status open
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 \begin_inset CommandInset label
@@ -1923,7 +1942,7 @@ status open
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 A tool that calculates the edit distance of two strings.

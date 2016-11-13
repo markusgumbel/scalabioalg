@@ -15,8 +15,9 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.dynpro.demo
 
-import net.gumbix.optimize.Knapsack
-import net.gumbix.dynpro.{Idx, DynProMatrixPrinter, DynPro, PathEntry}
+import net.gumbix.dynpro.{DynPro, DynProMatrixPrinter, Idx, PathEntry}
+import net.gumbix.layout.Element
+import net.gumbix.layout.Element._
 
 /*
 i|a_i|w_i|v_i|d_i
@@ -44,14 +45,14 @@ decision=1, v=14.0, curr=(3, 0), prev=Array((2, 2))
  * This variant builds the matrix by going forward and then
  * it calculates the decision path by going backwards.
  * This approach is the same like in string alignments.
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+  *
+  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
 class KnapsackDynPro(val items: Array[String],
                       val weights: Array[Int], val values: Array[Int],
                       val capacity: Int)
         extends DynPro[Int]
-                with DynProMatrixPrinter[Int]
-                with Knapsack {
+                with DynProMatrixPrinter[Int] {
   formatter = INT
 
   def n = weights.length
@@ -95,4 +96,31 @@ class KnapsackDynPro(val items: Array[String],
   override def columnLabels = None
 
   def knapsackSolution = solution.map(_.decision).toArray // from Knapsack
+
+  /**
+    * Create a table with all relevant information.
+    */
+  def mkOverviewString = {
+
+    def mkColumn(list: List[Any]): Element = list match {
+      case h :: Nil => line(h.toString)
+      case h :: t => line(h.toString) above mkColumn(t)
+    }
+    val iColumn = line("i") above expandableLine("-", '-') above
+      mkColumn((0 until weights.size).toList)
+    val aColumn = line("a_i") above expandableLine("-", '-') above
+      mkColumn(items.toList)
+    val wColumn = line("w_i") above expandableLine("-", '-') above
+      mkColumn(weights.toList)
+    val vColumn = line("v_i") above expandableLine("-", '-') above
+      mkColumn(values.toList)
+    val sColumn = line("d_i") above expandableLine("-", '-') above
+      mkColumn(knapsackSolution.toList)
+
+    iColumn beside expandableLine("|", '|') beside
+      aColumn beside expandableLine("|", '|') beside
+      wColumn beside expandableLine("|", '|') beside
+      vColumn beside expandableLine("|", '|') beside
+      sColumn
+  }
 }

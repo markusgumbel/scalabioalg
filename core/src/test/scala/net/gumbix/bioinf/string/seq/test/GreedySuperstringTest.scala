@@ -15,14 +15,15 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.seq.test
 
-import net.gumbix.bioinf.string.seq.{Fragments, GreedySuperstringFct, GreedySuperstringImperative, GreedySuperstring}
+import net.gumbix.bioinf.string.seq._
 import net.gumbix.util.Logger
 import org.junit.Test
+import org.junit.Assert._
 
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class SeqTest extends Logger {
+class GreedySuperstringTest extends Logger {
 
   logLevel = false
   
@@ -30,7 +31,6 @@ class SeqTest extends Logger {
     "Das ist eindeutiger Text, der nicht vertauscht werden kann")
 
   val seqs = List(
-    Array("aba", "baaaa", "aab"),
     Array("Das ist", "ist ein", "ein Text"),
     Array("ein Text", "Das is", "ist ein T"),
     Array("ein Text", "Das is", "Das ist", "ist ein T", "n Text")
@@ -40,9 +40,8 @@ class SeqTest extends Logger {
   def testImp() {
     seqs.foreach {
       s =>
-        println("Alignment")
         val gs = new GreedySuperstringImperative(s)
-        println(s.mkString(",") + " = '" + gs.superstrings.mkString("|") + "'")
+        assertEquals("Das ist ein Text", gs.superstrings.mkString("|"))
     }
   }
 
@@ -50,10 +49,9 @@ class SeqTest extends Logger {
   def testFct() {
     seqs.foreach {
       s =>
-        println("Alignment")
-
         val gs = new GreedySuperstringFct(s)
-        println(s.mkString(",") + " = '" + gs.superstrings.mkString("|") + "'")
+        gs.logLevel = false
+        assertEquals("Das ist ein Text", gs.superstrings.mkString("|"))
     }
   }
 
@@ -61,8 +59,7 @@ class SeqTest extends Logger {
   def testBig() {
     strings.foreach {
       s =>
-        println("\n*** Alignment ***")
-        val fragments = new Fragments(s, 10, 10).fragments.toArray
+        val fragments = new Fragments(s, 10, 10, 1).fragments.toArray
 
         logln("Fragments:")
         logln(fragments.mkString(", \n"))
@@ -72,32 +69,26 @@ class SeqTest extends Logger {
           logLevel = false
         }
         // val gs = new GreedySuperstringImperative(fragments)
-        println("\n'" + s + "' = '" + gs.superstrings.mkString("|") + "'")
+        assertEquals(s, gs.superstrings.mkString("|"))
     }
   }
 
   @Test
   def testOverlap() {
-    println("Overlap")
-    val gs = new GreedySuperstringImperative(Array[String]("aba", "baaaa", "aab"))
-
-    val pairs = List(("aba", "baca"),
-      ("aba", "caba"),
-      ("abab", "abab"),
-      ("ab", "aba"),
-      ("aab", "abaaaa")
-      )
-    pairs.foreach {
-      pair =>
-        println(pair._1 + " _ " + pair._2 + " = " + gs.overlap(pair._1, pair._2))
-    }
+    val gs = new Overlap {}
+    assertEquals("ba", gs.overlap("aba", "baca"))
+    assertEquals("", gs.overlap("aba", "caca"))
+    assertEquals("abab", gs.overlap("abab", "abab"))
+    assertEquals("ab", gs.overlap("ab", "aba"))
+    assertEquals("ab", gs.overlap("aab", "abaaaa"))
   }
 
   @Test
   def testFragmentation() {
     println("Fragmentation")
     val f = new Fragments("Markus Gumbel und Susanne Wassmuth-Gumbel",
-      10, 10)
-    println(f.fragments.mkString(", "))
+      10, 10, 0)
+    assertEquals("Markus Gumbel und ",f.fragments(0))
+    logln(f.fragments.mkString(", "))
   }
 }
