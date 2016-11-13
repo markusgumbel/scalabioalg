@@ -23,11 +23,6 @@
             <artifactId>scabio-ui</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-swing</artifactId>
-            <version>2.11.0-M7</version>
-        </dependency>
         <!-- JUNG libraries -->
         <dependency>
             <groupId>net.sf.jung</groupId>

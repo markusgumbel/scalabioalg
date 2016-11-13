@@ -15,11 +15,11 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.ui
 
-import swing._
 import java.awt.Color._
 import java.awt.{Dimension, Graphics2D}
 import net.gumbix.dynpro.Idx
 import scala.math._
+import swing._
 
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
