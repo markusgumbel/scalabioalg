@@ -87,13 +87,4 @@ class AlignedStringTest {
     assertEquals(s1.isGapAt(0), false)
     assertEquals(s1.isGapAt(6), true)
   }
-
-  @Test
-  def testLaTeX() {
-    val s1 = new AlignedString("-ACTGAG")
-    val s2 = new AlignedString("GAAT--G")
-    val latex = new AlignmentPrinter(){}.makeLaTeXAlignmentString(s1, s2)
-    val should = "\\begin{tikzpicture}\n\\matrix (matrix) [matrix of nodes,ampersand replacement=\\&,alignment] {\n  - \\& A \\& C \\& T \\& G \\& A \\& G \\\\\n    \\& \\textcolor{gray}{$\\vert$} \\&   \\& \\textcolor{gray}{$\\vert$} \\&   \\&   \\& \\textcolor{gray}{$\\vert$} \\\\\n  G \\& A \\& A \\& T \\& - \\& - \\& G \\\\\n};\n\\node[left=2mm of matrix-1-1] {$s_1$};\n\\node[left=2mm of matrix-3-1] {$s_2$};\n\\end{tikzpicture}"
-    assertEquals(latex, should)
-  }
 }

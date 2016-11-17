@@ -34,9 +34,4 @@ trait DynProAlignmentPrinter[Decision] extends AlignmentPrinter {
     val (als1, als2) = alignedStrings(solution)
     makeAlignmentString(als1, als2)
   }
-
-  def makeLaTeXAlignmentString(solution: List[PathEntry[Decision]]): String = {
-    val (als1, als2) = alignedStrings(solution)
-    makeLaTeXAlignmentString(als1, als2)
-  }
 }

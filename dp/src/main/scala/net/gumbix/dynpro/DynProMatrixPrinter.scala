@@ -49,28 +49,6 @@ trait DynProMatrixPrinter[Decision] extends MatrixPrinter {
     makeTable(matrix, pathMatrix).toString
   }
 
-  def mkMatrixLaTeXStringSolution(solution: List[PathEntry[Decision]]): String = {
-    def f() = {
-      val lines = for (e <- solution) yield {
-        e.prevCell.size match {
-          case 0 => {
-            val from = (e.currCell.i + 1) + "-" + (e.currCell.j + 1)
-            "\\draw[->,gray!50,dashed,thick] (matrix-" + from + ".center) " +
-              "|- node[blue] {\\scriptsize " + e.value + "} +(0,0.5);"
-          }
-          case 1 => {
-            val from = (e.currCell.i + 1) + "-" + (e.currCell.j + 1)
-            val to = (e.prevCell(0).i + 1) + "-" + (e.prevCell(0).j + 1)
-            "\\draw[->,blue!80,dashed,thick,shorten >= 4pt,shorten <= 4pt] (matrix-" + from + ".center) " +
-            "|- node[blue] {\\scriptsize " + e.value + "} (matrix-" + to + ".center);"
-          }
-          case _ => ""
-        }
-      }
-      lines.mkString("\n")
-    }
-    mkMatrixLaTeXString(f)
-  }
 
   def makeTable(matrix: Array[Array[Option[Double]]], pathMatrix: Array[Array[Boolean]]):
   net.gumbix.layout.Element = {

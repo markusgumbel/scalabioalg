@@ -29,9 +29,6 @@ class MatrixPrinterTest {
 
   @Test
   def testMatrix() {
-    val latex = matrixPrinter.mkMatrixLaTeXString()
-    println(latex)
-    assertEquals(true, true)
   }
 
   val matrixPrinter = new MatrixPrinter() {
