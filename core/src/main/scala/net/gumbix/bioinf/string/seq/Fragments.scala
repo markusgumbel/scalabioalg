@@ -36,7 +36,7 @@ class Fragments(s: String, count: Int, frgmtSize: Int, seed: Long) {
       val cutPositions = for (i <- 1 to cuts) yield {
         random.nextInt.abs % s.size
       }
-      val sortedPositions = cutPositions.sorted.toArray
+      val sortedPositions = cutPositions.distinct.sorted.toArray
       val positions = Array.concat(Array(0), sortedPositions, Array(s.size))
       val fragments = for (i <- 0 until positions.size - 1) yield {
         s.substring(positions(i), positions(i + 1))
