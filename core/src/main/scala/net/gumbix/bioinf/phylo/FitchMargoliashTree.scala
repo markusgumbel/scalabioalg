@@ -8,6 +8,7 @@ import scala.collection.mutable
 /**
   * Phylogenetic tree construction with the Fitch-Margoliash
   * algorithm.
+  *
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
 class FitchMargoliashTree(val metric: FitchMargoliashMetric)
@@ -21,23 +22,37 @@ class FitchMargoliashTree(val metric: FitchMargoliashMetric)
     val avgEdges = new mutable.HashMap[Taxon, Double]()
     // A sorted list of instructions how to build the tree:
     val allEdges = new mutable.ArrayBuffer[(Taxon, Double)]()
+    // A list of all taxa (leafs and inner):
+    val allJoins = new mutable.ArrayBuffer[Taxon]()
 
     if (metric.size >= 3) {
       // Otherwise there is no problem.
+
+      /**
+        *
+        * @param taxon
+        * @param p
+        * @return
+        */
       def dist(taxon: Taxon, p: Map[Taxon, Double]) = taxon match {
         case jt: JoinedTaxon => {
           val avgDist = avgEdges(jt)
           val distTaxon1 = avgEdges(jt.taxa(0))
           val distTaxon2 = avgEdges(jt.taxa(1))
           val dist = avgDist - (distTaxon1 + distTaxon2) / 2
-          allEdges.+=((jt, dist)) // Add inner taxon.
+          allEdges += ((jt, dist)) // Add inner taxon.
         }
         case _ => {
-          allEdges.+=((taxon, p(taxon))) // Add leaf taxon.
+          allEdges += ((taxon, p(taxon))) // Add leaf taxon.
         }
       }
 
-      val allJoins = new mutable.ArrayBuffer[Taxon]()
+      /**
+        *
+        * @param joinedTaxa
+        * @param p
+        * @return
+        */
       def join(joinedTaxa: JoinedTaxon, p: Map[Taxon, Double]) = {
         avgEdges ++= p // Add everything to the avg. edges.
         dist(joinedTaxa.taxa(0), p)
@@ -45,7 +60,7 @@ class FitchMargoliashTree(val metric: FitchMargoliashMetric)
         allJoins += joinedTaxa
       }
 
-      var m: FitchMargoliashMetric = metric
+      var m: FitchMargoliashMetric = metric // Copy metric?
       while (m.size >= 4) {
         logln("---------------------- iteration ---------------------------------")
         logln("Metric:")
@@ -63,7 +78,7 @@ class FitchMargoliashTree(val metric: FitchMargoliashMetric)
         logln("Metric of 3 taxa:")
         logln(m3.mkMatrixString)
 
-        val cEdges = calcEdges(m3)
+        val cEdges = calcEdges(m3) // Map:  taxon -> edge weight
         join(m.minTaxaGroup(), cEdges)
         logln("\n" + cEdges.mkString(", "))
 
@@ -97,9 +112,10 @@ class FitchMargoliashTree(val metric: FitchMargoliashMetric)
 
   /**
     * Calculate edges for a metric of 3 taxa by solving
-    * a linear equation.
+    * a linear equation system.
+    *
     * @param m Metric with 3 taxa.
-    * @return Edge weights.
+    * @return Edge weights for three taxa (a map).
     */
   def calcEdges(m: FitchMargoliashMetric) = {
     val A = Array

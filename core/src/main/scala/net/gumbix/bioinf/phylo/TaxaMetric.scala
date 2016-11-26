@@ -2,6 +2,7 @@ package net.gumbix.bioinf.phylo
 
 /**
   * Base class for all distance-based phylogenetic trees.
+  *
   * @param taxa List of taxa.
   * @param dist Matrix containing the distances.
   */
@@ -20,6 +21,7 @@ class TaxaMetric(val taxa: Array[String], val dist: Array[Array[Double]])
 
   /**
     * Get the distance for two taxa.
+    *
     * @param taxon1 First taxon.
     * @param taxon2 Second taxon.
     * @return Distance.
@@ -29,6 +31,7 @@ class TaxaMetric(val taxa: Array[String], val dist: Array[Array[Double]])
 
   /**
     * Get the distance for two taxa addressed by the index i and j.
+    *
     * @param i First index of a taxon.
     * @param j Second index of a taxon.
     * @return Distance.
@@ -39,6 +42,30 @@ class TaxaMetric(val taxa: Array[String], val dist: Array[Array[Double]])
     } else {
       if (i < j) dist(i)(j) else dist(j)(i)
     }
+  }
+
+  /**
+    * True if a ultrametric tree can be constructed with this
+    * distance matrix or else if not.
+    */
+  val isUltrametric = {
+    def check(): Boolean = {
+      // Iterate over all possible index combinations containing
+      // 3 indices (i1, i2, i3):
+      for (i1 <- 0 until size; i2 <- 0 until size if (i1 != i2);
+           i3 <- 0 until size if (i1 != i3 && i2 != i3)) {
+        val d12 = distByIndex(i1, i2)
+        val d13 = distByIndex(i1, i3)
+        val d23 = distByIndex(i2, i3)
+        val ultra =
+          (d12 <= d13 && d13 == d23) ||
+            (d13 <= d12 && d12 == d23) ||
+            (d23 <= d12 && d12 == d13)
+        if (!ultra) return false // First negative, exit...
+      }
+      true
+    }
+    check()
   }
 
   /**

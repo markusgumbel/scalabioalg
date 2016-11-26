@@ -47,7 +47,6 @@ class TaxaMetricTest {
       assertEquals(1.0, m.distByTaxon("A", "B"), DELTA)
       assertEquals(2.0, m.distByTaxon("A", "C"), DELTA)
       assertEquals(2.0, m.distByTaxon("C", "A"), DELTA)
-      println (m.mkMatrixString)
   }
 
   @Test
@@ -90,5 +89,33 @@ class TaxaMetricTest {
     val m = new TaxaMetric(Array("A", "B", "C", "D"), d)
     assertEquals(m.distByIndex(0, 0), E, DELTA)
     assertEquals(m.isAdditive, false)
+  }
+
+  @Test
+  def testUltraTrue01() {
+    val d: Array[Array[Double]] = A(
+      A(E, 6, 6, 8),
+      A(E, E, 2, 8),
+      A(E, E, E, 8),
+      A(E, E, E, E)
+    )
+    val m = new TaxaMetric(Array("A", "B", "C", "D"), d)
+    assertEquals(m.distByIndex(0, 0), E, DELTA)
+    assertEquals(m.isAdditive, true)
+    assertEquals(m.isUltrametric, true)
+  }
+
+  @Test
+  def testUltraFalse01() {
+    val d: Array[Array[Double]] = A(
+      A(E, 3, 7, 8),
+      A(E, E, 7, 8),
+      A(E, E, E, 3),
+      A(E, E, E, E)
+    )
+    val m = new TaxaMetric(Array("A", "B", "C", "D"), d)
+    assertEquals(m.distByIndex(0, 0), E, DELTA)
+    assertEquals(m.isAdditive, true)
+    assertEquals(m.isUltrametric, false)
   }
 }

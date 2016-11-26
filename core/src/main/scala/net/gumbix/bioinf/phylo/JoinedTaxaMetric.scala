@@ -22,7 +22,7 @@ abstract class JoinedTaxaMetric[T](val joinedTaxa: Array[Taxon],
   formatter = DECIMAL
 
   /**
-    * Defines how or with with metrix the minimum taxa can be
+    * Defines how or with which metric the minimum taxa can be
     * identified.
     * @param i
     * @param j
@@ -59,8 +59,16 @@ abstract class JoinedTaxaMetric[T](val joinedTaxa: Array[Taxon],
     new JoinedTaxon(idxCluster.map(idx => joinedTaxa(idx)))
   }
 
+  /**
+    * @return A joined taxon that contains all taxa except
+    *         the two taxa with the minimal distance.
+    */
   def nonMinTaxaGroup() = taxaGroup(nonMinDistanceIdx)
 
+  /**
+    * @return A joined taxon that contains the two taxa
+    *         with the minimal distance.
+    */
   def minTaxaGroup() = taxaGroup(minDistanceIdx)
 
   def clusterMinDistanceTaxa() = aggregateMatrix(minDistanceIdx)
