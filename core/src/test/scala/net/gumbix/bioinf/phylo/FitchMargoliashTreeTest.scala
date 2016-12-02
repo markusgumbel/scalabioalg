@@ -97,7 +97,7 @@ class FitchMargoliashTreeTest {
     println("Additive? " + metric.isAdditive)
     val m = new FitchMargoliashTree(metric)
     m.logLevel = false // true
-    val tree = m.tree()
+    val tree = m.allEdges
     println("Tree construction:")
     println(tree.map(e => e._1 + " = " + e._2).mkString("\n"))
   }

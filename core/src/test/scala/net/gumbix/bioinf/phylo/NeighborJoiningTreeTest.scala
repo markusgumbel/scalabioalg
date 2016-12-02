@@ -5,7 +5,7 @@ import org.junit.Test
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class NeighborJoiningTest {
+class NeighborJoiningTreeTest {
   val A = Array
 
   @Test
@@ -96,9 +96,9 @@ class NeighborJoiningTest {
 
   def buildTree(metric: NeighborJoiningMetric) {
     println("Additive? " + metric.isAdditive)
-    val m = new NeighborJoining(metric)
+    val m = new NeighborJoiningTree(metric)
     m.logLevel = true // true
-    val tree = m.tree()
+    val tree = m.allEdges
     println("Tree construction:")
     println(tree.map(e => e._1 + " = " + e._2).mkString("\n"))
   }

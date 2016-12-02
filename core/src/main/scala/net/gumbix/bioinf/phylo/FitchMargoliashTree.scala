@@ -16,98 +16,87 @@ class FitchMargoliashTree(val metric: FitchMargoliashMetric)
 
   logLevel = false
 
-  def tree() = {
+  // Avg. distance to future nodes:
+  val avgEdges = new mutable.HashMap[Taxon, Double]()
 
-    // Avg. distance to future nodes:
-    val avgEdges = new mutable.HashMap[Taxon, Double]()
-    // A sorted list of instructions how to build the tree:
-    val allEdges = new mutable.ArrayBuffer[(Taxon, Double)]()
-    // A list of all taxa (leafs and inner):
-    val allJoins = new mutable.ArrayBuffer[Taxon]()
+  if (metric.size >= 3) {
+    // Otherwise there is no problem.
 
-    if (metric.size >= 3) {
-      // Otherwise there is no problem.
-
-      /**
-        *
-        * @param taxon
-        * @param p
-        * @return
-        */
-      def dist(taxon: Taxon, p: Map[Taxon, Double]) = taxon match {
-        case jt: JoinedTaxon => {
-          val avgDist = avgEdges(jt)
-          val distTaxon1 = avgEdges(jt.taxa(0))
-          val distTaxon2 = avgEdges(jt.taxa(1))
-          val dist = avgDist - (distTaxon1 + distTaxon2) / 2
-          allEdges += ((jt, dist)) // Add inner taxon.
-        }
-        case _ => {
-          allEdges += ((taxon, p(taxon))) // Add leaf taxon.
-        }
+    /**
+      *
+      * @param taxon
+      * @param p
+      * @return
+      */
+    def dist(taxon: Taxon, p: Map[Taxon, Double]) = taxon match {
+      case jt: JoinedTaxon => {
+        val avgDist = avgEdges(jt)
+        val distTaxon1 = avgEdges(jt.taxa(0))
+        val distTaxon2 = avgEdges(jt.taxa(1))
+        val dist = avgDist - (distTaxon1 + distTaxon2) / 2
+        allEdges += ((jt, dist)) // Add inner taxon.
       }
-
-      /**
-        *
-        * @param joinedTaxa
-        * @param p
-        * @return
-        */
-      def join(joinedTaxa: JoinedTaxon, p: Map[Taxon, Double]) = {
-        avgEdges ++= p // Add everything to the avg. edges.
-        dist(joinedTaxa.taxa(0), p)
-        dist(joinedTaxa.taxa(1), p)
-        allJoins += joinedTaxa
+      case _ => {
+        allEdges += ((taxon, p(taxon))) // Add leaf taxon.
       }
+    }
 
-      var m: FitchMargoliashMetric = metric // Copy metric?
-      while (m.size >= 4) {
-        logln("---------------------- iteration ---------------------------------")
-        logln("Metric:")
-        logln(m.mkMatrixString)
+    /**
+      *
+      * @param joinedTaxa
+      * @param p
+      * @return
+      */
+    def join(joinedTaxa: JoinedTaxon, p: Map[Taxon, Double]) = {
+      avgEdges ++= p // Add everything to the avg. edges.
+      dist(joinedTaxa.taxa(0), p)
+      dist(joinedTaxa.taxa(1), p)
+      allJoins += joinedTaxa
+    }
 
-        // Calculate distances for a 3x3 matrix:
-        val m3 = m.clusterNonMinDistanceTaxa()
-
-        val im = m.minDistanceIdx(0)
-        val jm = m.minDistanceIdx(1)
-        logln("\nMinimum distance is dist(" + m.taxa(im) + ", " +
-          m.taxa(jm) + ") = " + m.distByIndex(im, jm) + " at index " +
-          m.minDistanceIdx.mkString("(", ", ", ")"))
-        logln("Grouping " + m.nonMinTaxaGroup())
-        logln("Metric of 3 taxa:")
-        logln(m3.mkMatrixString)
-
-        val cEdges = calcEdges(m3) // Map:  taxon -> edge weight
-        join(m.minTaxaGroup(), cEdges)
-        logln("\n" + cEdges.mkString(", "))
-
-        logln("Reducing metric by grouping " + m.minTaxaGroup() + ".\n")
-        m = m.clusterMinDistanceTaxa()
-      }
-
-      logln("--------------------------- final ---------------------------------")
+    var m: FitchMargoliashMetric = metric // Copy metric?
+    while (m.size >= 4) {
+      logln("---------------------- iteration ---------------------------------")
+      logln("Metric:")
       logln(m.mkMatrixString)
-      val cEdges = calcEdges(m)
+
+      // Calculate distances for a 3x3 matrix:
+      val m3 = m.clusterNonMinDistanceTaxa()
+
+      val im = m.minDistanceIdx(0)
+      val jm = m.minDistanceIdx(1)
+      logln("\nMinimum distance is dist(" + m.taxa(im) + ", " +
+        m.taxa(jm) + ") = " + m.distByIndex(im, jm) + " at index " +
+        m.minDistanceIdx.mkString("(", ", ", ")"))
+      logln("Grouping " + m.nonMinTaxaGroup())
+      logln("Metric of 3 taxa:")
+      logln(m3.mkMatrixString)
+
+      val cEdges = calcEdges(m3) // Map:  taxon -> edge weight
+      join(m.minTaxaGroup(), cEdges)
       logln("\n" + cEdges.mkString(", "))
 
-      if (metric.size <= 3) {
-        allEdges ++= cEdges
-      } else {
-        val taxon = allJoins(allJoins.size - 1)
-        // Add leafs:
-        allEdges ++= cEdges.filter(!_._1.isInstanceOf[JoinedTaxon])
-        avgEdges.+=((taxon, cEdges(taxon)))
-        dist(taxon, cEdges) // Last inner node.
-        allJoins += new JoinedTaxon(Array(allJoins(allJoins.size - 1),
-          m.minTaxaGroup.taxa(0), m.minTaxaGroup.taxa(1)))
-      }
-
-      logln("Edges:\n" + allEdges.sortBy(c => c._1.toString()).
-        map(e => e._1 + " = " + e._2).mkString("\n"))
-      logln("Tree construction (new):\n" + allJoins.mkString("\n"))
+      logln("Reducing metric by grouping " + m.minTaxaGroup() + ".\n")
+      m = m.clusterMinDistanceTaxa()
     }
-    allEdges
+
+    logln("--------------------------- final ---------------------------------")
+    logln(m.mkMatrixString)
+    val cEdges = calcEdges(m)
+    logln("\n" + cEdges.mkString(", "))
+
+    if (metric.size <= 3) {
+      allEdges ++= cEdges
+    } else {
+      val taxon = allJoins(allJoins.size - 1)
+      // Add leafs:
+      allEdges ++= cEdges.filter(!_._1.isInstanceOf[JoinedTaxon])
+      avgEdges.+=((taxon, cEdges(taxon)))
+      dist(taxon, cEdges) // Last inner node.
+      allJoins += new JoinedTaxon(Array(allJoins(allJoins.size - 1),
+        m.minTaxaGroup.taxa(0), m.minTaxaGroup.taxa(1)))
+    }
+    showSolution()
   }
 
   /**

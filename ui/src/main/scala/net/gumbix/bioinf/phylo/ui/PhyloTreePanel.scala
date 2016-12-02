@@ -16,6 +16,7 @@ import scala.collection.mutable.HashMap
 
 /**
   * A panel for a phylogenetic tree.
+  *
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
 class PhyloTreePanel extends JPanel {
@@ -69,11 +70,12 @@ class PhyloTreePanel extends JPanel {
 
     /**
       * Create the graph with JUNG nodes.
+      *
       * @param m Tree.
       * @return
       */
     def graph(m: PhyloTree) = {
-      val tree = m.tree()
+      val tree = m.allEdges
       val taxon2Dist = tree.toMap
 
       val taxon2Node = new HashMap[Taxon, Node]()
@@ -88,8 +90,10 @@ class PhyloTreePanel extends JPanel {
             val innerNode = new InnerNode(jt)
             g.addVertex(innerNode)
             taxon2Node(jt) = innerNode
-            g.addEdge(new Edge(taxon2Dist(taxon1)), innerNode, taxon2Node(taxon1))
-            g.addEdge(new Edge(taxon2Dist(taxon2)), innerNode, taxon2Node(taxon2))
+            g.addEdge(new Edge(taxon1.name, taxon2Dist(taxon1)),
+              innerNode, taxon2Node(taxon1))
+            g.addEdge(new Edge(taxon2.name, taxon2Dist(taxon2)),
+              innerNode, taxon2Node(taxon2))
           }
           case _ => {
             val leaf = new Node(taxon)
@@ -105,9 +109,12 @@ class PhyloTreePanel extends JPanel {
       val lastNode3 = taxon2Node(lastInnerTaxon._1)
 
       val newNode = new InnerNode(new JoinedTaxon(Array()))
-      g.addEdge(new Edge(lastTaxon1._2), newNode, taxon2Node(lastTaxon1._1))
-      g.addEdge(new Edge(lastTaxon2._2), newNode, taxon2Node(lastTaxon2._1))
-      g.addEdge(new Edge(lastInnerTaxon._2), newNode, lastNode3)
+      g.addEdge(new Edge(lastTaxon1._1.name, lastTaxon1._2),
+        newNode, taxon2Node(lastTaxon1._1))
+      g.addEdge(new Edge(lastTaxon2._1.name, lastTaxon2._2),
+        newNode, taxon2Node(lastTaxon2._1))
+      g.addEdge(new Edge(lastInnerTaxon._1.name,
+        lastInnerTaxon._2), newNode, lastNode3)
       g
     }
 
@@ -126,6 +133,6 @@ class InnerNode(taxon: Taxon) extends Node(taxon) {
   override def toString = ""
 }
 
-class Edge(val dist: Double) {
-  override def toString = dist.toString
+class Edge(val name: String, val dist: Double) {
+  override def toString = name + ": " + dist.toString
 }

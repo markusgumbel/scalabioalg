@@ -30,7 +30,7 @@ object PhyloTreeViewer {
     def NJMethod(e: (Array[String], Array[Array[Double]])) = {
       val (taxa, dist) = e
       val metric = new NeighborJoiningMetric(taxa, dist)
-      new NeighborJoining(metric)
+      new NeighborJoiningTree(metric)
     }
 
     var method: (((Array[String], Array[Array[Double]])) => PhyloTree) = NJMethod
