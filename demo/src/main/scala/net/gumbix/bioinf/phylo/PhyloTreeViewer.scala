@@ -4,16 +4,7 @@ import java.awt._
 import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing._
 
-import edu.uci.ics.jung.algorithms.layout.ISOMLayout
-import edu.uci.ics.jung.graph.{Graph, SparseMultigraph}
-import edu.uci.ics.jung.visualization.VisualizationViewer
-import edu.uci.ics.jung.visualization.control.{DefaultModalGraphMouse, ModalGraphMouse}
-import edu.uci.ics.jung.visualization.decorators.ToStringLabeller
-import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position
-import net.gumbix.bioinf.phylo.ui.PhyloTreePanel
-import org.apache.commons.collections15.Transformer
-
-import scala.collection.mutable.HashMap
+import net.gumbix.bioinf.phylo.ui.{PhyloTreePanel, PhyloTreePanel2}
 
 /**
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)

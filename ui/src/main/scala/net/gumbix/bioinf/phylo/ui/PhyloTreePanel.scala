@@ -3,13 +3,13 @@ package net.gumbix.bioinf.phylo.ui
 import java.awt._
 import javax.swing.JPanel
 
-import edu.uci.ics.jung.algorithms.layout.{KKLayout, DAGLayout, SpringLayout2, ISOMLayout}
+import edu.uci.ics.jung.algorithms.layout._
 import edu.uci.ics.jung.graph.{Graph, SparseMultigraph}
 import edu.uci.ics.jung.visualization.VisualizationViewer
 import edu.uci.ics.jung.visualization.control.{DefaultModalGraphMouse, ModalGraphMouse}
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position
-import net.gumbix.bioinf.phylo.{PhyloTree, FitchMargoliashTree, JoinedTaxon, Taxon}
+import net.gumbix.bioinf.phylo.{FitchMargoliashTree, JoinedTaxon, PhyloTree, Taxon}
 import org.apache.commons.collections15.Transformer
 
 import scala.collection.mutable.HashMap
@@ -47,8 +47,8 @@ class PhyloTreePanel extends JPanel {
     }
 
     def graphPanel(graph: Graph[Node, Edge]) = {
-      val layout = new ISOMLayout(graph)
-      // val layout = new SpringLayout2(graph, edgeLengthTransformer)
+      //val layout = new ISOMLayout(graph)
+      val layout = new SpringLayout(graph, edgeLengthTransformer)
       // val layout = new DAGLayout(graph)
 
       // val layout = new KKLayout(graph)
@@ -65,6 +65,9 @@ class PhyloTreePanel extends JPanel {
       val gm = new DefaultModalGraphMouse()
       gm.setMode(ModalGraphMouse.Mode.TRANSFORMING)
       vv.setGraphMouse(gm)
+      layout.setStretch(1.0)
+      layout.setForceMultiplier(0.1)
+      //for (i <- 1 to 100000) layout.step()
       vv
     }
 

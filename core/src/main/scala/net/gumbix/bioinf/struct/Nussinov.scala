@@ -41,7 +41,7 @@ abstract class AbstractNussinov(val s: String)
     if (idx.j - idx.i < 1) Array()
     else {
       val splitList = if (idx.j - idx.i > 1) {
-        val h = for (k <- (idx.i + 1) to (idx.j - 1)) yield {
+        val h = for (k <- (idx.i + 1) to (idx.j - 2)) yield {
           new NussinovDecision(SPLIT, idx, k, ' ', ' ')
         }
         h.toList
@@ -51,7 +51,7 @@ abstract class AbstractNussinov(val s: String)
                            if (state != SPLIT)) yield {
         new NussinovDecision(state, idx, 0, s(idx.i), s(idx.j))
       }
-      val u = splitList.toList ::: otherList.toList ::: Nil
+      val u = splitList ::: otherList.toList ::: Nil
       u.toArray
     }
   }

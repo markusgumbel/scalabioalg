@@ -31,6 +31,7 @@ class FitchMargoliashTreeTest {
     buildTree(metric)
   }
 
+  @Test
   def test4Taxa01() {
     val d: Array[Array[Double]] = A(
       A(0d, 3, 22, 24),
@@ -95,10 +96,10 @@ class FitchMargoliashTreeTest {
 
   def buildTree(metric: FitchMargoliashMetric) {
     println("Additive? " + metric.isAdditive)
-    val m = new FitchMargoliashTree(metric)
-    m.logLevel = false // true
-    val tree = m.allEdges
-    println("Tree construction:")
-    println(tree.map(e => e._1 + " = " + e._2).mkString("\n"))
+    val m = new FitchMargoliashTree(metric) {
+      logLevel = true
+    }
+    // println("Tree construction:")
+    // m.showSolution()
   }
 }

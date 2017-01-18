@@ -87,6 +87,9 @@ class FitchMargoliashTree(val metric: FitchMargoliashMetric)
 
     if (metric.size <= 3) {
       allEdges ++= cEdges
+      val t1 = new Taxon(metric.taxa(0))
+      val t2 = new Taxon(metric.taxa(1))
+      allJoins += new JoinedTaxon(Array(t1, t2))
     } else {
       val taxon = allJoins(allJoins.size - 1)
       // Add leafs:
