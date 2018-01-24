@@ -15,8 +15,10 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.seq
 
-import collection.mutable.{ArrayBuffer, HashMap}
 import net.gumbix.util.Logger
+
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Also, what do we do if we have more than one maximum?
@@ -159,10 +161,11 @@ trait Overlap {
  */
 trait SimpleSubstringFree {
   def substringFree(frgmts: Array[String]) = {
+    val frgmtsSet = frgmts.toSet // Remove duplicates.
     val targetList = new ArrayBuffer[String]
     // Go over each string and test if another string contains it...
-    for (s <- frgmts; if s.size > 0) {
-      val subs = frgmts.filter(_.contains(s)) // All strings that contain s
+    for (s <- frgmtsSet; if s.size > 0) {
+      val subs = frgmtsSet.filter(_.contains(s)) // All strings that contain s
       // If subs contains only 1 element this is s itself => unique string
       if (subs.size == 1) targetList += s
     }
