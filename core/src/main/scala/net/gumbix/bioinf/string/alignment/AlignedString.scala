@@ -151,7 +151,7 @@ object GapType extends Enumeration {
 
   val GAP = Value("-")
 
-  val EMPTY = Value(".")
+  val EMPTY = Value("~")
 
   val PAIR = Value("#")
 }

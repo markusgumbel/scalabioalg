@@ -23,27 +23,27 @@ import net.gumbix.bioinf.string.alignment.GapType._
 import net.gumbix.dynpro.{PathEntry, DynProMatrixPrinter, Idx, DynPro}
 
 /**
- * s1 is supposed to be the search string whereas s2 is the (longer) original
- * string. So it should be |s1| < |s2|.
- * This algorithm uses the "matrixForwardPathBackward" as this is the
- * common method in bioinformatics.
- * @param s1 The search string
- * @param s2 The original string
- * @param mode What kind of alignment is used
- * @param substMatrix A substitution matrix for matches and mismatches.
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
- */
+  * s1 is supposed to be the search string whereas s2 is the (longer) original
+  * string. So it should be |s1| < |s2|.
+  * This algorithm uses the "matrixForwardPathBackward" as this is the
+  * common method in bioinformatics.
+  * @param s1          The search string
+  * @param s2          The original string
+  * @param mode        What kind of alignment is used
+  * @param substMatrix A substitution matrix for matches and mismatches.
+  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+  */
 
 class Alignment(val s1: String, val s2: String,
                 val mode: AlignmentMode,
                 override val substMatrix: Option[String])
-        extends DynPro[AlignmentStep]
-                with Backpropagation[AlignmentStep]
-                with DynProMatrixPrinter[AlignmentStep]
-                with DynProAlignmentPrinter[AlignmentStep]
-                with Score {
+  extends DynPro[AlignmentStep]
+    with Backpropagation[AlignmentStep]
+    with DynProMatrixPrinter[AlignmentStep]
+    with DynProAlignmentPrinter[AlignmentStep]
+    with Score {
   // Helper constructor if no substitution matrix is used:
-  def this(s1: String, s2: String, mode: AlignmentMode) = this (s1, s2, mode, None)
+  def this(s1: String, s2: String, mode: AlignmentMode) = this(s1, s2, mode, None)
 
   formatter = INT
 
@@ -60,19 +60,19 @@ class Alignment(val s1: String, val s2: String,
   }
 
   /**
-   * The similarity of the alignment.
-   */
+    * The similarity of the alignment.
+    */
   def similarity = {
     val idx = cellIndices(backpropagationStart)
     matrix(idx.i)(idx.j).get
   }
 
   /**
-   * If we are at position (0, 0) there is no decision.
-   * If we are at the first row (idx.i = 0) only INSERT is possible.
-   * If we are at the left column (idx.j = 0) only DELETE is possible.
-   * In any other case, the prev. state is BOTH.
-   */
+    * If we are at position (0, 0) there is no decision.
+    * If we are at the first row (idx.i = 0) only INSERT is possible.
+    * If we are at the left column (idx.j = 0) only DELETE is possible.
+    * In any other case, the prev. state is BOTH.
+    */
   def decisions(idx: Idx) = {
     if (idx.i == 0 && idx.j == 0) Array(NOTHING)
     else if (idx.i == 0) Array(INSERT)
@@ -97,9 +97,9 @@ class Alignment(val s1: String, val s2: String,
   }
 
   /**
-   * If true gaps at the beginning of s1 are for free.
-   * s2 can proceed without any costs => first row is 0.
-   */
+    * If true gaps at the beginning of s1 are for free.
+    * s2 can proceed without any costs => first row is 0.
+    */
   val allowLeftGapsString1 = mode match {
     case LOCAL_LEFT_ALIGNMENT => false
     case LOCAL_RIGHT_ALIGNMENT => true
@@ -109,9 +109,9 @@ class Alignment(val s1: String, val s2: String,
   }
 
   /**
-   * If true gaps at the beginning of s2 are for free.
-   * s1 can proceed without any costs => first column is 0.
-   */
+    * If true gaps at the beginning of s2 are for free.
+    * s1 can proceed without any costs => first column is 0.
+    */
   val allowLeftGapsString2 = mode match {
     case LOCAL_LEFT_ALIGNMENT => false
     case LOCAL_RIGHT_ALIGNMENT => false
@@ -132,16 +132,17 @@ class Alignment(val s1: String, val s2: String,
   = alignedStrings(solution)
 
   /**
-   * @param solution A possible solution for the alignment.
-   * @return The aligned string based on on the given solution.
-   */
-  def alignedStrings(solution2: List[PathEntry[AlignmentStep]]) = {
+    * @param solution A possible solution for the alignment.
+    * @return The aligned string based on on the given solution.
+    */
+  def alignedStrings(solution: List[PathEntry[AlignmentStep]]) = {
 
-    val solution = solution2.toArray
+    val solutionArray = solution.toArray
 
     import scala.math._
 
-    if (solution.isEmpty) {
+    if (solutionArray.isEmpty) {
+      // No real alignment, just pile up strings.
       val as1 = new AlignedString(s1)
       val as2 = new AlignedString(s2)
       as1.insertGapBefore(0, s2.length, EMPTY)
@@ -149,9 +150,9 @@ class Alignment(val s1: String, val s2: String,
       (as1, as2)
     }
 
-    // Prefix calculation
-    val ib = solution(0).currCell.i
-    val jb = solution(0).currCell.j
+    // Prefix calculation:
+    val ib = solutionArray(0).currCell.i
+    val jb = solutionArray(0).currCell.j
 
     // Calc. the max. chars to print at the beginning:
     val b = max(ib, jb)
@@ -160,8 +161,8 @@ class Alignment(val s1: String, val s2: String,
     val gapB2 = b - jb
 
     // Suffix calculation
-    val ih = solution(solution.size - 1).currCell.i
-    val jh = solution(solution.size - 1).currCell.j
+    val ih = solutionArray(solutionArray.size - 1).currCell.i
+    val jh = solutionArray(solutionArray.size - 1).currCell.j
     // Calc. the max. chars to print at the end:
     val ie = n - 1 - ih
     val je = m - 1 - jh
@@ -178,8 +179,9 @@ class Alignment(val s1: String, val s2: String,
 
     var i1 = ib // gapB1 was wrong
     var i2 = jb // gapB2 was wrong
-    for (i <- 1 until solution.size) {
-      solution(i).decision match {
+    val start = if (solutionArray(0).decision == NOTHING) 1 else 0
+    for (i <- start until solutionArray.size) {
+      solutionArray(i).decision match {
         case INSERT => as1.insertGapBefore(i1, 1, GAP)
         case DELETE => as2.insertGapBefore(i2, 1, GAP)
         case _ =>
@@ -195,8 +197,8 @@ class Alignment(val s1: String, val s2: String,
   }
 
   /**
-   * Decision -> Previous state. What are the previous states if the decision is given?
-   */
+    * Decision -> Previous state. What are the previous states if the decision is given?
+    */
   val deltaIdx = Map(INSERT -> Idx(0, -1), DELETE -> Idx(-1, 0), BOTH -> Idx(-1, -1))
 
   override def rowLabels = makeLabels(s1).toArray
