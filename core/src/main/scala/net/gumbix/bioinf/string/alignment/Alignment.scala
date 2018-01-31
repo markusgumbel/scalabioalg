@@ -132,6 +132,8 @@ class Alignment(val s1: String, val s2: String,
   = alignedStrings(solution)
 
   /**
+    * Create a string of three lines (separated by \n) that
+    * pretty prints the alingment.
     * @param solution A possible solution for the alignment.
     * @return The aligned string based on on the given solution.
     */
@@ -141,7 +143,10 @@ class Alignment(val s1: String, val s2: String,
 
     import scala.math._
 
-    if (solutionArray.isEmpty) {
+    // Does the solution have a N-decision? If so, we ignore it.
+    val start = if (solutionArray(0).decision == NOTHING) 1 else 0
+
+    if (solutionArray.size - start <= 0) {
       // No real alignment, just pile up strings.
       val as1 = new AlignedString(s1)
       val as2 = new AlignedString(s2)
@@ -151,8 +156,8 @@ class Alignment(val s1: String, val s2: String,
     }
 
     // Prefix calculation:
-    val ib = solutionArray(0).currCell.i
-    val jb = solutionArray(0).currCell.j
+    val ib = solutionArray(start).currCell.i - 1
+    val jb = solutionArray(start).currCell.j - 1
 
     // Calc. the max. chars to print at the beginning:
     val b = max(ib, jb)
@@ -161,8 +166,8 @@ class Alignment(val s1: String, val s2: String,
     val gapB2 = b - jb
 
     // Suffix calculation
-    val ih = solutionArray(solutionArray.size - 1).currCell.i
-    val jh = solutionArray(solutionArray.size - 1).currCell.j
+    val ih = solutionArray(solutionArray.size - 1).currCell.i - 1
+    val jh = solutionArray(solutionArray.size - 1).currCell.j - 1
     // Calc. the max. chars to print at the end:
     val ie = n - 1 - ih
     val je = m - 1 - jh
@@ -177,13 +182,18 @@ class Alignment(val s1: String, val s2: String,
     as1.insertGapBefore(0, gapB1, EMPTY)
     as2.insertGapBefore(0, gapB2, EMPTY)
 
-    var i1 = ib // gapB1 was wrong
-    var i2 = jb // gapB2 was wrong
-    val start = if (solutionArray(0).decision == NOTHING) 1 else 0
+    var i1 = b // Both strings are now in sync.
+    var i2 = b
     for (i <- start until solutionArray.size) {
       solutionArray(i).decision match {
-        case INSERT => as1.insertGapBefore(i1, 1, GAP)
-        case DELETE => as2.insertGapBefore(i2, 1, GAP)
+        case INSERT => {
+          as1.insertGapBefore(i1, 1, GAP)
+          i1 += 1
+        }
+        case DELETE => {
+          as2.insertGapBefore(i2, 1, GAP)
+          i2 += 1
+        }
         case _ =>
       }
       i1 += 1

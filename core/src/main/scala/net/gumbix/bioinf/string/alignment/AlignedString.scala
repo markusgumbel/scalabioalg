@@ -16,7 +16,9 @@ Copyright 2011 the original author or authors.
 package net.gumbix.bioinf.string.alignment
 
 /**
-  * A string that can have gaps.
+  * A string that can have gaps. The size of the string
+  * is the number of characters plus the size of the gaps.
+  * An index position always includes the gaps.
   * @param s The input string that is either a plain string
   *          or it can contains gaps identified by the - character.
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
