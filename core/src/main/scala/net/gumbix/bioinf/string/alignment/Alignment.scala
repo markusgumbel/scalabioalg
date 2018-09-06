@@ -137,7 +137,8 @@ class Alignment(val s1: String, val s2: String,
     * @param solution A possible solution for the alignment.
     * @return The aligned string based on on the given solution.
     */
-  def alignedStrings(solution: List[PathEntry[AlignmentStep]]) = {
+  def alignedStrings(solution: List[PathEntry[AlignmentStep]]):
+    Tuple2[AlignedString,AlignedString] = {
 
     val solutionArray = solution.toArray
 
@@ -152,7 +153,7 @@ class Alignment(val s1: String, val s2: String,
       val as2 = new AlignedString(s2)
       as1.insertGapBefore(0, s2.length, EMPTY)
       as2.insertGapAtEnd(s1.length, EMPTY)
-      (as1, as2)
+      return (as1, as2)
     }
 
     // Prefix calculation:
@@ -188,11 +189,11 @@ class Alignment(val s1: String, val s2: String,
       solutionArray(i).decision match {
         case INSERT => {
           as1.insertGapBefore(i1, 1, GAP)
-          i1 += 1
+          //i1 += 1
         }
         case DELETE => {
           as2.insertGapBefore(i2, 1, GAP)
-          i2 += 1
+          //i2 += 1 // Correct?
         }
         case _ =>
       }

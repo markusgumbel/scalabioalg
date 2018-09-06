@@ -122,4 +122,15 @@ class AlignmentTest {
     assertEquals("ATC\n  |\n~~C", res)
     assertEquals(1, dp.similarity, 0.001)
   }
+
+  @Test
+  def globalAlignment1() {
+    val s1 = "ACTTTATGCCTGCT"
+    val s2 = "ACAGGCT"
+    val dp = new Alignment(s1, s2, AlignmentMode.GLOBAL)
+    val res = dp.makeAlignmentString(dp.solution)
+    assertEquals("NBBDDDBDBDDDBBB", dp.solution.map(_.decision).mkString(""))
+    assertEquals("ACTTTATGCCTGCT\n||   | |   |||\nAC---A-G---GCT", res)
+    assertEquals(-7, dp.similarity, 0.001)
+  }
 }

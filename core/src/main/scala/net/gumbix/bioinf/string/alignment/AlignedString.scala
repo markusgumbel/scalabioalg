@@ -87,7 +87,8 @@ class AlignedString(s: String) {
     * Note: pos = string size is possible. This inserts gaps
     * at the end of the string.
     *
-    * @param pos    Index position where to insert the gap
+    * @param pos    Index position where to insert the gap. The
+    *               position includes any gaps.
     * @param length Size of the gap.
     * @param gapType
     */

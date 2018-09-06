@@ -87,4 +87,52 @@ class AlignedStringTest {
     assertEquals(s1.isGapAt(0), false)
     assertEquals(s1.isGapAt(6), true)
   }
+
+  @Test
+  def testInsert1Gap() {
+    val s1 = new AlignedString("ACTGAG")
+    assertEquals(s1.primaryString, "ACTGAG")
+    s1.insertGapBefore(1, 1, GAP)
+    assertEquals(s1.toString(), "A-CTGAG")
+    assertEquals(s1.isGapAt(0), false)
+    assertEquals(s1.isGapAt(1), true)
+    assertEquals(s1.isGapAt(2), false)
+  }
+
+  @Test
+  def testInsert2Gap() {
+    val s1 = new AlignedString("ACTGAG")
+    assertEquals(s1.primaryString, "ACTGAG")
+    s1.insertGapBefore(1, 1, GAP)
+    assertEquals(s1.toString(), "A-CTGAG")
+    s1.insertGapBefore(2, 1, GAP)
+    assertEquals(s1.toString(), "A--CTGAG")
+  }
+
+  @Test
+  def testInsert2bGap() {
+    val s1 = new AlignedString("ACTGAG")
+    assertEquals(s1.primaryString, "ACTGAG")
+    s1.insertGapBefore(1, 2, GAP)
+    assertEquals(s1.toString(), "A--CTGAG")
+  }
+
+  @Test
+  def testInsertxGap() {
+    val s1 = new AlignedString("ACAGGCT")
+    assertEquals(s1.primaryString, "ACAGGCT")
+    s1.insertGapBefore(2, 1, GAP)
+    assertEquals(s1.toString(), "AC-AGGCT")
+    s1.insertGapBefore(3, 1, GAP)
+    assertEquals(s1.toString(), "AC--AGGCT")
+  }
+
+  @Test
+  def testInsert2GapsWithGap() {
+    val s1 = new AlignedString("ACTGAG")
+    assertEquals(s1.primaryString, "ACTGAG")
+    s1.insertGapBefore(1, 1, GAP)
+    s1.insertGapBefore(3, 1, GAP)
+    assertEquals(s1.toString(), "A-C-TGAG")
+  }
 }
