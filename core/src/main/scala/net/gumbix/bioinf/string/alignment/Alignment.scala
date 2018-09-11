@@ -180,8 +180,14 @@ class Alignment(val s1: String, val s2: String,
     val as1 = new AlignedString(s1)
     val as2 = new AlignedString(s2)
 
-    as1.insertGapBefore(0, gapB1, EMPTY)
-    as2.insertGapBefore(0, gapB2, EMPTY)
+    // Only in case of a local alignment we have to adjust the
+    // strings. A local alignment was used when first decision
+    // was not NOTHING.
+    // Maybe better: use mode
+    if (solutionArray(0).decision != NOTHING) {
+      as1.insertGapBefore(0, gapB1, EMPTY)
+      as2.insertGapBefore(0, gapB2, EMPTY)
+    }
 
     var i1 = b // Both strings are now in sync.
     var i2 = b

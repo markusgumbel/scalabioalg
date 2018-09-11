@@ -133,4 +133,16 @@ class AlignmentTest {
     assertEquals("ACTTTATGCCTGCT\n||   | |   |||\nAC---A-G---GCT", res)
     assertEquals(-7, dp.similarity, 0.001)
   }
+
+  @Test
+  def semiglobalAlignment1() {
+    val s1 = "ACTAGGC"
+    val s2 = "ACTTTACGCTGCTAGCT"
+    val dp = new Alignment(s1, s2, AlignmentMode.LOCAL_CENTERED)
+    val res = dp.makeAlignmentString(dp.solution)
+    println(res)
+    assertEquals("NIIIIIIIIIIBBBBBDB", dp.solution.map(_.decision).mkString(""))
+    assertEquals("----------ACTAGGC~\n           |||| | \nACTTTACGCTGCTAG-CT", res)
+    assertEquals(2, dp.similarity, 0.001)
+  }
 }
