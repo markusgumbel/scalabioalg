@@ -21,15 +21,14 @@ import net.gumbix.layout.Element._
 /**
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-
 trait MultipleAlignmentPrinter {
-  protected val alignments: Array[Array[Alignment]]
+  val alignments: Array[Array[Alignment]]
 
   val strings: Array[String]
 
   def consensus: String
   
-  protected val multipleAlignment: Array[AlignedString]
+  val multipleAlignment: Array[AlignedString]
 
   /**
    * Format the multiple alignment.

@@ -17,6 +17,8 @@ class Taxon(val name: String) {
       name == taxon.name
     }
   }
+
+  override def hashCode() = name.hashCode
 }
 
 class JoinedTaxon(val taxa: Array[Taxon]) extends Taxon("") {
@@ -26,14 +28,4 @@ class JoinedTaxon(val taxa: Array[Taxon]) extends Taxon("") {
   override val size = taxa.length
 
   override def toString() = taxa.mkString("{", ", ", "}")
-
-  override def equals(o: Any) = {
-    if (o == null || !o.isInstanceOf[JoinedTaxon]) {
-      false
-    } else {
-      val taxon = o.asInstanceOf[JoinedTaxon]
-      // Important: sameElements and not ==
-      name == taxon.name &&  taxa.sameElements(taxon.taxa)
-    }
-  }
 }

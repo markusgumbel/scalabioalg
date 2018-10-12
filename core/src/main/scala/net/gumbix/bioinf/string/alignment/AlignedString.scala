@@ -29,7 +29,7 @@ class AlignedString(s: String) {
 
   require(s.length > 0)
 
-  val primaryString = s.filter(c => c!='-').toString
+  val primaryString = s.filter(c => c != '-').toString
 
   /**
     * Each position (0 .. primaryString.size + 1) points to the
@@ -78,6 +78,12 @@ class AlignedString(s: String) {
     */
   def isGapAt(pos: Int) = pos != mapper(getMapperIndex(pos))._1
 
+  def gaps() = {
+    val gaps = for (i <- 0 to size) yield {
+      if (isGapAt(i)) i else -1
+    }
+    gaps.filter(e => e >= 0).toList
+  }
 
   def insertGapBefore(pos: Int, gapType: GapType) {
     insertGapBefore(pos, 1, gapType)
@@ -86,7 +92,6 @@ class AlignedString(s: String) {
   /**
     * Note: pos = string size is possible. This inserts gaps
     * at the end of the string.
-    *
     * @param pos    Index position where to insert the gap. The
     *               position includes any gaps.
     * @param length Size of the gap.
@@ -140,11 +145,12 @@ class AlignedString(s: String) {
   private def stripString() {
     val idx = (0 until s.size)
     val l = idx zip s
-    val pos = l.filter(c => c._2=='-').map(c => c._1)
-    pos.foreach{
+    val pos = l.filter(c => c._2 == '-').map(c => c._1)
+    pos.foreach {
       pos => insertGapBefore(pos, GAP)
     }
   }
+
   stripString()
 }
 
