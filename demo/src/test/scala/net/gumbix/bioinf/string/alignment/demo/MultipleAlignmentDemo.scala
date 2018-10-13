@@ -15,8 +15,7 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.alignment.demo
 
-import net.gumbix.bioinf.string.alignment.AlignmentMode._
-import net.gumbix.bioinf.string.alignment.{AlignmentMode, Clustal, MultipleAlignment, StarAlignment}
+import net.gumbix.bioinf.string.alignment.{Clustal, MultipleAlignment, StarAlignment}
 import org.junit.{Ignore, Test}
 
 class MultipleAlignmentDemo {
@@ -34,56 +33,41 @@ class MultipleAlignmentDemo {
       "garfield the fast cat",
       "garfield the very fast cat",
       "the fat cat"),
-      "Garfield")
-    )
+      "Garfield"),
+    (Array("NYLSC", "NFLS", "NKYLSC", "NFSC", "NWSC"), "Garfield")
+  )
 
   @Test
   @Ignore
   def starAlignmentDemo() {
-    for (s <- strings; if (s._2.startsWith(""))) {
-      doMultipleAligment(s._1, AlignmentMode.GLOBAL, s._2)
+    for (s <- strings; if (s._2.startsWith("Garfield"))) {
+      doMultipleAligment(s._1, s._2,
+        (s: Array[String]) => new StarAlignment(s), "Star-Alignment")
     }
   }
 
   @Test
   @Ignore
   def clustalDemo() {
-    for (s <- strings; if (s._2.startsWith(""))) {
-      doClustalAligment(s._1, AlignmentMode.GLOBAL, s._2)
+    for (s <- strings; if (s._2.startsWith("Garfield"))) {
+      doMultipleAligment(s._1, s._2,
+        (s: Array[String]) => new Clustal(s), "Clustal")
     }
   }
 
-  def doClustalAligment(s: Array[String], mode: AlignmentMode, comment: String) {
+  def doMultipleAligment(s: Array[String], comment: String,
+                         msa: (Array[String]) => MultipleAlignment,
+                         method: String) {
     println("---------------------------------")
-    println("Multiple Alignment with Clustal, mode = " + mode + ", " + comment)
+    println("Multiple Alignment with " + method + ", " + comment)
     println()
-    (0 until s.size).foreach {i => print("s" + i + " = '" + s(i) + "', ")}
+    (0 until s.size).foreach { i => print("s" + i + " = '" + s(i) + "', ") }
     println()
     println()
-    val ma = new Clustal(s, mode)
+    val ma = msa(s)
     println(ma.mkString)
-    // ma.printAlignment
     println()
-    println("dist = " + ma.distance)
-    println("SP = " + ma.sumOfPairs)
-    // println("root index = " + ma.rootIdx)
-    println()
-  }
-
-  def doMultipleAligment(s: Array[String], mode: AlignmentMode, comment: String) {
-    println("---------------------------------")
-    println("Multiple Alignment, mode = " + mode + ", " + comment)
-    println()
-    (0 until s.size).foreach {i => print("s" + i + " = '" + s(i) + "', ")}
-    println()
-    println()
-    val ma = new StarAlignment(s, mode)
-    println(ma.mkString)
-    // ma.printAlignment
-    println()
-    println("dist = " + ma.distance)
-    println("SP = " + ma.sumOfPairs)
-    // println("root index = " + ma.rootIdx)
+    println("SP = " + ma.sumOfPairs + "; dist = " + ma.distance)
     println()
   }
 }

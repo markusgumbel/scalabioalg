@@ -7,10 +7,11 @@ import scala.collection.mutable
 /**
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
-class NeighborJoiningTree(val metric: NeighborJoiningMetric)
+class NeighborJoiningTree(val metric: NeighborJoiningMetric,
+                          ll: Boolean = false)
   extends PhyloTree with Logger {
 
-  logLevel = true
+  logLevel = ll
 
   var m = metric
 

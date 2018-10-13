@@ -25,11 +25,13 @@ import org.apache.commons.math3.stat.Frequency
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
 
-abstract class MultipleAlignment(val strings: Array[String], val mode: AlignmentMode)
+abstract class MultipleAlignment(val strings: Array[String])
   extends MultipleAlignmentPrinter with DynProMatrixPrinter[Int]
     with Score with Logger {
   logLevel = true
   formatter = INT
+
+  val mode = AlignmentMode.GLOBAL
 
   /**
     * Calculate the consensus sequence.
