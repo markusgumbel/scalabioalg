@@ -152,7 +152,7 @@ class Alignment(val s1: String, val s2: String,
       val as1 = new AlignedString(s1)
       val as2 = new AlignedString(s2)
       as1.insertGapBefore(0, s2.length, EMPTY)
-      as2.insertGapAtEnd(s1.length, EMPTY)
+      as2.insertGapsAtEnd(s1.length, EMPTY)
       return (as1, as2)
     }
 
@@ -207,8 +207,8 @@ class Alignment(val s1: String, val s2: String,
       i2 += 1
     }
 
-    as1.insertGapAtEnd(gapE1, EMPTY)
-    as2.insertGapAtEnd(gapE2, EMPTY)
+    as1.insertGapsAtEnd(gapE1, EMPTY)
+    as2.insertGapsAtEnd(gapE2, EMPTY)
 
     (as1, as2)
   }

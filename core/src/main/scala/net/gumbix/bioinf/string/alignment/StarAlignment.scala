@@ -15,11 +15,11 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.alignment
 
-import net.gumbix.bioinf.string.alignment.AlignmentMode.AlignmentMode
-
 import scala.collection.mutable.ArrayBuffer
 
 /**
+  * Implementation of the star alignment algorithm.
+  * @param strings List of sequences to align.
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
 class StarAlignment(strings: Array[String], ll: Boolean = false)
@@ -33,7 +33,7 @@ class StarAlignment(strings: Array[String], ll: Boolean = false)
     */
   val multipleAlignment = {
 
-    /*
+    /**
     * Calculate root index. Add the similarities for each row, i.e.
     * iterate over the columns per row. Identify the row-index with
     * the highest sum of similarities.
@@ -48,7 +48,7 @@ class StarAlignment(strings: Array[String], ll: Boolean = false)
           ai.map(aij => aij.similarity).reduceLeft(_ + _)
       }
       logln("alignments:")
-      logln(mkMatrixString)
+      logln(mkAlignmentTable())
       logln("list of similarities: " + similarities.toList.mkString(", "))
       val max = similarities reduceLeft (_ max _)
 
@@ -58,7 +58,7 @@ class StarAlignment(strings: Array[String], ll: Boolean = false)
       rootIdx
     }
 
-    val treeBuffer = new ArrayBuffer[AlignedString]
+    val msa = new ArrayBuffer[AlignedString]
     // Create a list of all indices except the root index:
     val idxs = (0 until alignments.size).toArray.filter(_ != rootIdx)
 
@@ -71,12 +71,12 @@ class StarAlignment(strings: Array[String], ll: Boolean = false)
       alignments(rootIdx)(idxs(0)).alignedStrings
     }
 
-    treeBuffer += root
-    treeBuffer += leaf
-    val alignedRoot = treeBuffer(0)
+    msa += root
+    msa += leaf
+    val alignedRoot = msa(0)
 
     logln("\nInitial pairwise Alignment:")
-    logln(treeBuffer.mkString("\n"))
+    logln(msa.mkString("\n"))
 
     // Go through the remaining children...
     for (idx <- idxs.drop(1)) {
@@ -87,15 +87,15 @@ class StarAlignment(strings: Array[String], ll: Boolean = false)
         alignments(rootIdx)(idx).alignedStrings
       }
 
-      // logln("\ncompare root idx = " + rootIdx + " with leaf idx = " + idx)
-      // logln("Current  root = " + treeBuffer(0).toString)
       logln("\nAlignment of root and new leaf:")
       logln("root: " + root.toString)
       logln("leaf: " + leaf.toString)
 
       // Identify inserts such that the current root and
       // the root aligned with idx are compatible:
-      val (insertPos, insertPosMsa) = getInsertions(root, leaf)
+      // val (insertPos, insertPosMsa) = getInsertions(root, leaf)
+      val insertPosMsa = root.gaps()
+
       // Also consider the gaps in the aligned root node:
       val aligendRootGaps = alignedRoot.gaps()
 
@@ -106,18 +106,18 @@ class StarAlignment(strings: Array[String], ll: Boolean = false)
 
       // Add the inserts to the idx-th string:
       // reversed because ... TODO
-      insertGaps(leaf, aligendRootGaps.reverse)
+      insertGaps(leaf, aligendRootGaps.toList.reverse)
 
       // Also insert the inserts in the current tree buffer:
-      treeBuffer.foreach(insertGaps(_, insertPosMsa))
+      msa.foreach(insertGaps(_, insertPosMsa.toList))
 
-      treeBuffer += leaf // Finally, add the new string.
+      msa += leaf // Finally, add the new string.
 
-      logln("\nMultiple Alignment:")
-      logln(treeBuffer.mkString("\n"))
+      logln("\nMultiple alignment:")
+      logln(msa.mkString("\n"))
     }
     logln("\nDone.\n")
 
-    treeBuffer.toArray
+    msa.toArray
   }
 }

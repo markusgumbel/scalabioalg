@@ -64,8 +64,16 @@ class AlignedString(s: String) {
 
   def alignedString = toString()
 
-  def size = mapper(mapper.size - 1)._1
+  /**
+    * @return Number of characters and gaps.
+    */
+  def size = mapper(mapper.size - 1)._1 // Last array entry
 
+  /**
+    * Retrieve the character or gap at the index position.
+    * @param pos Index position.
+    * @return Character or gap type (e.g. -)
+    */
   def apply(pos: Int): Char = {
     val rPos = getMapperIndex(pos)
     val (mPos, gapType) = mapper(rPos)
@@ -78,13 +86,22 @@ class AlignedString(s: String) {
     */
   def isGapAt(pos: Int) = pos != mapper(getMapperIndex(pos))._1
 
+  /**
+    * @return All gap positions in the aligned string or
+    *         empty list if there are none.
+    */
   def gaps() = {
     val gaps = for (i <- 0 to size) yield {
       if (isGapAt(i)) i else -1
     }
-    gaps.filter(e => e >= 0).toList
+    gaps.filter(e => e >= 0).toArray
   }
 
+  /**
+    * Insert a gap before the given index position.
+    * @param pos Index position.
+    * @param gapType
+    */
   def insertGapBefore(pos: Int, gapType: GapType) {
     insertGapBefore(pos, 1, gapType)
   }
@@ -114,10 +131,10 @@ class AlignedString(s: String) {
   }
 
   def insertGapAtEnd(gapType: GapType) {
-    insertGapAtEnd(1, gapType)
+    insertGapsAtEnd(1, gapType)
   }
 
-  def insertGapAtEnd(length: Int, gapType: GapType) {
+  def insertGapsAtEnd(length: Int, gapType: GapType) {
     insertGapBefore(this.size, length, gapType)
   }
 
@@ -154,12 +171,17 @@ class AlignedString(s: String) {
   stripString()
 }
 
-
 object GapType extends Enumeration {
   type GapType = Value
 
+  /**
+    * A gap inside the sequence.
+    */
   val GAP = Value("-")
 
+  /**
+    * A gap at the beginning of the end of the string.
+    */
   val EMPTY = Value("~")
 
   val PAIR = Value("#")

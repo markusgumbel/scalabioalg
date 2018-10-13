@@ -15,21 +15,17 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.alignment
 
-import net.gumbix.bioinf.string.alignment.AlignmentMode._
 import net.gumbix.bioinf.string.alignment.GapType._
-import net.gumbix.dynpro.DynProMatrixPrinter
 import net.gumbix.util.Logger
 import org.apache.commons.math3.stat.Frequency
 
 /**
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
-
 abstract class MultipleAlignment(val strings: Array[String])
-  extends MultipleAlignmentPrinter with DynProMatrixPrinter[Int]
+  extends MultipleAlignmentPrinter
     with Score with Logger {
   logLevel = true
-  formatter = INT
 
   val mode = AlignmentMode.GLOBAL
 
@@ -118,19 +114,6 @@ abstract class MultipleAlignment(val strings: Array[String])
       alignments(j)(i) = a
     }
     alignments
-  }
-
-  /**
-    * TODO only for DPMatrixPrinter...
-    * do not derive from DPMatrixPrinter.
-    * @return
-    */
-  def matrix: Array[Array[Option[Double]]] = {
-    val m = Array.ofDim[Option[Double]](alignments.size, alignments.size)
-    for (i <- 0 until alignments.size; j <- 0 until alignments.size) {
-      m(i)(j) = Some(alignments(i)(j).similarity)
-    }
-    m
   }
 
   /**

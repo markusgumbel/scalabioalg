@@ -51,6 +51,7 @@ class AlignedStringTest {
   def testParserNoGaps() {
     val s1 = new AlignedString("ACTGAG")
     assertEquals("ACTGAG", s1.toString)
+    assertEquals(0, s1.gaps().size)
   }
 
   @Test
@@ -59,6 +60,8 @@ class AlignedStringTest {
     assertEquals(s1.primaryString, "ACTGAG")
     assertEquals(s1.isGapAt(0), false)
     assertEquals(s1.isGapAt(2), true)
+    assertEquals(1, s1.gaps().size)
+    assertEquals(2, s1.gaps()(0))
   }
 
   @Test

@@ -15,6 +15,8 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.alignment.test
 
+import net.gumbix.bioinf.string.alignment.{Clustal, StarAlignment}
+import org.junit.Assert._
 import org.junit.Test
 
 /**
@@ -24,10 +26,13 @@ import org.junit.Test
  *
  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
  */
-class MultipleAlignmentTest {
+class ClustalTest extends MultipleAlignmentData {
 
   @Test
-  def testDummy() {
-    // TODO
+  def testPair() {
+    val msa = new Clustal(seqs("pair"))
+    assertEquals("CAT", msa.consensus)
+    assertEquals((-2+1+1), msa.sumOfPairs)
+    assertEquals(1, msa.distance)
   }
 }

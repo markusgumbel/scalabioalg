@@ -6,6 +6,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 /**
+  * Implementation of a variant of the CLUSTAL algorithm.
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
 class Clustal(strings: Array[String], ll: Boolean = false)
@@ -50,6 +51,7 @@ class Clustal(strings: Array[String], ll: Boolean = false)
       */
     def insertGapsInMSA(msa: List[AlignedString], gaps: List[Int]) {
       for (as <- msa) {
+        // TODO clarify why reverse
         insertGaps(as, gaps.reverse)
       }
     }
@@ -64,30 +66,47 @@ class Clustal(strings: Array[String], ll: Boolean = false)
       val jt = t.asInstanceOf[JoinedTaxon]
       val t1 = jt.taxa(0)
       val t2 = jt.taxa(1)
+
       // We can ensure that the taxa are available:
       val msa1 = maMap.get(t1).get
       val msa2 = maMap.get(t2).get
       val c1 = consensusFromList(msa1)
       val c2 = consensusFromList(msa2)
+
+      logln("\nAlign " + t1 + " and " + t2 + ":")
+      logln("   " + msa1.mkString("\n   "))
+      logln("c: " + c1.toString)
+      logln()
+      logln("   " + msa2.mkString("\n   "))
+      logln("c: " + c2.toString)
+
       val a = new Alignment(c1, c2, mode)
       val (as1, as2) = a.alignedStrings()
-      val (ins1, ins2) = getInsertions(as1, as2)
-      insertGapsInMSA(msa1, ins2) // Insert gaps in the other MSA.
-      insertGapsInMSA(msa2, ins1)
+      val ins1 = as1.gaps().toList
+      val ins2 = as2.gaps().toList
+
+      logln("\nPairwise alignment btw. consensus:")
+      logln(a.makeAlignmentString(a.solution))
+
+      insertGapsInMSA(msa1, ins1) // Insert gaps in the MSAs.
+      insertGapsInMSA(msa2, ins2)
       val msa = msa1 ::: msa2 // join both (multiple) alignments
       maMap.put(t, msa)
     }
 
-    val m = new NeighborJoiningTree(distMetric)
-    // Go through all sequences:
-    for (t <- m.allJoins) {
-      align(t)
+    if (strings.size == 2) { // no real msa?
+      val (as1, as2) = alignments(0)(1).alignedStrings()
+      Array(as1, as2)
+    } else {
+      val m = new NeighborJoiningTree(distMetric)
+      m.allJoins.foreach(align(_)) // Go through all sequences.
+      // One remaining node:
+      val ft1 = m.allEdges(m.allEdges.size - 1)._1
+      val ft2 = m.allJoins(m.allJoins.size - 1)
+      val jt = new JoinedTaxon(List(ft1, ft2).toArray)
+      align(jt)
+      logln()
+      maMap(jt).toArray
     }
-    // One remaining node:
-    val ft1 = m.allEdges(m.allEdges.size - 1)._1
-    val ft2 = m.allJoins(m.allJoins.size - 1)
-    val jt = new JoinedTaxon(List(ft1, ft2).toArray)
-    align(jt)
-    maMap(jt).toArray
   }
 }
