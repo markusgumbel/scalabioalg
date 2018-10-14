@@ -1,10 +1,13 @@
 package net.gumbix.bioinf
 
-import org.biojava3.core.sequence.DNASequence
-import string.alignment.Alignment
-import string.alignment.AlignmentMode._
+
 import java.net.URL
-import org.biojava3.core.sequence.io.FastaReaderHelper
+
+import net.gumbix.bioinf.string.alignment.Alignment
+import net.gumbix.bioinf.string.alignment.AlignmentMode._
+import org.biojava.nbio.core.sequence.DNASequence
+import org.biojava.nbio.core.sequence.io.FastaReaderHelper
+
 
 object DNASeq {
   implicit def seq2string(seq: DNASequence) = seq.toString
@@ -17,10 +20,10 @@ object DNASeq {
     val align = new Alignment(s1, s2, GLOBAL)
     println(align.mkMatrixString)
 
-    // AAI44185: Homo sapiens (human) NR1H4 protein
-    // AAL57619: Gallus gallus (chicken) partial orphan nuclear receptor FXR
-    val fxr1 = getEMBLBank("AAI44185").values.iterator.next
-    val fxr2 = getEMBLBank("AAL57619").values.iterator.next
+    // BC144184: Homo sapiens (human) NR1H4 protein
+    // AF456453: Gallus gallus (chicken) partial orphan nuclear receptor FXR
+    val fxr1 = getEMBLBank("BC144184").values.iterator.next
+    val fxr2 = getEMBLBank("AF456453").values.iterator.next
     val alignFxr = new Alignment(fxr1, fxr2, GLOBAL)
     //println(alignFxr.mkMatrixString)
     val solution = alignFxr.solution

@@ -6,10 +6,11 @@ package net.gumbix.bioinf
  * This shows off a few nice scala features, such as implicit methods
  */
 
-import org.biojava3.alignment.{Alignments,SimpleGapPenalty,SubstitutionMatrixHelper}
-import org.biojava3.alignment.Alignments.PairwiseSequenceAlignerType.LOCAL
-import org.biojava3.core.sequence.DNASequence
-import org.biojava3.core.sequence.compound.AmbiguityDNACompoundSet
+import org.biojava.nbio.alignment.{Alignments, SimpleGapPenalty}
+import org.biojava.nbio.alignment.Alignments.PairwiseSequenceAlignerType.LOCAL
+import org.biojava.nbio.core.alignment.matrices.SubstitutionMatrixHelper
+import org.biojava.nbio.core.sequence.DNASequence
+import org.biojava.nbio.core.sequence.compound.AmbiguityDNACompoundSet
 
 object PSA_DNA {
   implicit def str2DNA(seq: String) = new DNASequence(seq,AmbiguityDNACompoundSet.getDNACompoundSet)

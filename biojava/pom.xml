@@ -17,17 +17,17 @@
         <dependency>
             <groupId>net.gumbix</groupId>
             <artifactId>scabio-core</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.5.1</version>
         </dependency>
         <dependency>
             <groupId>org.biojava</groupId>
-            <artifactId>biojava3-core</artifactId>
-            <version>3.0.1</version>
+            <artifactId>biojava-core</artifactId>
+            <version>4.2.8</version>
         </dependency>
         <dependency>
             <groupId>org.biojava</groupId>
-            <artifactId>biojava3-alignment</artifactId>
-            <version>3.0.1</version>
+            <artifactId>biojava-alignment</artifactId>
+            <version>4.2.8</version>
         </dependency>
     </dependencies>
 
