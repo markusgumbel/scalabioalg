@@ -16,7 +16,7 @@ Highlights so far
 
 # Getting Started
 
-*More documentation will come soon.* Please refer to [project home page](http://http://mi.informatik.hs-mannheim.de/gumbel/en/forschung/scabio/) or the to the [wiki pages](https://github.com/markusgumbel/scalabioalg/wiki) for more information. A good start is to read the preliminary [manual](http://www.mi.hs-mannheim.de/gumbel/files/scabio-manual.pdf) or the generated scaladoc API documentation. See installation below where to find it.
+*More documentation will come soon.* Please refer to [project home page](http://mi.informatik.hs-mannheim.de/gumbel/en/forschung/scabio/) or the to the [wiki pages](https://github.com/markusgumbel/scalabioalg/wiki) for more information. A good start is to read the preliminary [manual](http://mi.informatik.hs-mannheim.de/gumbel/files/scabio-manual.pdf) or the generated scaladoc API documentation. See installation below where to find it.
 
 There are two important branches:
 
@@ -26,11 +26,11 @@ There are two important branches:
 # Requirements
 
 * [GIT](http://git-scm.com/)
-* [Maven 3](:http://maven.apache.org/)
+* [Maven 3](http://maven.apache.org/)
 
 # Installation
 
-The project uses Maven 3 as the build tool. Check out the project and run the Maven goal `mvn site`. This will generate all the relevant artifacts. The scaladoc can be found in ./target/site/index.html. More details are described int the "manual":http://mi.informatik.hs-mannheim.de/gumbel/files/scabio-manual.pdf.
+The project uses Maven 3 as the build tool. Check out the project and run the Maven goal `mvn site`. This will generate all the relevant artifacts. The scaladoc can be found in ./target/site/index.html. More details are described int the [manual](http://mi.informatik.hs-mannheim.de/gumbel/files/scabio-manual.pdf).
 
 # Mailing Lists
 
@@ -38,4 +38,4 @@ None yet. :-)
 
 # History
 
-The software was originally developed for a lecture on "bioinformatics":http://mi.informatik.hs-mannheim.de/gumbel/aktuelle-vorlesungen/bioinformatik-bim/. Thus, this software was mainly supposed to be for academic use. However, I believe that part of it might be of common interest. Let's see how this project relates to "Biojava":http://biojava.org/wiki/Main_Page and other projects like "bioscala":https://github.com/bioscala/bioscala.    
+The software was originally developed for a lecture on [bioinformatics](http://mi.informatik.hs-mannheim.de/gumbel/aktuelle-vorlesungen/bioinformatik-bim/). Thus, this software was mainly supposed to be for academic use. However, I believe that part of it might be of common interest. Let's see how this project relates to [Biojava](http://biojava.org/wiki/Main_Page) and other projects like [bioscala](https://github.com/bioscala/bioscala).    
