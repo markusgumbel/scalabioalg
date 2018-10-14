@@ -34,12 +34,12 @@ class StarAlignment(strings: Array[String], ll: Boolean = false)
   val multipleAlignment = {
 
     /**
-    * Calculate root index. Add the similarities for each row, i.e.
-    * iterate over the columns per row. Identify the row-index with
-    * the highest sum of similarities.
-    * Let M be the n x n matrix of similarities and e=(1, 1, ..., 1)
-    * a vector. Then root index is max(M e).
-    */
+      * Calculate root index. Add the similarities for each row, i.e.
+      * iterate over the columns per row. Identify the row-index with
+      * the highest sum of similarities.
+      * Let M be the n x n matrix of similarities and e=(1, 1, ..., 1)
+      * a vector. Then root index is max(M e).
+      */
     val rootIdx = {
       // similarities is an array of sum of column-similarities
       val similarities = alignments.map {
@@ -54,9 +54,11 @@ class StarAlignment(strings: Array[String], ll: Boolean = false)
 
       val rootIdx = similarities.indexOf(max)
       logln("root " + alignments(rootIdx)(rootIdx).s1 +
-      " with max. " + max)
+        " with max. " + max)
       rootIdx
     }
+
+    val oroot = new AlignedString(strings(rootIdx))
 
     val msa = new ArrayBuffer[AlignedString]
     // Create a list of all indices except the root index:
@@ -73,7 +75,7 @@ class StarAlignment(strings: Array[String], ll: Boolean = false)
 
     msa += root
     msa += leaf
-    val alignedRoot = msa(0)
+    val msaRoot = root // Current msa root element.
 
     logln("\nInitial pairwise Alignment:")
     logln(msa.mkString("\n"))
@@ -91,25 +93,20 @@ class StarAlignment(strings: Array[String], ll: Boolean = false)
       logln("root: " + root.toString)
       logln("leaf: " + leaf.toString)
 
-      // Identify inserts such that the current root and
-      // the root aligned with idx are compatible:
-      // val (insertPos, insertPosMsa) = getInsertions(root, leaf)
-      val insertPosMsa = root.gaps()
+      // Look for differences in the current root
+      // and the root which is part of the msa:
+      val (msaGaps, pwGaps) = getInsertions(root, msaRoot)
 
-      // Also consider the gaps in the aligned root node:
-      val aligendRootGaps = alignedRoot.gaps()
+      logln("Gap positions from pw. alignment (msa): " +
+        pwGaps.mkString(", "))
+      logln("Gap positions from msa (root, leaf)   : " +
+        msaGaps.mkString(", "))
 
-      logln("Insert positions in existing msa: " +
-        insertPosMsa.mkString(", "))
-      logln("Insert positions in new leaf    : " +
-        aligendRootGaps.mkString(", "))
+      // Add the msa gaps to the new leaf:
+      insertGaps(leaf, msaGaps)
 
-      // Add the inserts to the idx-th string:
-      // reversed because ... TODO
-      insertGaps(leaf, aligendRootGaps.toList.reverse)
-
-      // Also insert the inserts in the current tree buffer:
-      msa.foreach(insertGaps(_, insertPosMsa.toList))
+      // Also insert the gaps in the current msa:
+      msa.foreach(insertGaps(_, pwGaps.toList))
 
       msa += leaf // Finally, add the new string.
 

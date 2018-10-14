@@ -138,6 +138,23 @@ class AlignedString(s: String) {
     insertGapBefore(this.size, length, gapType)
   }
 
+  /**
+    *
+    * @param pos
+    */
+  def insertOriginalGapBefore(pos: Int) {
+    if (pos < 0 || pos > primaryString.size - 1) {
+      val text = "pos = " + pos + " must be in 0 ... " + primaryString.size
+      throw new IndexOutOfBoundsException(text)
+    }
+    mapper(pos) = (pos + 1, GAP)
+    for (p <- (pos + 1) to primaryString.size) {
+      val posIdx = mapper(p)._1
+      val gapType = mapper(p)._2
+      mapper(p) = (posIdx + 1, gapType)
+    }
+  }
+
   override def toString() = {
     val list = for (i <- 0 until size) yield {
       this (i)
