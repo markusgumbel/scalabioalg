@@ -2,17 +2,22 @@
 
 This project provides algorithms written in Scala which are used in the bioinformatics domain.
 
-Highlights so far
+Highlights so far:
 
 * generic (2D) dynamic programing algorithm (see `net.gumbix.dynpro.DynPro`)
 * Global, semi-local and local pairwise alignment (see `net.gumbix.bioinf.string.alignment.Alignment`)
 * Multiple alignment
- * star algorithm, see `net.gumbix.bioinf.string.alignment.StarAlignment`
- * Clustal variant, see `net.gumbix.bioinf.string.alignment.Clustal`
+  * star algorithm, see `net.gumbix.bioinf.string.alignment.StarAlignment`
+  * Clustal variant, see `net.gumbix.bioinf.string.alignment.Clustal`
+* Phylogenetic tree algorithms
+  * Neighbor-Joining, see `net.gumbix.bioinf.phylo.NeighborJoiningTree`
+  * Fitch-Margoliash, see `net.gumbix.bioinf.phylo.FitchMargoliashTree`
 * Pattern recognition with the Viterbi-algorithm (hidden markov model, see `net.gumbix.bioinf.hmm.Viterbi`)
 * RNA 2D struct viewer based on Nussinov algorithm (see `net.gumbix.bioinf.struct.RNAStruct2DViewer`)
 * Greedy superstring algorithm for sequence assembly (see `net.gumbix.bioinf.string.seq.GreedySuperstring`)
 * and many more...
+
+The Maven module `demo` contains several examples.
 
 # Getting Started
 
