@@ -6,19 +6,20 @@
     <groupId>net.gumbix</groupId>
     <artifactId>scabio-dp</artifactId>
     <name>SCABIO dynamic programming</name>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <parent>
         <groupId>net.gumbix</groupId>
         <artifactId>scabio</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>net.gumbix</groupId>
             <artifactId>scabio-util</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 

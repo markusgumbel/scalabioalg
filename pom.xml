@@ -12,7 +12,7 @@ to generate full documentation.
 
     <groupId>net.gumbix</groupId>
     <artifactId>scabio</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>SCABIO bioinformatics algorithms</name>
@@ -46,11 +46,11 @@ to generate full documentation.
     </properties>
 
     <modules>
-        <module>util</module>
-        <module>dp</module>
         <module>core</module>
-        <module>ui</module>
+        <module>dp</module>
+        <module>util</module>
         <module>biojava</module>
+        <module>ui</module>
         <module>demo</module>
     </modules>
 

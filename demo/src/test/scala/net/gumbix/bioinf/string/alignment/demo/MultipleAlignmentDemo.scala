@@ -18,6 +18,10 @@ package net.gumbix.bioinf.string.alignment.demo
 import net.gumbix.bioinf.string.alignment.{Clustal, MultipleAlignment, StarAlignment}
 import org.junit.{Ignore, Test}
 
+/**
+  * Some examples for multiple alignments.
+  * (see also scabio-BIM: net.gumbix.bioinf.string.alignment.demo)
+  */
 class MultipleAlignmentDemo {
   val strings: Array[Tuple2[Array[String], String]] = Array(
     (Array("ATGCATT", "AGTCAAT", "TCTCA"), "Böckenhauer, p. 107"),
