@@ -218,7 +218,7 @@ class Alignment(val s1: String, val s2: String,
     */
   val deltaIdx = Map(INSERT -> Idx(0, -1), DELETE -> Idx(-1, 0), BOTH -> Idx(-1, -1))
 
-  override def rowLabels = makeLabels(s1).toArray
+  override def rowLabels = Some(makeLabels(s1).toArray)
 
   override def columnLabels = Some(makeLabels(s2).toArray)
 

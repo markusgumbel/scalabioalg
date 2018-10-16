@@ -105,7 +105,7 @@ class Clustal(strings: Array[String], ll: Boolean = false)
       val (as1, as2) = alignments(0)(1).alignedStrings()
       Array(as1, as2)
     } else {
-      val m = new NeighborJoiningTree(distMetric)
+      val m = new NeighborJoiningTree(distMetric, ll)
       m.allJoins.foreach(align(_)) // Go through all sequences.
       // One remaining node:
       val ft1 = m.allEdges(m.allEdges.size - 1)._1

@@ -57,8 +57,8 @@ trait MatrixPrinter {
   /**
     * What labels should the rows get?
     */
-  def rowLabels: Array[String] = {
-    (1 to matrix.length).toList.map("row" + _.toString).toArray
+  def rowLabels: Option[Array[String]] = {
+    Some((1 to matrix.length).toList.map("row" + _.toString).toArray)
   }
 
   /**
@@ -92,7 +92,11 @@ trait MatrixPrinter {
       line("") above expandableLine("-", '-')
     }
 
-    rowLabels.foreach(r => secondColumn = secondColumn above line(r))
+    if (rowLabels != None) {
+      rowLabels.get.foreach(r => secondColumn = secondColumn above line(r))
+    } else {
+      (1 to matrix.size).foreach(r => secondColumn = secondColumn above line(" "))
+    }
 
     var table = firstColumn beside
       expandableLine(" ", ' ') beside secondColumn beside expandableLine("|", '|')

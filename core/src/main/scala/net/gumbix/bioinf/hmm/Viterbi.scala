@@ -76,7 +76,7 @@ class Viterbi(val s: Array[Char], val alphabet: Array[Char],
     }
   }
 
-  override def rowLabels = s.map(c => c.toString)
+  override def rowLabels = Some(s.map(c => c.toString))
 
   override def columnLabels = Some(states.map(c => c.toString))
 }

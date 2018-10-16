@@ -33,5 +33,5 @@ trait TaxaMetricPrinter extends MatrixPrinter {
   /**
     * Labels are the taxa.
     */
-  override def rowLabels = taxa.take(size - 1)
+  override def rowLabels = Some(taxa.take(size - 1))
 }

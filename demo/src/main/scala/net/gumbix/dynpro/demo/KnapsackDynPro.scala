@@ -91,7 +91,7 @@ class KnapsackDynPro(val items: Array[String],
    */
   def solution: List[PathEntry[Int]] = solution(Idx(n - 1, 0))
 
-  override def rowLabels: Array[String] = items
+  override def rowLabels = Some(items)
 
   override def columnLabels = None
 

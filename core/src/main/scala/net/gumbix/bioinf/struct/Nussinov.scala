@@ -87,9 +87,9 @@ abstract class AbstractNussinov(val s: String)
    */
   override def getCellIndex(k: Int) = indices(k)
 
-  override def rowLabels: Array[String] = s.toArray.map(_.toString)
+  override def rowLabels = Some(s.toArray.map(_.toString))
 
-  override def columnLabels = Some(rowLabels)
+  override def columnLabels = rowLabels
 }
 
 /**

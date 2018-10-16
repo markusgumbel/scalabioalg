@@ -68,7 +68,11 @@ trait DynProMatrixPrinter[Decision] extends MatrixPrinter {
       line("") above expandableLine("-", '-')
     }
 
-    rowLabels.foreach(r => secondColumn = secondColumn above line(r))
+    if (rowLabels != None) {
+      rowLabels.get.foreach(r => secondColumn = secondColumn above line(r))
+    } else {
+      (1 to matrix.size).foreach(r => secondColumn = secondColumn above line(" "))
+    }
 
     var table = firstColumn beside
       expandableLine(" ", ' ') beside secondColumn beside expandableLine("|", '|')
