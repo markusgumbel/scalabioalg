@@ -15,7 +15,7 @@ Copyright 2011 the original author or authors.
 */
 package net.gumbix.bioinf.string.alignment.demo
 
-import net.gumbix.bioinf.string.alignment.{Clustal, MultipleAlignment, StarAlignment}
+import net.gumbix.bioinf.string.alignment._
 import org.junit.{Ignore, Test}
 
 /**
@@ -60,17 +60,34 @@ class MultipleAlignmentDemo {
     }
   }
 
+
   @Test
   @Ignore
   def clustalDemo() {
-    for (s <- strings; if (s._2.startsWith(""))) {
+    for (s <- strings; if (s._2.startsWith("More"))) {
       doMultipleAligment(s._1, s._2,
-        (s: Array[String]) => new Clustal(s), "Clustal")
+        (s: Array[String]) => new Clustal(s, true), "Clustal")
     }
   }
 
+  @Test
+  @Ignore
+  def manualDemo() {
+    val msaSeqs = Array(
+      "HUNKYDLSS-",
+      "H-NKYFLS--",
+      "-UAKYFLS--",
+      "-----NLSAC",
+      "-----NDSAC",
+      "-----NFSC-"
+    ).map(new AlignedString(_))
+    val msa = new MultipleAlignment(msaSeqs)
+    println(msa.mkString())
+    println("SP = " + msa.sumOfPairs + "; dist = " + msa.distance)
+  }
+
   def doMultipleAligment(s: Array[String], comment: String,
-                         msa: (Array[String]) => MultipleAlignment,
+                         msa: (Array[String]) => AbstractMultipleAlignment,
                          method: String) {
     println("---------------------------------")
     println("Multiple Alignment with " + method + ", " + comment)

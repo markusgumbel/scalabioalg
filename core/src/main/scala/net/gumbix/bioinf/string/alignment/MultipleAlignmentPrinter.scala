@@ -19,32 +19,43 @@ import net.gumbix.layout.Element._
 import net.gumbix.util.MatrixPrinter
 
 /**
- * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
- */
+  * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
+  */
 trait MultipleAlignmentPrinter {
   val alignments: Array[Array[Alignment]]
 
   val strings: Array[String]
 
   def consensus: String
-  
+
   val multipleAlignment: Array[AlignedString]
 
   /**
-   * Format the multiple alignment.
-   */
-  def mkString() = {
-    var element = line(multipleAlignment(0).toString)
-    for (t <- 1 until multipleAlignment.size) {
-      val btw = for (i <- 0 until multipleAlignment(t).size) yield {
-        if (multipleAlignment(t - 1).isGapAt(i) || multipleAlignment(t).isGapAt(i)) " "
-        else if (multipleAlignment(t - 1)(i) == multipleAlignment(t)(i)) "|"
+    * Format the multiple alignment.
+    */
+  private def mkString(msa: Array[AlignedString]) = {
+    var element = line(msa(0).toString)
+    for (t <- 1 until msa.size) {
+      val btw = for (i <- 0 until msa(t).size) yield {
+        if (msa(t - 1).isGapAt(i) || msa(t).isGapAt(i)) " "
+        else if (msa(t - 1)(i) == msa(t)(i)) "|"
         else " "
       }
-      element = element above line(btw.mkString) above line(multipleAlignment(t).toString)
+      element = element above line(btw.mkString) above line(msa(t).toString)
     }
     element = element above line("-" * consensus.size) above line(consensus)
     element.toString
+  }
+
+  def mkString(): String = mkString(true)
+
+  def mkString(sort: Boolean): String = {
+    if (sort) {
+      val smsa = multipleAlignment.sortWith(_.alignedString < _.alignedString)
+      mkString(smsa)
+    } else {
+      mkString(multipleAlignment)
+    }
   }
 
   def mkAlignmentTable() = {
@@ -59,6 +70,7 @@ trait MultipleAlignmentPrinter {
       }
 
       override def columnLabels = None
+      override def rowLabels = None
     }
     o.mkMatrixString
   }

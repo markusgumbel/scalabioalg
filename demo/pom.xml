@@ -17,7 +17,7 @@
         <dependency>
             <groupId>net.gumbix</groupId>
             <artifactId>scabio-core</artifactId>
-            <version>0.5.0</version>
+            <version>0.5.2</version>
         </dependency>
         <dependency>
             <groupId>net.gumbix</groupId>

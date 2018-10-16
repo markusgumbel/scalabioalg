@@ -23,7 +23,7 @@ import scala.collection.mutable.ArrayBuffer
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
 class StarAlignment(strings: Array[String], ll: Boolean = false)
-  extends MultipleAlignment(strings)
+  extends AbstractMultipleAlignment(strings)
     with ProgressiveAlignment {
 
   logLevel = ll

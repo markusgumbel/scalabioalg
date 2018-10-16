@@ -10,7 +10,7 @@ import scala.collection.mutable.ArrayBuffer
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
 class Clustal(strings: Array[String], ll: Boolean = false)
-  extends MultipleAlignment(strings)
+  extends AbstractMultipleAlignment(strings)
     with ProgressiveAlignment {
 
   logLevel = ll
@@ -30,6 +30,10 @@ class Clustal(strings: Array[String], ll: Boolean = false)
       maMap.put(taxon, List(as))
       taxa += taxon
     }
+
+    logln("Primary pairwise alignments:")
+    logln(mkAlignmentTable())
+
     val m = Array.ofDim[Double](alignments.size, alignments.size)
     for (i <- 0 until alignments.size; j <- 0 until alignments.size) {
       m(i)(j) = alignments(i)(j).similarity
@@ -39,7 +43,10 @@ class Clustal(strings: Array[String], ll: Boolean = false)
     for (i <- 0 until alignments.size; j <- 0 until alignments.size) {
       m(i)(j) = maximum - m(i)(j)
     }
-    new NeighborJoiningMetric(taxa.toArray, m)
+    val njm = new NeighborJoiningMetric(taxa.toArray, m)
+    logln("\nDistance matrix:")
+    logln(njm.mkMatrixString)
+    njm
   }
 
   val multipleAlignment = {
