@@ -3,15 +3,17 @@ package net.gumbix.bioinf.phylo
 /**
   * Base class for all distance-based phylogenetic trees.
   *
-  * @param taxa List of taxa.
+  * @param t List of taxa as Strings.
   * @param dist Matrix containing the distances.
   */
-class TaxaMetric(val taxa: Array[String], val dist: Array[Array[Double]])
+class TaxaMetric(val t: Array[String], val dist: Array[Array[Double]])
   extends TaxaMetricPrinter {
+
+  val taxa = t.map(new Taxon(_))
 
   protected val taxonToIdx: Map[String, Int] = {
     // zip with numbers from 0 to n-1 and then map it to key-value pairs:
-    taxa.zip(0 until taxa.size).toMap
+    t.zip(0 until t.size).toMap
   }
 
   /**

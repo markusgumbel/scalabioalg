@@ -34,7 +34,7 @@ trait Score {
   def score(c1: Char, c2: Char) = substMatrix match {
     case None => {
       (c1, c2) match {
-        case ('-', '-') => values(MATCH)
+        case ('-', '-') => values(INSERT)  // values(MATCH) // or 0?
         case ('-', d2) => values(INSERT)
         case (d1, '-') => values(INSERT)
         case (d1, d2) if (d1 == d2) => values(MATCH)

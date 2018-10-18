@@ -55,7 +55,7 @@ class MultipleAlignmentDemo {
   @Test
   @Ignore
   def starAlignmentDemo() {
-    for (s <- strings; if (s._2.startsWith(""))) {
+    for (s <- strings; if (s._2.startsWith("NR1H4"))) {
       doMultipleAligment(s._1, s._2,
         (s: Array[String]) => new StarAlignment(s), "Star-Alignment")
     }
@@ -65,9 +65,9 @@ class MultipleAlignmentDemo {
   @Test
   @Ignore
   def clustalDemo() {
-    for (s <- strings; if (s._2.startsWith("M2ore"))) {
+    for (s <- strings; if (s._2.startsWith("NR1H4"))) {
       doMultipleAligment(s._1, s._2,
-        (s: Array[String]) => new Clustal(s, true), "Clustal")
+        (s: Array[String]) => new Clustal(s), "Clustal")
     }
   }
 

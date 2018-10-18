@@ -5,6 +5,8 @@ import net.gumbix.util.Logger
 import scala.collection.mutable
 
 /**
+  * The Neighbor-Joining algorithm, adapted from
+  * Durbin et al. "Biological Sequence Analysis" (1998), p. 172.
   * @author Markus Gumbel (m.gumbel@hs-mannheim.de)
   */
 class NeighborJoiningTree(val metric: NeighborJoiningMetric,

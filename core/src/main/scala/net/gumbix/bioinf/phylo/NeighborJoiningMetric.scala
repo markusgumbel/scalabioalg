@@ -9,6 +9,10 @@ class NeighborJoiningMetric(joinedTaxa: Array[Taxon], dist: Array[Array[Double]]
   def this(taxa: Array[String], dist: Array[Array[Double]]) =
     this(taxa.map(s => new Taxon(s)), dist)
 
+  /**
+    * Array (0 <= i <= |taxa|) containing the average
+    * distance of the i-th taxon to all other taxa.
+    */
   val r = {
     val h = for (i <- 0 until taxa.length) yield {
       val d = for (k <- 0 until taxa.size if (k != i)) yield {
@@ -21,6 +25,9 @@ class NeighborJoiningMetric(joinedTaxa: Array[Taxon], dist: Array[Array[Double]]
 
   def rByTaxon(taxon: String) = r(taxonToIdx(taxon))
 
+  /**
+    * Cells D_{ij}
+    */
   val njDist = Array.tabulate(taxa.size, taxa.size) {
     (i, j) =>
       if (i < j) distByIndex(i, j) - (r(i) + r(j)) else 0

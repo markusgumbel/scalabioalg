@@ -49,7 +49,7 @@ class StarAlignmentTest extends MultipleAlignmentData {
     assertEquals(-1 - 2 + 1 + 1, msa.alignments(0)(2).similarity, 0.01)
 
     assertEquals("CHAT", msa.consensus)
-    val sp = (-1 - 2 - 2) + (-2 + 1 - 2) + (1 + 1 + 1) + (1 + 1 + 1)
+    val sp = (-1 - 2 - 2) + (-2 -2 - 2) + (1 + 1 + 1) + (1 + 1 + 1)
     assertEquals(sp, msa.sumOfPairs)
     assertEquals(2 + 2 + 0 + 0, msa.distance)
   }

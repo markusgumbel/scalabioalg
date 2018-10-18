@@ -7,7 +7,7 @@ import net.gumbix.util.MatrixPrinter
   */
 trait TaxaMetricPrinter extends MatrixPrinter {
 
-  val taxa: Array[String]
+  val taxa: Array[Taxon]
   val dist: Array[Array[Double]]
 
   val size: Int
@@ -28,10 +28,10 @@ trait TaxaMetricPrinter extends MatrixPrinter {
   /**
     * Labels are the taxa.
     */
-  override def columnLabels = Some(taxa.takeRight(size - 1))
+  override def columnLabels = Some(taxa.takeRight(size - 1).map(_.toString))
 
   /**
     * Labels are the taxa.
     */
-  override def rowLabels = Some(taxa.take(size - 1))
+  override def rowLabels = Some(taxa.take(size - 1).map(_.toString))
 }
